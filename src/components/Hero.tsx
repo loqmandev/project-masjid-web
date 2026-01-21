@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react'
 
 const Hero = () => {
   const slides = [
-    { id: 'mock-1', label: 'Screenshot 1' },
-    { id: 'mock-2', label: 'Screenshot 2' },
-    { id: 'mock-3', label: 'Screenshot 3' },
+    { id: 'mock-1', label: 'App screenshot 1', src: '/1.png' },
+    { id: 'mock-2', label: 'App screenshot 2', src: '/2.png' },
+    { id: 'mock-3', label: 'App screenshot 3', src: '/3.png' },
   ]
   const [activeIndex, setActiveIndex] = useState(0)
 
@@ -43,15 +43,20 @@ const Hero = () => {
           <div className="flex justify-center lg:justify-end">
             <div className="relative w-full max-w-72 rounded-[2.25rem] border border-border bg-card/70 p-5 shadow-[0_30px_60px_rgba(0,79,77,0.15)] backdrop-blur sm:max-w-80 sm:p-6">
               <div className="mb-6 h-3 w-16 rounded-full bg-muted" />
-              <div className="relative aspect-[9/19.5] w-full overflow-hidden rounded-[1.75rem] border border-border bg-[linear-gradient(160deg,_rgba(0,169,165,0.08),_rgba(255,204,0,0.12))] p-6">
+              <div className="relative aspect-[9/19.5] w-full overflow-hidden rounded-[1.75rem] border border-border bg-[linear-gradient(160deg,_rgba(0,169,165,0.08),_rgba(255,204,0,0.12))] p-0">
                 {slides.map((slide, index) => (
                   <div
                     key={slide.id}
-                    className={`absolute inset-6 flex items-center justify-center rounded-[1.25rem] border border-dashed border-border bg-background/80 text-sm text-muted-foreground transition-opacity duration-700 ${
+                    className={`absolute inset-0 rounded-[1.6rem] bg-background/80 transition-opacity duration-700 ${
                       index === activeIndex ? 'opacity-100' : 'opacity-0'
                     }`}
                   >
-                    {slide.label}
+                    <img
+                      src={slide.src}
+                      alt={slide.label}
+                      className="h-full w-full rounded-[1.25rem] object-cover"
+                      loading="lazy"
+                    />
                   </div>
                 ))}
               </div>
