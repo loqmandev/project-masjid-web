@@ -198,7 +198,7 @@ const Waitlist = () => {
           {submitted ? (
             <div>
               <h3 className="mb-2 text-[1.8rem] text-secondary-foreground">Thank You!</h3>
-              <p className="text-[1.1rem] text-muted-foreground">We will contact you soon.</p>
+              <p className="text-[1.1rem] text-muted-foreground">We will contact you soon. Make sure to check your spam/junk folder if you can't find our email.</p>
             </div>
           ) : (
             <form className="flex flex-col items-center gap-4" onSubmit={handleSubmit}>
