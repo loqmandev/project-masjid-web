@@ -1,8 +1,12 @@
 import { createServerFn, useServerFn } from '@tanstack/react-start';
 import { useState } from 'react';
+import { onboardingAndroidHtml, onboardingAndroidSubject } from '../emails/onboarding-android';
+import { onboardingIosHtml, onboardingIosSubject } from '../emails/onboarding-ios';
+import { Resend } from 'resend';
 
 const SHEET_TAB = 'Waitlist';
 const SHEET_RANGE = `${SHEET_TAB}!A:C`;
+const ANDROID_GROUP_JOIN_URL = 'https://groups.google.com/g/jejakmasjid';
 
 const submitWaitlist = createServerFn({ method: 'POST' })
   .inputValidator((formData: FormData) => formData)
@@ -48,7 +52,12 @@ const submitWaitlist = createServerFn({ method: 'POST' })
       throw new Error(`Failed to save waitlist entry: ${errorText}`);
     }
 
-    return { ok: true };
+    await sendOnboardingEmail(email, platform);
+
+    return {
+      ok: true,
+      joinGroupUrl: platform === 'android' ? ANDROID_GROUP_JOIN_URL : null,
+    };
   });
 
 async function getGoogleAccessToken({
@@ -100,6 +109,46 @@ async function getGoogleAccessToken({
   }
 
   return tokenData.access_token;
+}
+
+async function sendOnboardingEmail(email: string, platform: string) {
+  const resendApiKey = process.env.RESEND_API_KEY;
+  const resendFromEmail = process.env.RESEND_FROM_EMAIL;
+  const isDev = process.env.NODE_ENV !== 'production';
+  
+  if (!resendApiKey) {
+    throw new Error('Missing RESEND_API_KEY.');
+  }
+  
+  if (!resendFromEmail) {
+    throw new Error('Missing RESEND_FROM_EMAIL.');
+  }
+  
+  const resend = new Resend(resendApiKey);
+
+  if (isDev) {
+    console.log('[waitlist] sending onboarding email', { email, platform });
+  }
+
+  const { data, error } = await resend.emails.send({
+    from: resendFromEmail,
+    to: [email],
+    subject: platform === 'android' ? onboardingAndroidSubject : onboardingIosSubject,
+    html: platform === 'android' ? onboardingAndroidHtml(email) : onboardingIosHtml(email),
+  });
+
+  if (isDev) {
+    console.log('[waitlist] resend response', { data, error });
+  }
+
+  if (error) {
+    const errorText = error.message;
+    throw new Error(`Failed to send onboarding email: ${errorText}`);
+  }
+
+  if (!data?.id) {
+    throw new Error('Resend response missing message id.');
+  }
 }
 
 async function createSignedJwt(
@@ -164,6 +213,7 @@ const Waitlist = () => {
   const [email, setEmail] = useState('');
   const [platform, setPlatform] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [joinGroupUrl, setJoinGroupUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const submitWaitlistFn = useServerFn(submitWaitlist);
@@ -174,8 +224,9 @@ const Waitlist = () => {
     setIsSubmitting(true);
 
     try {
-      await submitWaitlistFn({ data: new FormData(e.currentTarget) });
+      const result = await submitWaitlistFn({ data: new FormData(e.currentTarget) });
       setSubmitted(true);
+      setJoinGroupUrl(result?.joinGroupUrl ?? null);
       setEmail('');
       setPlatform('');
     } catch (err) {
@@ -198,7 +249,23 @@ const Waitlist = () => {
           {submitted ? (
             <div>
               <h3 className="mb-2 text-[1.8rem] text-secondary-foreground">Thank You!</h3>
-              <p className="text-[1.1rem] text-muted-foreground">We will contact you soon. Make sure to check your spam/junk folder if you can't find our email.</p>
+              <p className="text-[1.1rem] text-muted-foreground">
+                We will contact you soon. Make sure to check your spam/junk folder if you can't find our email.
+              </p>
+              {joinGroupUrl ? (
+                <p className="mt-4 text-[1.05rem] text-muted-foreground">
+                  Android testers:{" "}
+                  <a
+                    className="font-semibold text-primary underline-offset-4 hover:underline"
+                    href={joinGroupUrl}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    join the Google Group
+                  </a>
+                  .
+                </p>
+              ) : null}
             </div>
           ) : (
             <form className="flex flex-col items-center gap-4" onSubmit={handleSubmit}>
