@@ -6,7 +6,16 @@ import { Resend } from 'resend';
 
 const SHEET_TAB = 'Waitlist';
 const SHEET_RANGE = `${SHEET_TAB}!A:C`;
-const ANDROID_GROUP_JOIN_URL = 'https://groups.google.com/g/jejakmasjid';
+const DEFAULT_APP_DOMAIN = 'https://jejakmasjid.my';
+const ANDROID_GROUP_JOIN_PATH = '/google-groups';
+
+function normalizeAppDomain(appDomain: string) {
+  return appDomain.replace(/\/+$/, '');
+}
+
+function getAppDomain() {
+  return normalizeAppDomain(process.env.APP_DOMAIN ?? DEFAULT_APP_DOMAIN);
+}
 
 const submitWaitlist = createServerFn({ method: 'POST' })
   .inputValidator((formData: FormData) => formData)
@@ -56,7 +65,8 @@ const submitWaitlist = createServerFn({ method: 'POST' })
 
     return {
       ok: true,
-      joinGroupUrl: platform === 'android' ? ANDROID_GROUP_JOIN_URL : null,
+      joinGroupUrl:
+        platform === 'android' ? `${getAppDomain()}${ANDROID_GROUP_JOIN_PATH}` : null,
     };
   });
 
@@ -125,6 +135,7 @@ async function sendOnboardingEmail(email: string, platform: string) {
   }
   
   const resend = new Resend(resendApiKey);
+  const appDomain = getAppDomain();
 
   if (isDev) {
     console.log('[waitlist] sending onboarding email', { email, platform });
@@ -134,7 +145,10 @@ async function sendOnboardingEmail(email: string, platform: string) {
     from: resendFromEmail,
     to: [email],
     subject: platform === 'android' ? onboardingAndroidSubject : onboardingIosSubject,
-    html: platform === 'android' ? onboardingAndroidHtml(email) : onboardingIosHtml(email),
+    html:
+      platform === 'android'
+        ? onboardingAndroidHtml(email, appDomain)
+        : onboardingIosHtml(email, appDomain),
   });
 
   if (isDev) {

@@ -11,6 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TosRouteImport } from './routes/tos'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as GoogleGroupsRouteImport } from './routes/google-groups'
+import { Route as BetaIosRouteImport } from './routes/beta-ios'
+import { Route as BetaAndroidRouteImport } from './routes/beta-android'
 import { Route as IndexRouteImport } from './routes/index'
 
 const TosRoute = TosRouteImport.update({
@@ -23,6 +26,21 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GoogleGroupsRoute = GoogleGroupsRouteImport.update({
+  id: '/google-groups',
+  path: '/google-groups',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BetaIosRoute = BetaIosRouteImport.update({
+  id: '/beta-ios',
+  path: '/beta-ios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BetaAndroidRoute = BetaAndroidRouteImport.update({
+  id: '/beta-android',
+  path: '/beta-android',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -31,30 +49,61 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/beta-android': typeof BetaAndroidRoute
+  '/beta-ios': typeof BetaIosRoute
+  '/google-groups': typeof GoogleGroupsRoute
   '/privacy': typeof PrivacyRoute
   '/tos': typeof TosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/beta-android': typeof BetaAndroidRoute
+  '/beta-ios': typeof BetaIosRoute
+  '/google-groups': typeof GoogleGroupsRoute
   '/privacy': typeof PrivacyRoute
   '/tos': typeof TosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/beta-android': typeof BetaAndroidRoute
+  '/beta-ios': typeof BetaIosRoute
+  '/google-groups': typeof GoogleGroupsRoute
   '/privacy': typeof PrivacyRoute
   '/tos': typeof TosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/privacy' | '/tos'
+  fullPaths:
+    | '/'
+    | '/beta-android'
+    | '/beta-ios'
+    | '/google-groups'
+    | '/privacy'
+    | '/tos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/privacy' | '/tos'
-  id: '__root__' | '/' | '/privacy' | '/tos'
+  to:
+    | '/'
+    | '/beta-android'
+    | '/beta-ios'
+    | '/google-groups'
+    | '/privacy'
+    | '/tos'
+  id:
+    | '__root__'
+    | '/'
+    | '/beta-android'
+    | '/beta-ios'
+    | '/google-groups'
+    | '/privacy'
+    | '/tos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BetaAndroidRoute: typeof BetaAndroidRoute
+  BetaIosRoute: typeof BetaIosRoute
+  GoogleGroupsRoute: typeof GoogleGroupsRoute
   PrivacyRoute: typeof PrivacyRoute
   TosRoute: typeof TosRoute
 }
@@ -75,6 +124,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/google-groups': {
+      id: '/google-groups'
+      path: '/google-groups'
+      fullPath: '/google-groups'
+      preLoaderRoute: typeof GoogleGroupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/beta-ios': {
+      id: '/beta-ios'
+      path: '/beta-ios'
+      fullPath: '/beta-ios'
+      preLoaderRoute: typeof BetaIosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/beta-android': {
+      id: '/beta-android'
+      path: '/beta-android'
+      fullPath: '/beta-android'
+      preLoaderRoute: typeof BetaAndroidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -87,6 +157,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BetaAndroidRoute: BetaAndroidRoute,
+  BetaIosRoute: BetaIosRoute,
+  GoogleGroupsRoute: GoogleGroupsRoute,
   PrivacyRoute: PrivacyRoute,
   TosRoute: TosRoute,
 }

@@ -1,6 +1,18 @@
 export const onboardingIosSubject = 'Welcome to Jejak Masjid beta';
 
-export function onboardingIosHtml(email: string) {
+const DEFAULT_APP_DOMAIN = 'https://jejakmasjid.my';
+
+function normalizeAppDomain(appDomain: string) {
+  return appDomain.replace(/\/+$/, '');
+}
+
+export function onboardingIosHtml(
+  email: string,
+  appDomain: string = DEFAULT_APP_DOMAIN,
+) {
+  const baseUrl = normalizeAppDomain(appDomain);
+  const betaUrl = `${baseUrl}/beta-ios`;
+
   return `
     <!doctype html>
 <html lang="en">
@@ -35,8 +47,8 @@ export function onboardingIosHtml(email: string) {
         <li>
           Join the beta using this link:
           <br />
-          <a href="https://testflight.apple.com/join/zrH5N8Tp" style="color:#2563eb;text-decoration:underline;">
-            https://testflight.apple.com/join/zrH5N8Tp
+          <a href="${betaUrl}" style="color:#2563eb;text-decoration:underline;">
+            ${betaUrl}
           </a>
         </li>
         <li>Install Jejak Masjid from TestFlight</li>

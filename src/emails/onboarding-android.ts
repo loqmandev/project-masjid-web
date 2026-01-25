@@ -1,6 +1,19 @@
 export const onboardingAndroidSubject = 'Welcome to Jejak Masjid beta (Android)';
 
-export function onboardingAndroidHtml(email: string) {
+const DEFAULT_APP_DOMAIN = 'https://jejakmasjid.my';
+
+function normalizeAppDomain(appDomain: string) {
+  return appDomain.replace(/\/+$/, '');
+}
+
+export function onboardingAndroidHtml(
+  email: string,
+  appDomain: string = DEFAULT_APP_DOMAIN,
+) {
+  const baseUrl = normalizeAppDomain(appDomain);
+  const groupUrl = `${baseUrl}/google-groups`;
+  const betaUrl = `${baseUrl}/beta-android`;
+
   return `
     <!doctype html>
 <html lang="en">
@@ -36,8 +49,8 @@ export function onboardingAndroidHtml(email: string) {
         First, join our internal testing Google Group using the link below:
       </p>
       <p style="margin:0 0 12px 0;">
-        <a href="https://groups.google.com/g/jejakmasjid" style="color:#2563eb;text-decoration:underline;">
-          https://groups.google.com/g/jejakmasjid
+        <a href="${groupUrl}" style="color:#2563eb;text-decoration:underline;">
+          ${groupUrl}
         </a>
       </p>
       <p style="margin:0 0 16px 0;">
@@ -49,8 +62,8 @@ export function onboardingAndroidHtml(email: string) {
         After joining the group, install the app using this link:
       </p>
       <p style="margin:0 0 12px 0;">
-        <a href="https://play.google.com/apps/internaltest/4701127114534778311" style="color:#2563eb;text-decoration:underline;">
-          https://play.google.com/apps/internaltest/4701127114534778311
+        <a href="${betaUrl}" style="color:#2563eb;text-decoration:underline;">
+          ${betaUrl}
         </a>
       </p>
       <p style="margin:0 0 16px 0;">
