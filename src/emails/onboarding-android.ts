@@ -41,25 +41,12 @@ export function onboardingAndroidHtml(
       </ul>
 
       <h3 style="margin:20px 0 8px 0;font-size:16px;line-height:1.4;">
-        Install the Android beta (important – 2 steps)
+        Install the Android beta 
       </h3>
 
       <p style="margin:0 0 8px 0;">
-        <strong>Step 1: Join the Google Group (required)</strong><br />
-        First, join our internal testing Google Group using the link below:
-      </p>
-      <p style="margin:0 0 12px 0;">
-        <a href="${groupUrl}" style="color:#2563eb;text-decoration:underline;">
-          ${groupUrl}
-        </a>
-      </p>
-      <p style="margin:0 0 16px 0;">
-        Make sure you join using the <strong>same Google account</strong> you used to sign up.
-      </p>
-
-      <p style="margin:0 0 8px 0;">
-        <strong>Step 2: Install the beta app from Play Store</strong><br />
-        After joining the group, install the app using this link:
+        <strong>Install the beta app from Play Store</strong><br />
+        Install the app using this link:
       </p>
       <p style="margin:0 0 12px 0;">
         <a href="${betaUrl}" style="color:#2563eb;text-decoration:underline;">

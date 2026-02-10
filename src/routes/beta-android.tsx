@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 
-const ANDROID_BETA_URL = 'https://play.google.com/apps/internaltest/4701127114534778311'
+const ANDROID_BETA_URL = 'https://play.google.com/store/apps/details?id=my.lonasoft.jejakmasjidmobile'
 
 export const Route = createFileRoute('/beta-android')({
   loader: () => {
