@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TosRouteImport } from './routes/tos'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as GoogleGroupsRouteImport } from './routes/google-groups'
 import { Route as BetaIosRouteImport } from './routes/beta-ios'
@@ -19,6 +20,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const TosRoute = TosRouteImport.update({
   id: '/tos',
   path: '/tos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/beta-ios': typeof BetaIosRoute
   '/google-groups': typeof GoogleGroupsRoute
   '/privacy': typeof PrivacyRoute
+  '/support': typeof SupportRoute
   '/tos': typeof TosRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/beta-ios': typeof BetaIosRoute
   '/google-groups': typeof GoogleGroupsRoute
   '/privacy': typeof PrivacyRoute
+  '/support': typeof SupportRoute
   '/tos': typeof TosRoute
 }
 export interface FileRoutesById {
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/beta-ios': typeof BetaIosRoute
   '/google-groups': typeof GoogleGroupsRoute
   '/privacy': typeof PrivacyRoute
+  '/support': typeof SupportRoute
   '/tos': typeof TosRoute
 }
 export interface FileRouteTypes {
@@ -80,6 +89,7 @@ export interface FileRouteTypes {
     | '/beta-ios'
     | '/google-groups'
     | '/privacy'
+    | '/support'
     | '/tos'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -88,6 +98,7 @@ export interface FileRouteTypes {
     | '/beta-ios'
     | '/google-groups'
     | '/privacy'
+    | '/support'
     | '/tos'
   id:
     | '__root__'
@@ -96,6 +107,7 @@ export interface FileRouteTypes {
     | '/beta-ios'
     | '/google-groups'
     | '/privacy'
+    | '/support'
     | '/tos'
   fileRoutesById: FileRoutesById
 }
@@ -105,6 +117,7 @@ export interface RootRouteChildren {
   BetaIosRoute: typeof BetaIosRoute
   GoogleGroupsRoute: typeof GoogleGroupsRoute
   PrivacyRoute: typeof PrivacyRoute
+  SupportRoute: typeof SupportRoute
   TosRoute: typeof TosRoute
 }
 
@@ -115,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/tos'
       fullPath: '/tos'
       preLoaderRoute: typeof TosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -161,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   BetaIosRoute: BetaIosRoute,
   GoogleGroupsRoute: GoogleGroupsRoute,
   PrivacyRoute: PrivacyRoute,
+  SupportRoute: SupportRoute,
   TosRoute: TosRoute,
 }
 export const routeTree = rootRouteImport

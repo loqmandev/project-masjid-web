@@ -8,6 +8,7 @@ const Footer = () => {
         <p>&copy; {currentYear} Jejak Masjid. All rights reserved.</p>
         <p><Link to="/privacy" className="mt-2 block no-underline hover:underline">Privacy Policy</Link></p>
         <p><Link to="/tos" className="mt-2 block no-underline hover:underline">Terms of Service</Link></p>
+        <p><Link to="/support" className="mt-2 block no-underline hover:underline">Support</Link></p>
       </div>
     </footer>
   );
