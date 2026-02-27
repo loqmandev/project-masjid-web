@@ -33,12 +33,27 @@ const Hero = () => {
             <p className="mb-8 text-base text-secondary-foreground sm:text-[1.1rem] lg:text-[1.2rem]">
               Jejak Masjid is your personal journey companion to record and cherish every visit to a mosque. It's not about competition, but about sincerity in every step.
             </p>
-            <a
-              href="#waitlist"
-              className="inline-flex w-full items-center justify-center rounded-lg bg-primary px-6 py-[0.85rem] font-medium text-primary-foreground no-underline shadow-[0_12px_24px_rgba(0,169,165,0.25)] transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_16px_28px_rgba(0,169,165,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:w-auto"
-            >
-              Join Waitlist
-            </a>
+            <div className="flex w-full flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
+              <a
+                href="https://play.google.com/store/apps/details?id=my.lonasoft.jejakmasjidmobile&hl=ms"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center transition-opacity hover:opacity-80"
+              >
+                <img
+                  src="/play-store-badge.svg"
+                  alt="Get it on Google Play"
+                  className="h-12"
+                />
+              </a>
+              <div className="inline-flex h-12 min-w-44 items-center justify-center gap-2 rounded-lg bg-muted px-4 text-muted-foreground">
+                <div className="flex flex-col leading-tight">
+                  <span className="text-[10px] opacity-70">Download on the</span>
+                  <span className="text-sm font-semibold">App Store</span>
+                </div>
+                <span className="ml-1 rounded bg-foreground/10 px-1.5 py-0.5 text-[10px] font-medium">SOON</span>
+              </div>
+            </div>
           </div>
           <div className="flex justify-center lg:justify-end">
             <div className="relative w-full max-w-72 rounded-[2.25rem] border border-border bg-card/70 p-5 shadow-[0_30px_60px_rgba(0,79,77,0.15)] backdrop-blur sm:max-w-80 sm:p-6">

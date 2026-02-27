@@ -13,6 +13,7 @@ import { Route as TosRouteImport } from './routes/tos'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as GoogleGroupsRouteImport } from './routes/google-groups'
+import { Route as DownloadRouteImport } from './routes/download'
 import { Route as BetaIosRouteImport } from './routes/beta-ios'
 import { Route as BetaAndroidRouteImport } from './routes/beta-android'
 import { Route as IndexRouteImport } from './routes/index'
@@ -37,6 +38,11 @@ const GoogleGroupsRoute = GoogleGroupsRouteImport.update({
   path: '/google-groups',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DownloadRoute = DownloadRouteImport.update({
+  id: '/download',
+  path: '/download',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BetaIosRoute = BetaIosRouteImport.update({
   id: '/beta-ios',
   path: '/beta-ios',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/beta-android': typeof BetaAndroidRoute
   '/beta-ios': typeof BetaIosRoute
+  '/download': typeof DownloadRoute
   '/google-groups': typeof GoogleGroupsRoute
   '/privacy': typeof PrivacyRoute
   '/support': typeof SupportRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/beta-android': typeof BetaAndroidRoute
   '/beta-ios': typeof BetaIosRoute
+  '/download': typeof DownloadRoute
   '/google-groups': typeof GoogleGroupsRoute
   '/privacy': typeof PrivacyRoute
   '/support': typeof SupportRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/beta-android': typeof BetaAndroidRoute
   '/beta-ios': typeof BetaIosRoute
+  '/download': typeof DownloadRoute
   '/google-groups': typeof GoogleGroupsRoute
   '/privacy': typeof PrivacyRoute
   '/support': typeof SupportRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/beta-android'
     | '/beta-ios'
+    | '/download'
     | '/google-groups'
     | '/privacy'
     | '/support'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/beta-android'
     | '/beta-ios'
+    | '/download'
     | '/google-groups'
     | '/privacy'
     | '/support'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/beta-android'
     | '/beta-ios'
+    | '/download'
     | '/google-groups'
     | '/privacy'
     | '/support'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BetaAndroidRoute: typeof BetaAndroidRoute
   BetaIosRoute: typeof BetaIosRoute
+  DownloadRoute: typeof DownloadRoute
   GoogleGroupsRoute: typeof GoogleGroupsRoute
   PrivacyRoute: typeof PrivacyRoute
   SupportRoute: typeof SupportRoute
@@ -151,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GoogleGroupsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/download': {
+      id: '/download'
+      path: '/download'
+      fullPath: '/download'
+      preLoaderRoute: typeof DownloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/beta-ios': {
       id: '/beta-ios'
       path: '/beta-ios'
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BetaAndroidRoute: BetaAndroidRoute,
   BetaIosRoute: BetaIosRoute,
+  DownloadRoute: DownloadRoute,
   GoogleGroupsRoute: GoogleGroupsRoute,
   PrivacyRoute: PrivacyRoute,
   SupportRoute: SupportRoute,
