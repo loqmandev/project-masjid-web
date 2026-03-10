@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
-const IOS_APP_URL = 'https://testflight.apple.com/join/zrH5N8Tp'
+const IOS_APP_URL = 'https://apps.apple.com/my/app/jejak-masjid-masjid-journey/id6757920248'
 const ANDROID_APP_URL = 'https://play.google.com/store/apps/details?id=my.lonasoft.jejakmasjidmobile'
 const FALLBACK_URL = '/'
 

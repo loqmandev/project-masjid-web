@@ -46,13 +46,18 @@ const Hero = () => {
                   className="h-12"
                 />
               </a>
-              <div className="inline-flex h-12 min-w-44 items-center justify-center gap-2 rounded-lg bg-muted px-4 text-muted-foreground">
-                <div className="flex flex-col leading-tight">
-                  <span className="text-[10px] opacity-70">Download on the</span>
-                  <span className="text-sm font-semibold">App Store</span>
-                </div>
-                <span className="ml-1 rounded bg-foreground/10 px-1.5 py-0.5 text-[10px] font-medium">SOON</span>
-              </div>
+              <a
+                href="https://apps.apple.com/my/app/jejak-masjid-masjid-journey/id6757920248"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center transition-opacity hover:opacity-80"
+              >
+                <img
+                  src="/app-store-badge.svg"
+                  alt="Download on the App Store"
+                  className="h-12"
+                />
+              </a>
             </div>
           </div>
           <div className="flex justify-center lg:justify-end">
@@ -77,7 +82,7 @@ const Hero = () => {
               </div>
               <div className="mt-6 flex items-center justify-between text-xs text-muted-foreground">
                 <span>Jejak Masjid</span>
-                <span>Coming soon</span>
+                <span>Available now</span>
               </div>
               <div className="mt-4 flex items-center justify-center gap-3">
                 {slides.map((slide, index) => (
