@@ -32,8 +32,6 @@ pnpm run deploy   # Build and deploy to Cloudflare (`pnpm deploy` is a
 - **Framework**: TanStack Start (React SSR) with TanStack Router (file-based routing)
 - **Styling**: Tailwind CSS v4, design tokens in `src/styles.css`
 - **Deployment**: Cloudflare Workers via Wrangler (`jejakmasjid.my`, `www.jejakmasjid.my`)
-- **Email**: Resend (waitlist onboarding — legacy, no longer linked from the homepage)
-- **Data Storage**: Google Sheets API (waitlist — legacy)
 
 ### Project Structure
 ```
@@ -44,7 +42,9 @@ src/
     index.tsx         # Homepage + FAQPage JSON-LD
     privacy.tsx | tos.tsx | support.tsx   # Long-form pages via PageLayout
     download.tsx      # UA-sniffing redirect to the right store
-    beta-ios.tsx | beta-android.tsx | google-groups.tsx  # Redirects
+    beta-ios.tsx | beta-android.tsx | google-groups.tsx  # Redirects. Kept even
+                      # though nothing links /google-groups now; it was printed in
+                      # onboarding emails already sent.
   components/
     Header · Hero · Assurances · Journey · Features · HowItWorks · Faq · Cta · Footer
     PageLayout.tsx    # Header + title band + .prose-jm article + Footer
@@ -102,16 +102,15 @@ Light-only "journal" surface: warm paper `#fbfaf6`, teal `#00807d`, gold `#b9890
 Newsreader (serif) for headings, Inter for body, both from Google Fonts. `.path-rule` is the
 recurring dotted-footpath motif. Prefer lines and whitespace over filled shapes and gradients.
 
-### Environment Variables (Production)
-- `SHEET_ID` — Google Sheets ID for the legacy waitlist
-- `GOOGLE_SERVICE_ACCOUNT_JSON` — service account credentials (JSON string)
-- `RESEND_API_KEY` / `RESEND_FROM_EMAIL` — onboarding email
-- `APP_DOMAIN` — optional, defaults to https://jejakmasjid.my
+### Environment Variables
+None. The site is fully static apart from the `/download` user-agent redirect, which needs no
+configuration. The old waitlist (Google Sheets + Resend) was removed in full, along with
+`SHEET_ID`, `GOOGLE_SERVICE_ACCOUNT_JSON`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL` and
+`APP_DOMAIN`. Any of those still set as Worker secrets can be deleted.
 
 ### Known Follow-ups
 - App Store badge is the Malay (`_MY`) artwork while the Play badge is English. Swap one for
   consistency using Apple/Google marketing resources — badges must not be redrawn by hand.
-- `src/components/Waitlist.tsx` is unused (the homepage no longer has a waitlist).
 - The header pairs the app icon with a text wordmark; the icon's own baked-in "Jejak Masjid"
   text is illegible at 36px. A symbol-only (dome) variant from the design source would read
   better, but must come from the brand owner rather than be cropped here.
