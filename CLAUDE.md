@@ -22,7 +22,8 @@ disagree, the store copy and the shipped app win (e.g. the ten-minute minimum vi
 pnpm dev          # Dev server (port 3000, falls back if taken)
 pnpm build        # Build for production
 pnpm test         # Vitest — currently no test files; the runner errors on startup (pre-existing)
-pnpm deploy       # Build and deploy to Cloudflare
+pnpm run deploy   # Build and deploy to Cloudflare (`pnpm deploy` is a
+                  # different, built-in pnpm command and will fail)
 ```
 
 ## Architecture
@@ -45,10 +46,10 @@ src/
     download.tsx      # UA-sniffing redirect to the right store
     beta-ios.tsx | beta-android.tsx | google-groups.tsx  # Redirects
   components/
-    Header · Hero · Journey · Features · HowItWorks · Faq · Cta · Footer
+    Header · Hero · Assurances · Journey · Features · HowItWorks · Faq · Cta · Footer
     PageLayout.tsx    # Header + title band + .prose-jm article + Footer
     PrivacyPolicy · TermsOfService · Support   # Body copy only; no page chrome
-    ui/               # Logo, StoreBadges, PhoneFrame, Section
+    ui/               # Logo, StoreBadges, PhoneFrame, Section, Reveal
   lib/
     site.ts           # Site constants, store URLs, nav sections
     seo.ts            # seo() head builder + structuredData() + faqStructuredData()
@@ -75,6 +76,16 @@ the root `<head>`; `faqStructuredData(FAQ)` renders on the homepage. Both as inl
 script, and the OS `prefers-color-scheme` is ignored. `:root` in `styles.css` carries the only
 token set and declares `color-scheme: light`. Do not reintroduce a `.dark` block or `dark:`
 utilities without being asked.
+
+**Motion.** Quiet by intent, and dependency-free: `ui/Reveal.tsx` uses one
+IntersectionObserver, never a scroll listener. Everything animated is gated behind
+`html[data-motion="on"]`, set by `MOTION_INIT` in `__root.tsx` only when JS runs and the
+visitor has not asked for reduced motion, so the page always renders complete and static
+otherwise. Animate only `transform` and `opacity`.
+
+**Layout rhythm.** Max 1 section eyebrow per 3 sections, max 4 text elements in the hero, and
+no more than 2 consecutive image-and-text split rows. Features deliberately runs three
+different layout families for this reason.
 
 **Server Functions**: `createServerFn` from `@tanstack/react-start`. See `src/routes/download.tsx`.
 
