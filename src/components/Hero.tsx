@@ -1,110 +1,75 @@
-import appLogo from '@/logo.svg'
-import { useEffect, useState } from 'react'
+import PhoneFrame from '@/components/ui/PhoneFrame'
+import StoreBadges from '@/components/ui/StoreBadges'
+import { Container } from '@/components/ui/Section'
 
-const Hero = () => {
-  const slides = [
-    { id: 'mock-1', label: 'App screenshot 1', src: '/1.png' },
-    { id: 'mock-2', label: 'App screenshot 2', src: '/2.png' },
-    { id: 'mock-3', label: 'App screenshot 3', src: '/3.png' },
-  ]
-  const [activeIndex, setActiveIndex] = useState(0)
+const ASSURANCES = [
+  '2,000+ masjids & surau across Malaysia',
+  'Free to download',
+  'Your visit history stays private',
+]
 
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % slides.length)
-    }, 3500)
-
-    return () => window.clearInterval(intervalId)
-  }, [slides.length])
-
+export default function Hero() {
   return (
-    <section className="min-h-[100svh] bg-[linear-gradient(180deg,_rgba(0,169,165,0.12)_0%,_var(--color-background)_55%,_rgba(255,204,0,0.12)_100%)] py-14 sm:py-16">
-      <div className="mx-auto flex min-h-[100svh] max-w-240 items-center px-4 sm:px-6">
-        <div className="grid w-full items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
-          <div className="text-center lg:text-left">
-            <img
-              src={appLogo}
-              alt="Jejak Masjid logo"
-              className="mx-auto mb-6 h-14 w-14 sm:h-16 sm:w-16 lg:mx-0 lg:h-20 lg:w-20"
-            />
-            <h1 className="mb-4 text-4xl font-bold leading-[1.15] text-foreground sm:text-5xl lg:text-6xl">
-              A blessed journey begins with a single step.
+    <section className="relative overflow-hidden pt-10 pb-16 sm:pt-16 sm:pb-24">
+      {/* A soft teal wash at the top, fading into paper. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(120%_100%_at_50%_0%,var(--color-primary-tint)_0%,transparent_70%)]"
+      />
+
+      <Container className="relative">
+        <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
+          <div className="jm-rise text-center lg:text-left">
+            <p className="eyebrow">A masjid journal, not a scoreboard</p>
+
+            <h1 className="mt-4 text-[2.6rem] leading-[1.08] text-foreground sm:text-6xl">
+              Remember where
+              <br className="hidden sm:block" /> you prayed.
             </h1>
-            <p className="mb-8 text-base text-secondary-foreground sm:text-[1.1rem] lg:text-[1.2rem]">
-              Jejak Masjid is your personal journey companion to record and cherish every visit to a mosque. It's not about competition, but about sincerity in every step.
+
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground lg:mx-0 mx-auto">
+              Jejak Masjid helps you find the masjid nearest you, check in when you arrive,
+              and keep a private record of the places that have become part of your prayer
+              journey.
             </p>
-            <div className="flex w-full flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
-              <a
-                href="https://play.google.com/store/apps/details?id=my.lonasoft.jejakmasjidmobile&hl=ms"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center transition-opacity hover:opacity-80"
-              >
-                <img
-                  src="/play-store-badge.svg"
-                  alt="Get it on Google Play"
-                  className="h-12"
-                />
-              </a>
-              <a
-                href="https://apps.apple.com/my/app/jejak-masjid-masjid-journey/id6757920248"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center transition-opacity hover:opacity-80"
-              >
-                <img
-                  src="/app-store-badge.svg"
-                  alt="Download on the App Store"
-                  className="h-12"
-                />
-              </a>
-            </div>
+
+            <p className="mt-5 font-display text-xl italic text-primary">
+              Langkah kecil, jejak yang bermakna.
+            </p>
+
+            <StoreBadges className="mt-9 justify-center lg:justify-start" />
+
+            <ul className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-subtle-foreground lg:justify-start">
+              {ASSURANCES.map((item) => (
+                <li key={item} className="flex items-center gap-2">
+                  <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
-          <div className="flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-72 rounded-[2.25rem] border border-border bg-card/70 p-5 shadow-[0_30px_60px_rgba(0,79,77,0.15)] backdrop-blur sm:max-w-80 sm:p-6">
-              <div className="mb-6 h-3 w-16 rounded-full bg-muted" />
-              <div className="relative aspect-[9/19.5] w-full overflow-hidden rounded-[1.75rem] border border-border bg-[linear-gradient(160deg,_rgba(0,169,165,0.08),_rgba(255,204,0,0.12))] p-0">
-                {slides.map((slide, index) => (
-                  <div
-                    key={slide.id}
-                    className={`absolute inset-0 rounded-[1.6rem] bg-background/80 transition-opacity duration-700 ${
-                      index === activeIndex ? 'opacity-100' : 'opacity-0'
-                    }`}
-                  >
-                    <img
-                      src={slide.src}
-                      alt={slide.label}
-                      className="h-full w-full rounded-[1.25rem] object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 flex items-center justify-between text-xs text-muted-foreground">
-                <span>Jejak Masjid</span>
-                <span>Available now</span>
-              </div>
-              <div className="mt-4 flex items-center justify-center gap-3">
-                {slides.map((slide, index) => (
-                  <button
-                    key={`${slide.id}-dot`}
-                    type="button"
-                    aria-label={`Go to ${slide.label}`}
-                    onClick={() => setActiveIndex(index)}
-                    className={`h-3.5 w-3.5 rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background hover:scale-110 ${
-                      index === activeIndex
-                        ? 'bg-primary shadow-[0_0_0_6px_rgba(0,169,165,0.15)]'
-                        : 'bg-border hover:bg-primary/40'
-                    }`}
-                  />
-                ))}
-              </div>
+
+          <div className="relative mx-auto flex w-full max-w-md justify-center lg:max-w-none">
+            <div
+              aria-hidden
+              className="path-rule absolute inset-x-0 top-1/2 hidden lg:block"
+            />
+            <div className="relative flex items-end gap-4 sm:gap-6">
+              <PhoneFrame
+                src="/screens/02-explore.webp"
+                alt="Jejak Masjid map view showing masjids and surau near the user"
+                className="hidden w-40 translate-y-6 sm:block sm:w-44"
+              />
+              <PhoneFrame
+                src="/screens/01-today.webp"
+                alt="The Jejak Masjid Today screen with an active check-in, prayer times and a visit streak"
+                className="w-56 sm:w-64"
+                priority
+              />
             </div>
           </div>
         </div>
-      </div>
+      </Container>
     </section>
-  );
-};
-
-export default Hero;
+  )
+}
