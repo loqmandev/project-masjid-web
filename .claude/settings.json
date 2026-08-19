@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(adb exec-out screencap:*)",
+      "Bash(adb shell input:*)",
+      "Bash(adb shell dumpsys:*)",
+      "Bash(adb logcat:*)",
+      "Bash(adb devices)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx tsc --noEmit:*)",
+      "Bash(npx jest:*)",
+      "Bash(npx vitest run:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npm test)",
+      "Bash(npm test:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run lint:*)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm lint:*)",
+      "Bash(rtk proxy grep:*)",
+      "Bash(rtk proxy sed:*)",
+      "Bash(rtk proxy diff:*)",
+      "Bash(rtk proxy cat:*)",
+      "Bash(rtk proxy ls:*)",
+      "Bash(curl -s http://localhost:*)"
+    ]
+  }
+}
