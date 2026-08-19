@@ -5,8 +5,9 @@ export const SITE = {
   /** App Store "name" field — keep in sync with store-assets-v2/ASO_COPY.md */
   storeName: 'Jejak Masjid: Mosque Tracker',
   tagline: 'Remember where you prayed.',
+  /** Kept under ~155 characters so Google does not truncate it in results. */
   description:
-    'Jejak Masjid is a masjid finder and visit journal for Muslims in Malaysia. Find masjids and surau near you, record verified visits, and keep a private record of your prayer journey. Free on iOS and Android.',
+    'A masjid finder and visit journal for Muslims in Malaysia. Find masjids and surau near you, and keep a private record of your prayer journey.',
   email: 'admin@jejakmasjid.my',
   ogImage: '/og-image.png',
   locale: 'en_MY',
