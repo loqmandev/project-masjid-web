@@ -44,7 +44,7 @@ export default function Header() {
         <div className="flex items-center gap-2">
           <a
             href="/download"
-            className="hidden rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-strong sm:inline-flex"
+            className="jm-press hidden rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-strong sm:inline-flex"
           >
             Get the app
           </a>
@@ -76,7 +76,7 @@ export default function Header() {
             ))}
             <a
               href="/download"
-              className="mt-3 mb-3 rounded-full bg-primary px-5 py-3 text-center text-sm font-medium text-primary-foreground"
+              className="jm-press mt-3 mb-3 rounded-full bg-primary px-5 py-3 text-center text-sm font-medium text-primary-foreground"
             >
               Get the app
             </a>

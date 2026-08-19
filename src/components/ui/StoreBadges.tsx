@@ -3,19 +3,21 @@ import { APP_STORE_URL, PLAY_STORE_URL } from '@/lib/site'
 export default function StoreBadges({
   className = '',
   size = 'default',
+  style,
 }: {
   className?: string
   size?: 'default' | 'compact'
+  style?: React.CSSProperties
 }) {
   const height = size === 'compact' ? 'h-10' : 'h-12'
 
   return (
-    <div className={`flex flex-wrap items-center gap-3 ${className}`}>
+    <div style={style} className={`flex flex-wrap items-center gap-3 ${className}`}>
       <a
         href={APP_STORE_URL}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex transition-transform duration-200 hover:-translate-y-0.5"
+        className="jm-press inline-flex transition-transform duration-200 hover:-translate-y-0.5"
       >
         <img
           src="/app-store-badge.svg"
@@ -29,7 +31,7 @@ export default function StoreBadges({
         href={PLAY_STORE_URL}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex transition-transform duration-200 hover:-translate-y-0.5"
+        className="jm-press inline-flex transition-transform duration-200 hover:-translate-y-0.5"
       >
         <img
           src="/play-store-badge.svg"

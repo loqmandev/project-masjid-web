@@ -11,12 +11,10 @@ export function Container({
 }
 
 export function SectionHeading({
-  eyebrow,
   title,
   lede,
   align = 'center',
 }: {
-  eyebrow?: string
   title: ReactNode
   lede?: ReactNode
   align?: 'center' | 'left'
@@ -25,7 +23,6 @@ export function SectionHeading({
 
   return (
     <div className={alignment}>
-      {eyebrow ? <p className="eyebrow mb-3">{eyebrow}</p> : null}
       <h2 className="text-3xl leading-tight text-foreground sm:text-4xl">{title}</h2>
       {lede ? (
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{lede}</p>

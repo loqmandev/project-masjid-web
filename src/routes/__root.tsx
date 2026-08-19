@@ -6,6 +6,13 @@ import appCss from '../styles.css?url'
 import { SITE } from '@/lib/site'
 import { seo, structuredData } from '@/lib/seo'
 
+/**
+ * Opts the page into motion. Everything animated is gated behind
+ * `html[data-motion="on"]`, so a visitor without JS, or one who has asked for
+ * reduced motion, gets the full page rendered static and visible.
+ */
+const MOTION_INIT = `(function(){try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.dataset.motion='on'}}catch(e){}})()`
+
 export const Route = createRootRoute({
   head: () => ({
     meta: [
@@ -41,6 +48,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-MY">
       <head>
+        <script dangerouslySetInnerHTML={{ __html: MOTION_INIT }} />
         <HeadContent />
         <script
           type="application/ld+json"

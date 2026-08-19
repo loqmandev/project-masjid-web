@@ -19,7 +19,7 @@ const Support = () => {
             How do I create an account?
           </summary>
           <p>
-            You can create an account using three options: Google, Apple, or your email address. Simply open the app and tap "Continue with Google/Apple/Email." All authentication methods are passwordless—for email sign-up, an OTP code will be sent to your email. Follow the on-screen instructions to complete the registration process.
+            You can create an account using three options: Google, Apple, or your email address. Simply open the app and tap "Continue with Google/Apple/Email." All authentication methods are passwordless. For email sign-up, an OTP code will be sent to your email. Follow the on-screen instructions to complete the registration process.
           </p>
         </details>
 
@@ -28,7 +28,7 @@ const Support = () => {
             How do I find masjids near me?
           </summary>
           <p>
-            The app uses your device's location to show you nearby masjids. Make sure you have granted location permissions to the app. Please note that you cannot search manually for masjids—the app requires your device location. Also, ensure you grant "Precise" location, not "Approximate," as this may affect your check-in experience.
+            The app uses your device's location to show you nearby masjids. Make sure you have granted location permissions to the app. Please note that you cannot search manually for masjids: the app requires your device location. Also, ensure you grant "Precise" location, not "Approximate," as this may affect your check-in experience.
           </p>
         </details>
 

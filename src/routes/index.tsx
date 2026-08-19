@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import Cta from '@/components/Cta'
+import Assurances from '@/components/Assurances'
 import Faq from '@/components/Faq'
 import Features from '@/components/Features'
 import Footer from '@/components/Footer'
@@ -27,6 +28,7 @@ function App() {
       <Header />
       <main>
         <Hero />
+        <Assurances />
         <Journey />
         <Features />
         <HowItWorks />

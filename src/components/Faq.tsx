@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react'
+import Reveal from '@/components/ui/Reveal'
 import { Container, SectionHeading } from '@/components/ui/Section'
 import { SITE } from '@/lib/site'
 import { FAQ } from '@/lib/faq'
@@ -7,9 +8,11 @@ export default function Faq() {
   return (
     <section id="faq" className="scroll-mt-24 bg-surface-sunken py-20 sm:py-28">
       <Container>
-        <SectionHeading eyebrow="Questions" title="Things people ask" />
+        <Reveal>
+          <SectionHeading title="Things people ask" />
+        </Reveal>
 
-        <div className="mx-auto mt-14 max-w-3xl divide-y divide-border border-y border-border">
+        <Reveal className="mx-auto mt-14 max-w-3xl divide-y divide-border border-y border-border">
           {FAQ.map((item) => (
             <details key={item.q} className="group py-5">
               <summary className="flex cursor-pointer list-none items-start justify-between gap-6 text-left text-lg text-foreground marker:content-none">
@@ -22,7 +25,7 @@ export default function Faq() {
               <p className="mt-3 max-w-2xl leading-relaxed text-muted-foreground">{item.a}</p>
             </details>
           ))}
-        </div>
+        </Reveal>
 
         <p className="mt-10 text-center text-sm text-subtle-foreground">
           Still stuck?{' '}
@@ -32,7 +35,7 @@ export default function Faq() {
           >
             {SITE.email}
           </a>{' '}
-          — or read the{' '}
+          or read the{' '}
           <a href="/support" className="text-primary underline underline-offset-4">
             full support page
           </a>

@@ -18,7 +18,7 @@ export const FAQ = [
   },
   {
     q: 'Is my visit history private?',
-    a: 'Yes. Your visit history is private and visible only to you. Rankings are optional and secondary — you can appear under an anonymous display name, or simply ignore them.',
+    a: 'Yes. Your visit history is private and visible only to you. Rankings are optional and secondary: you can appear under an anonymous display name, or simply ignore them.',
   },
   {
     q: 'What is a Prayer Circle?',

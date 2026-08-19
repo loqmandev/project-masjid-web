@@ -9,7 +9,7 @@ export const Route = createFileRoute('/privacy')({
       title: 'Privacy Policy',
       path: '/privacy',
       description:
-        'How Jejak Masjid collects, uses and protects your information — including location data, masjid visit history and account details.',
+        'How Jejak Masjid collects, uses and protects your information, including location data, masjid visit history and account details.',
     }),
   component: PrivacyPolicyPage,
 })

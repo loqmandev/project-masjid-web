@@ -26,7 +26,7 @@ export function seo({
   noindex = false,
   type = 'website',
 }: SeoInput = {}) {
-  const fullTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} — ${SITE.tagline}`
+  const fullTitle = title ? `${title} | ${SITE.name}` : `${SITE.name}: ${SITE.tagline}`
   const canonical = absoluteUrl(path)
   const imageUrl = absoluteUrl(image)
 
@@ -47,7 +47,7 @@ export function seo({
     { property: 'og:image', content: imageUrl },
     { property: 'og:image:width', content: '1200' },
     { property: 'og:image:height', content: '630' },
-    { property: 'og:image:alt', content: `${SITE.name} — ${SITE.tagline}` },
+    { property: 'og:image:alt', content: `${SITE.name}: ${SITE.tagline}` },
 
     { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:title', content: fullTitle },

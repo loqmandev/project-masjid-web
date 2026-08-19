@@ -9,7 +9,7 @@ export const Route = createFileRoute('/support')({
       title: 'Support & Help',
       path: '/support',
       description:
-        'Answers to common Jejak Masjid questions — accounts, check-ins, location permissions, the leaderboard and deleting your account. Contact admin@jejakmasjid.my for anything else.',
+        'Answers to common Jejak Masjid questions: accounts, check-ins, location permissions, the leaderboard and deleting your account. Contact admin@jejakmasjid.my for anything else.',
     }),
   component: SupportPage,
 })
@@ -20,7 +20,7 @@ function SupportPage() {
       eyebrow="Support"
       title="How can we help?"
       updated="February 18, 2026"
-      intro="Answers to the questions we are asked most. If yours is not here, write to us — we usually reply within a day or two."
+      intro="Answers to the questions we are asked most. If yours is not here, write to us. We usually reply within a day or two."
     >
       <Support />
     </PageLayout>
