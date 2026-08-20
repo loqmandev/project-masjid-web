@@ -16,8 +16,6 @@ export const Route = createFileRoute('/')({
   head: () =>
     seo({
       path: '/',
-      keywords:
-        'masjid finder, mosque tracker, masjid berdekatan, surau near me, waktu solat, prayer times Malaysia, masjid directory Malaysia, mosque check in app',
     }),
   component: App,
 })

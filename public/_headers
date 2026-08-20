@@ -1,6 +1,12 @@
 /screens/*
   Cache-Control: public, max-age=31536000, immutable
 
+# Immutable is safe because a changed face gets a new filename, never an
+# in-place swap.
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
+
 /*.svg
   Cache-Control: public, max-age=604800
 

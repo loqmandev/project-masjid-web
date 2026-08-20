@@ -7,7 +7,6 @@ type SeoInput = {
   /** Site-root-relative path, e.g. `/privacy`. Used for the canonical URL. */
   path?: string
   image?: string
-  keywords?: string
   /** Redirect/utility routes should not be indexed. */
   noindex?: boolean
   type?: 'website' | 'article'
@@ -22,7 +21,6 @@ export function seo({
   description = SITE.description,
   path = '/',
   image = SITE.ogImage,
-  keywords,
   noindex = false,
   type = 'website',
 }: SeoInput = {}) {
@@ -55,7 +53,6 @@ export function seo({
     { name: 'twitter:image', content: imageUrl },
   ]
 
-  if (keywords) meta.push({ name: 'keywords', content: keywords })
 
   return {
     meta,
