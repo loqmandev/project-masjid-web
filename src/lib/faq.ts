@@ -6,7 +6,7 @@ export const FAQ = [
   },
   {
     q: 'Which masjids are covered?',
-    a: 'More than 2,000 masjids and surau across all 13 states and 3 federal territories of Malaysia, drawn from JAKIM records and community submissions. Coverage of Singapore, Brunei and Indonesia is in progress.',
+    a: 'More than 8,000 masjids and surau across all 13 states and 3 federal territories of Malaysia, drawn from JAKIM records and community submissions. Coverage of Singapore, Brunei and Indonesia is in progress.',
   },
   {
     q: 'Why does the app need my precise location?',

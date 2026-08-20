@@ -6,7 +6,7 @@ import { Container } from '@/components/ui/Section'
  * it, so the hero stays a single moment: message plus one way to act on it.
  */
 const ASSURANCES = [
-  { stat: '2,000+', label: 'masjids and surau, across all 13 states and 3 federal territories' },
+  { stat: '8,000+', label: 'masjids and surau, across all 13 states and 3 federal territories' },
   { stat: 'Free', label: 'to download and to use, on both iOS and Android' },
   { stat: 'Private', label: 'visit history by default, visible only to you' },
 ]

@@ -51,8 +51,7 @@ export default function HowItWorks() {
 
         <Reveal as="p" className="mx-auto mt-10 max-w-2xl text-center text-sm text-subtle-foreground">
           Precise location is required for check-in, so a visit can be confirmed rather than
-          claimed. It is used at that moment only. Jejak Masjid does not track you in the
-          background.
+          claimed. Jejak Masjid does not track you in the background.
         </Reveal>
       </Container>
     </section>

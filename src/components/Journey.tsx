@@ -4,15 +4,15 @@ import { Container, SectionHeading } from '@/components/ui/Section'
 const PRINCIPLES = [
   {
     term: 'Ikhlas',
-    title: 'Sincerity, not streak panic',
+    title: 'Gentle, even when a streak ends',
     body:
-      'No shaming, no guilt, no red warnings when a day passes. If you miss one, nothing is lost. The path is still there tomorrow.',
+      'A streak does end if a day passes, and you have until the next Subuh before it does. Nothing else goes with it. Your points, your visits and your milestones all stay exactly where they are.',
   },
   {
     term: 'Hadir',
     title: 'Presence over performance',
     body:
-      'A short visit still counts. What matters is that you singgah at all, not how long you stayed or how many places you reached.',
+      'Ten minutes at the masjid is all a visit needs. What matters is that you singgah at all, not how long you stay beyond that or how many places you reach.',
   },
   {
     term: 'Peribadi',
