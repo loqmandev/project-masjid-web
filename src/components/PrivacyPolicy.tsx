@@ -23,12 +23,24 @@ const PrivacyPolicy = () => {
 
         <h3>Location Data</h3>
         <p>
-          We use your device location solely to help you find nearby masjids. Your location data may be cached locally on your device for performance purposes, but we do NOT store your location data on our servers or in our database.
+          We use your device location for two things: showing you masjids near you, and confirming that a check-in and check-out actually took place at the masjid you selected.
+        </p>
+        <p>
+          When you check in, we store the coordinates of your check-in and check-out, the accuracy reported by your device, your IP address and your device user agent, attached to that visit record. If a check-in is rejected as suspicious, we store the same details against that rejected attempt. This is what allows a visit to be verified rather than simply claimed, and it is how we detect falsified GPS locations.
+        </p>
+        <p>
+          We do not track your location in the background, and we do not collect location outside a check-in or check-out. We do not sell location data and we do not share it with advertisers or analytics providers. The app contains no third-party tracking or analytics SDKs.
+        </p>
+        <p>
+          Location data attached to your visits is kept for as long as your account exists. Deleting your account deletes your visit records and the location data attached to them.
         </p>
 
         <h3>Masjid Visit History</h3>
         <p>
-          We store a record of masjids you have visited in our database. This data is used exclusively for your personal tracking and reference. Your visit history is NEVER displayed to other users and is kept private to your account.
+          We store a record of the masjids you have visited. Your visit history is private to your account by default and is not browsable by other users.
+        </p>
+        <p>
+          There is one exception you control. If you join a Prayer Circle, your completed check-ins appear in that Circle's shared activity for its members, and a separate setting controls whether the masjid name is included or hidden. If you do not join a Circle, your history stays private.
         </p>
 
         <h3>Usage Data</h3>
@@ -44,7 +56,7 @@ const PrivacyPolicy = () => {
         <ul>
           <li>To facilitate account creation and login via passwordless authentication (OTP code sent to email) or OAuth providers (Google, Apple).</li>
           <li><strong>Important:</strong> We do NOT store passwords in our database. All authentication is passwordless.</li>
-          <li>To find nearby masjids using your device location (used temporarily, not stored on our servers).</li>
+          <li>To find nearby masjids using your device location, and to verify check-ins and check-outs (see Location Data above for what is stored).</li>
           <li>To track your personal masjid visit history for your own reference.</li>
           <li>To display your username and profile picture on the leaderboard (if you choose to participate).</li>
           <li>To send you marketing and promotional communications (if you opt-in).</li>

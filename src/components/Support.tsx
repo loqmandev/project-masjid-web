@@ -107,7 +107,7 @@ const Support = () => {
             Is my location data stored?
           </summary>
           <p>
-            No, we do not store your location data on our servers. Your location is only used temporarily to help you find nearby masjids. Location data may be cached locally on your device for performance purposes, but it is never transmitted to or stored on our databases.
+            Yes, for your check-ins. When you check in and complete a visit, we store the coordinates of both, along with the accuracy your device reported, your IP address and your device user agent, attached to that visit. This is how a visit is verified rather than simply claimed, and how we detect falsified GPS. We do not track your location in the background, we do not collect it outside a check-in, and we never sell or share it. Deleting your account removes your visit history and the location data attached to it.
           </p>
         </details>
 
