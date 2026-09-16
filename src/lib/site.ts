@@ -9,7 +9,7 @@ export const SITE = {
   description:
     'A masjid finder and visit journal for Muslims in Malaysia. Find masjids and surau near you, and keep a private record of your prayer journey.',
   email: 'admin@jejakmasjid.my',
-  ogImage: '/og-image.png',
+  ogImage: '/og-image-cb5aed1525f9.png',
   locale: 'en_MY',
 } as const
 
