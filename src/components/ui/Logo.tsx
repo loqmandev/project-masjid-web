@@ -1,28 +1,16 @@
-/**
- * The shipped Jejak Masjid app icon (mirrored from
- * project-masjid-mobile/assets/images/icon.png). Use this everywhere the brand
- * mark appears — do not substitute a redrawn mark.
- */
+/** Approved JM artwork. Preserve the original silhouette and lockup spacing. */
 export function LogoMark({ className = 'h-9 w-9' }: { className?: string }) {
-  return (
-    <img
-      src="/logo.png"
-      alt=""
-      aria-hidden="true"
-      width={256}
-      height={256}
-      className={`rounded-[22%] ${className}`}
-    />
-  )
+  return <img src="/logo.png" alt="" aria-hidden="true" width={256} height={256} className={className} />
 }
 
 export function Wordmark({ className = '' }: { className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-2.5 ${className}`}>
-      <LogoMark className="h-9 w-9" />
-      <span className="font-display text-[1.35rem] leading-none text-foreground">
-        Jejak Masjid
-      </span>
-    </span>
+    <img
+      src="/brand/jm-wordmark-ink.svg"
+      alt="Jejak Masjid"
+      width={387}
+      height={174}
+      className={`block h-11 w-auto shrink-0 ${className}`}
+    />
   )
 }
