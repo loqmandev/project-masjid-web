@@ -1,8 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import { APP_STORE_URL, PLAY_STORE_URL } from '@/lib/site'
 
-const IOS_APP_URL = 'https://apps.apple.com/my/app/jejak-masjid-masjid-journey/id6757920248'
-const ANDROID_APP_URL = 'https://play.google.com/store/apps/details?id=my.lonasoft.jejakmasjidmobile'
 const FALLBACK_URL = '/'
 
 const getRedirectUrl = createServerFn({ method: 'GET' })
@@ -10,9 +9,9 @@ const getRedirectUrl = createServerFn({ method: 'GET' })
     const userAgent = request.headers.get('user-agent') || ''
 
     if (/iPad|iPhone|iPod/.test(userAgent)) {
-      return IOS_APP_URL
+      return APP_STORE_URL
     } else if (/Android/.test(userAgent)) {
-      return ANDROID_APP_URL
+      return PLAY_STORE_URL
     }
     return FALLBACK_URL
   })

@@ -1,4 +1,55 @@
-Welcome to your new TanStack app! 
+# Jejak Masjid — jejakmasjid.my
+
+Marketing site for the Jejak Masjid app. TanStack Start (SSR React) on Cloudflare Workers.
+See `CLAUDE.md` for architecture and `BRAND.md` for voice.
+
+## Prayer Circle invite links
+
+Circle owners in the app share `https://jejakmasjid.my/prayer-circles/invite/<CODE>`.
+
+- **Landing page** — `src/routes/prayer-circles.invite.$code.tsx`. No backend call; shows the
+  code, **Open in Jejak Masjid** (`jejakmasjidmobile://prayer-circle/join?code=…`, an
+  `intent://` URL with a Play fallback on Android), **Copy code** and store badges. Not indexed,
+  not cached, no referrer. A malformed code renders "This invite link looks incomplete" (404).
+- **App association** — `/.well-known/apple-app-site-association` and
+  `/.well-known/assetlinks.json`, claiming only `/prayer-circles/invite/*` for
+  `my.lonasoft.jejakmasjidmobile`. **Fail-closed:** each returns 404 until its var is set and
+  well-formed.
+
+| Var | Format | Where to find it |
+|---|---|---|
+| `APPLE_TEAM_ID` | 10 upper-case alphanumerics | Apple Developer → Membership details |
+| `ANDROID_SHA256_CERT_FINGERPRINTS` | comma-separated `AA:BB:…:FF` (32 hex pairs each) | Play Console → App integrity → App signing key SHA-256, plus the upload key SHA-256 |
+
+### Operator steps to turn app links on
+
+1. Set both values, either as `vars` in `wrangler.jsonc` or with `npx wrangler secret put
+   APPLE_TEAM_ID` / `npx wrangler secret put ANDROID_SHA256_CERT_FINGERPRINTS`. Avoid
+   dashboard-only plain vars: the next `wrangler deploy` drops them.
+2. `pnpm run deploy`.
+3. Check both documents return `200` and `application/json` with no redirect:
+   `curl -i https://jejakmasjid.my/.well-known/apple-app-site-association` and
+   `curl -i https://jejakmasjid.my/.well-known/assetlinks.json`.
+4. iOS: run Apple's AASA validator; on a device, reinstall the app and tap an invite link in
+   Notes or Messages.
+5. Android: with the app installed, `adb shell pm verify-app-links --re-verify
+   my.lonasoft.jejakmasjidmobile`, then `adb shell pm get-app-links
+   my.lonasoft.jejakmasjidmobile` — `jejakmasjid.my` should read `verified`.
+
+### Local checks
+
+```bash
+pnpm test                    # normaliser + document builder unit tests
+pnpm build
+npx wrangler dev -c dist/server/wrangler.json --port 8788                  # docs → 404
+npx wrangler dev -c dist/server/wrangler.json --port 8788 \
+  --var APPLE_TEAM_ID:ABCDE12345 \
+  --var ANDROID_SHA256_CERT_FINGERPRINTS:AB:AB:…                           # docs → 200 (fake values)
+curl -i localhost:8788/prayer-circles/invite/ABCDE12345
+```
+
+---
+
 
 # Getting Started
 

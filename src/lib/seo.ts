@@ -10,6 +10,8 @@ type SeoInput = {
   /** Redirect/utility routes should not be indexed. */
   noindex?: boolean
   type?: 'website' | 'article'
+  /** Overrides the OG/Twitter title when the share card should read differently. */
+  socialTitle?: string
 }
 
 /**
@@ -23,8 +25,10 @@ export function seo({
   image = SITE.ogImage,
   noindex = false,
   type = 'website',
+  socialTitle,
 }: SeoInput = {}) {
   const fullTitle = title ? `${title} | ${SITE.name}` : `${SITE.name}: ${SITE.tagline}`
+  const cardTitle = socialTitle ?? fullTitle
   const canonical = absoluteUrl(path)
   const imageUrl = absoluteUrl(image)
 
@@ -39,7 +43,7 @@ export function seo({
     { property: 'og:type', content: type },
     { property: 'og:site_name', content: SITE.name },
     { property: 'og:locale', content: SITE.locale },
-    { property: 'og:title', content: fullTitle },
+    { property: 'og:title', content: cardTitle },
     { property: 'og:description', content: description },
     { property: 'og:url', content: canonical },
     { property: 'og:image', content: imageUrl },
@@ -48,7 +52,7 @@ export function seo({
     { property: 'og:image:alt', content: `${SITE.name}: ${SITE.tagline}` },
 
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: fullTitle },
+    { name: 'twitter:title', content: cardTitle },
     { name: 'twitter:description', content: description },
     { name: 'twitter:image', content: imageUrl },
   ]
