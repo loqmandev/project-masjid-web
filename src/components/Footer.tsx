@@ -92,11 +92,18 @@ export default function Footer() {
 
         <div className="path-rule my-10" />
 
-        <div className="flex flex-col gap-4 text-sm text-subtle-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            © {year} {SITE.name}. Built by {SITE.legalName}.
-          </p>
-          <div className="flex gap-6">
+        <div className="flex flex-col gap-6 text-sm text-subtle-foreground lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-1 leading-relaxed">
+            <p>
+              © {year} {SITE.name}. Built by{' '}
+              <a href="https://loqman.dev/en/business" className="transition-colors hover:text-foreground">
+                Hakim Technologies Services
+              </a>.
+            </p>
+            <p>SSM: 202403307010 (TR0312291-A)</p>
+            <p>Developer: Loqman Al Hakim Aripin</p>
+          </div>
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
             <Link to="/privacy" className="transition-colors hover:text-foreground">
               Privacy Policy
             </Link>
