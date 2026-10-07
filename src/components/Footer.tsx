@@ -96,11 +96,9 @@ export default function Footer() {
           <div className="space-y-1 leading-relaxed">
             <p>
               © {year} {SITE.name}. Built by{' '}
-              <a href="https://loqman.dev/en/business" className="transition-colors hover:text-foreground">
-                Hakim Technologies Services
-              </a>.
+              {SITE.legalName}.
             </p>
-            <p>SSM: 202403307010 (TR0312291-A)</p>
+            <p>SSM: {SITE.registrationNumber}</p>
             <p>Developer: Loqman Al Hakim Aripin</p>
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2">

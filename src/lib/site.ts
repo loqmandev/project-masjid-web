@@ -1,6 +1,7 @@
 export const SITE = {
   name: 'Jejak Masjid',
-  legalName: 'Lonasoft',
+  legalName: 'JEJAK MANFAAT DIGITAL SOLUTIONS',
+  registrationNumber: '202603263114 (JM1051015-M)',
   url: 'https://jejakmasjid.my',
   /** App Store "name" field — keep in sync with store-assets-v2/ASO_COPY.md */
   storeName: 'Jejak Masjid: Mosque Tracker',
