@@ -29,7 +29,7 @@ const STEPS = [
 
 export default function HowItWorks() {
   return (
-    <section id="how" className="scroll-mt-24 py-20 sm:py-28">
+    <section id="how" className="scroll-mt-32 py-20 sm:py-28">
       <Container>
         <Reveal>
           <SectionHeading
@@ -37,10 +37,11 @@ export default function HowItWorks() {
           />
         </Reveal>
 
-        <ol className="mt-16 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+        <ol className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((step, index) => (
-            <Reveal as="li" key={step.n} delay={index * 90} className="bg-background p-7">
-              <span className="font-display text-2xl text-accent">{step.n}</span>
+            <Reveal as="li" key={step.n} delay={index * 90} className="rounded-[20px] border border-border bg-surface p-7">
+              <span className="block font-display text-2xl text-foreground">{step.n}</span>
+              <span aria-hidden className="mt-2 block h-1 w-8 rounded-full bg-accent" />
               <h3 className="mt-4 text-lg text-foreground">{step.title}</h3>
               <p className="mt-2.5 text-[0.95rem] leading-relaxed text-muted-foreground">
                 {step.body}

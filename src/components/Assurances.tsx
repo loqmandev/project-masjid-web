@@ -18,7 +18,7 @@ export default function Assurances() {
         <Reveal className="grid gap-8 sm:grid-cols-3 sm:gap-10">
           {ASSURANCES.map((item) => (
             <div key={item.stat} className="flex gap-4">
-              <span aria-hidden className="mt-2 h-px w-8 shrink-0 bg-accent" />
+              <span aria-hidden className="mt-2 h-[3px] w-8 shrink-0 rounded-full bg-accent" />
               <p className="text-[0.95rem] leading-relaxed text-muted-foreground">
                 <span className="font-display text-lg text-foreground">{item.stat}</span>{' '}
                 {item.label}

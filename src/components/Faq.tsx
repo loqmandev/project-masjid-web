@@ -6,7 +6,7 @@ import { FAQ } from '@/lib/faq'
 
 export default function Faq() {
   return (
-    <section id="faq" className="scroll-mt-24 bg-surface-sunken py-20 sm:py-28">
+    <section id="faq" className="scroll-mt-32 py-20 sm:py-28">
       <Container>
         <Reveal>
           <SectionHeading title="Things people ask" />
@@ -15,7 +15,7 @@ export default function Faq() {
         <Reveal className="mx-auto mt-14 max-w-3xl divide-y divide-border border-y border-border">
           {FAQ.map((item) => (
             <details key={item.q} className="group py-5">
-              <summary className="flex cursor-pointer list-none items-start justify-between gap-6 text-left text-lg text-foreground marker:content-none">
+              <summary className="flex cursor-pointer list-none items-start justify-between gap-6 text-left font-display text-lg font-bold text-foreground marker:content-none">
                 {item.q}
                 <Plus
                   aria-hidden

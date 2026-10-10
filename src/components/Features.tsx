@@ -66,7 +66,7 @@ function Points({ points }: { points: string[] }) {
     <ul className="mt-6 space-y-3">
       {points.map((point) => (
         <li key={point} className="flex gap-3 text-[0.95rem] text-muted-foreground">
-          <span aria-hidden className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+          <span aria-hidden className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-teal" />
           {point}
         </li>
       ))}
@@ -75,20 +75,12 @@ function Points({ points }: { points: string[] }) {
 }
 
 function Plinth({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      <div
-        aria-hidden
-        className="absolute inset-x-2 inset-y-8 rounded-[3rem] bg-[radial-gradient(70%_55%_at_50%_45%,var(--color-primary-tint)_0%,transparent_72%)]"
-      />
-      {children}
-    </>
-  )
+  return <>{children}</>
 }
 
 export default function Features() {
   return (
-    <section id="features" className="scroll-mt-24 bg-surface-sunken py-20 sm:py-28">
+    <section id="features" className="scroll-mt-32 bg-surface-sunken py-20 sm:py-28">
       <Container>
         <Reveal>
           <SectionHeading
@@ -132,7 +124,7 @@ export default function Features() {
         </div>
 
         {/* Family 2: one centred, full-width moment for the social feature. */}
-        <article className="mt-20 rounded-3xl border border-border bg-background px-6 py-14 text-center sm:mt-24 sm:px-12">
+        <article className="mt-20 rounded-[20px] border border-border bg-surface px-6 py-14 text-center sm:mt-24 sm:px-12">
           <Reveal className="mx-auto max-w-2xl">
             <h3 className="text-2xl leading-snug text-foreground sm:text-3xl">
               Pray together, privately
