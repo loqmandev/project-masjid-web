@@ -23,7 +23,7 @@ export default function Header() {
       }`}
     >
       <Container className="flex h-16 items-center sm:h-24 justify-between gap-4">
-        <Link to="/" aria-label="Jejak Masjid home" className="flex items-center py-2" onClick={() => setOpen(false)}>
+        <Link to="/" aria-label="Jejak Masjid home" className="flex items-center sm:py-0" onClick={() => setOpen(false)}>
           <LogoMark className="h-10 w-10 sm:hidden" />
           <Wordmark className="hidden sm:block" />
         </Link>
