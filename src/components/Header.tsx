@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { Menu, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Wordmark } from '@/components/ui/Logo'
+import { LogoMark, Wordmark } from '@/components/ui/Logo'
 import { Container } from '@/components/ui/Section'
 import { SECTIONS } from '@/lib/site'
 
@@ -22,9 +22,10 @@ export default function Header() {
         lifted ? 'border-border bg-background/90 backdrop-blur-md' : 'border-border bg-background'
       }`}
     >
-      <Container className="flex h-28 items-center justify-between gap-4">
-        <Link to="/" aria-label="Jejak Masjid home" className="py-3" onClick={() => setOpen(false)}>
-          <Wordmark />
+      <Container className="flex h-16 items-center sm:h-24 justify-between gap-4">
+        <Link to="/" aria-label="Jejak Masjid home" className="flex items-center py-2" onClick={() => setOpen(false)}>
+          <LogoMark className="h-10 w-10 sm:hidden" />
+          <Wordmark className="hidden sm:block" />
         </Link>
 
         <nav className="hidden items-center gap-6 lg:flex" aria-label="Main">

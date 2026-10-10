@@ -17,7 +17,7 @@ export default function Footer() {
       <Container>
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
-            <Wordmark tone="dark" />
+            <Wordmark tone="dark" className="block" />
             <p className="mt-4 max-w-sm leading-relaxed text-deep-muted">
               A quiet record of your visits to the masjid, so you can remember where you have
               been and choose where to go next.

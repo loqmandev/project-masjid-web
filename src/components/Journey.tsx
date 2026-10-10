@@ -24,7 +24,7 @@ const PRINCIPLES = [
 
 export default function Journey() {
   return (
-    <section id="journey" className="scroll-mt-32 py-20 sm:py-28">
+    <section id="journey" className="py-20 sm:py-28">
       <Container>
         <Reveal>
           <SectionHeading

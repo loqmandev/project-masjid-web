@@ -29,7 +29,7 @@ const STEPS = [
 
 export default function HowItWorks() {
   return (
-    <section id="how" className="scroll-mt-32 py-20 sm:py-28">
+    <section id="how" className="py-20 sm:py-28">
       <Container>
         <Reveal>
           <SectionHeading

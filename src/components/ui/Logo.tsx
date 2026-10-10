@@ -39,7 +39,7 @@ export function Wordmark({
       alt="Jejak Masjid"
       width={387}
       height={174}
-      className={`block h-auto w-[184px] max-w-none shrink-0 ${className}`}
+      className={`h-auto w-[184px] max-w-none shrink-0 ${className}`}
     />
   )
 }

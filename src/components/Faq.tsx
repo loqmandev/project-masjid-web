@@ -6,7 +6,7 @@ import { FAQ } from '@/lib/faq'
 
 export default function Faq() {
   return (
-    <section id="faq" className="scroll-mt-32 py-20 sm:py-28">
+    <section id="faq" className="py-20 sm:py-28">
       <Container>
         <Reveal>
           <SectionHeading title="Things people ask" />

@@ -127,7 +127,12 @@
   html {
     scroll-behavior: smooth;
     /* Offset anchor targets so the sticky header never covers a heading. */
-    scroll-padding-top: 8rem;
+    scroll-padding-top: 5rem;
+  }
+  @media (min-width: 640px) {
+    html {
+      scroll-padding-top: 7rem;
+    }
   }
 
   body {
@@ -149,7 +154,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--ring);
+    outline: 2px solid var(--primary);
     outline-offset: 3px;
     border-radius: 4px;
   }
@@ -189,14 +194,18 @@
     border-top: 2px dotted var(--border-strong);
   }
 
-  /* Long-form legal / support copy. */
+  /* Deep-teal colour blocks (hero, CTA, footer, page band). */
+  .on-deep :focus-visible {
+    outline-color: var(--ring);
+  }
   .on-deep .eyebrow {
     color: var(--accent);
   }
   .on-deep .path-rule {
-    border-top-color: var(--deep-line);
+    border-top-color: color-mix(in srgb, var(--brand-teal) 45%, var(--deep));
   }
 
+  /* Long-form legal / support copy. */
   .prose-jm {
     color: var(--muted-foreground);
     line-height: 1.75;

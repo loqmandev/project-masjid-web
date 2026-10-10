@@ -27,7 +27,7 @@ export default function ForCommittees() {
       id="committees"
       lang="ms"
       aria-labelledby="committees-heading"
-      className="scroll-mt-32 border-y border-border bg-surface-sunken py-20 sm:py-28"
+      className="border-y border-border bg-surface-sunken py-20 sm:py-28"
     >
       <Container>
         <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
@@ -88,7 +88,7 @@ export default function ForCommittees() {
             </p>
             <a
               href={enquiry}
-              className="jm-press inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-primary px-6 py-3 font-display text-sm font-extrabold text-primary-foreground transition-colors hover:bg-primary-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+              className="jm-press inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-primary px-6 py-3 font-display text-sm font-extrabold text-primary-foreground transition-colors hover:bg-primary-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
             >
               Bincang kerjasama melalui e-mel
             </a>
