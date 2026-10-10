@@ -19,13 +19,11 @@ export default function Header() {
   return (
     <header
       className={`sticky top-0 z-50 border-b transition-colors duration-300 ${
-        lifted
-          ? 'border-border bg-background/85 backdrop-blur-md'
-          : 'border-transparent bg-transparent'
+        lifted ? 'border-border bg-background/90 backdrop-blur-md' : 'border-border bg-background'
       }`}
     >
-      <Container className="flex h-16 items-center justify-between gap-4 sm:h-18">
-        <Link to="/" aria-label="Jejak Masjid home" onClick={() => setOpen(false)}>
+      <Container className="flex h-28 items-center justify-between gap-4">
+        <Link to="/" aria-label="Jejak Masjid home" className="py-3" onClick={() => setOpen(false)}>
           <Wordmark />
         </Link>
 
@@ -44,13 +42,13 @@ export default function Header() {
         <div className="flex items-center gap-2">
           <a
             href="/download"
-            className="jm-press hidden rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-strong sm:inline-flex"
+            className="jm-press hidden rounded-full bg-primary px-5 py-2.5 text-sm font-extrabold text-primary-foreground transition-colors hover:bg-primary-strong sm:inline-flex min-h-11 items-center font-display"
           >
             Get the app
           </a>
           <button
             type="button"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-foreground lg:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border text-foreground lg:hidden"
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-label={open ? 'Close menu' : 'Open menu'}
@@ -76,7 +74,7 @@ export default function Header() {
             ))}
             <a
               href="/download"
-              className="jm-press mt-3 mb-3 rounded-full bg-primary px-5 py-3 text-center text-sm font-medium text-primary-foreground"
+              className="jm-press mt-3 mb-3 min-h-11 rounded-full bg-primary px-5 py-3 text-center font-display text-sm font-extrabold text-primary-foreground"
             >
               Get the app
             </a>
