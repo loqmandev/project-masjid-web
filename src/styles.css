@@ -70,6 +70,7 @@
   --deep-foreground: #f7f6f0;
   --deep-muted: #b9c5c0; /* ivory at 75% over #003130 */
   --deep-line: #154c46;
+  --deep-tile: color-mix(in srgb, var(--brand-teal) 10%, var(--deep)); /* ~#0b3f3e */
 
   --destructive: #b3261e;
   --destructive-foreground: #ffffff;
@@ -106,6 +107,7 @@
   --color-deep-foreground: var(--deep-foreground);
   --color-deep-muted: var(--deep-muted);
   --color-deep-line: var(--deep-line);
+  --color-deep-tile: var(--deep-tile);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
 
@@ -359,4 +361,24 @@
 
 [data-motion='on'] details[open] > :not(summary) {
   animation: jm-open 320ms var(--ease-out) both;
+}
+
+/* Committee snapshot bars: grow from zero, transform only, motion-gated. */
+@keyframes snap-grow-x {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes snap-grow-y {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+[data-motion='on'] [data-reveal='in'] .snap-bar-x {
+  transform-origin: left center;
+  animation: snap-grow-x 900ms var(--ease-out) both;
+  animation-delay: 150ms;
+}
+[data-motion='on'] [data-reveal='in'] .snap-bar-y {
+  transform-origin: center bottom;
+  animation: snap-grow-y 900ms var(--ease-out) both;
+  animation-delay: 150ms;
 }

@@ -1,4 +1,5 @@
 import { Container } from '@/components/ui/Section'
+import CommitteeSnapshot from '@/components/CommitteeSnapshot'
 import { SITE } from '@/lib/site'
 
 const MODULES = [
@@ -62,6 +63,8 @@ export default function ForCommittees() {
             ))}
           </div>
         </div>
+
+        <CommitteeSnapshot />
 
         <div className="mt-12 border-t border-border pt-8 sm:mt-16">
           <div className="grid gap-8 md:grid-cols-2 md:gap-16">
