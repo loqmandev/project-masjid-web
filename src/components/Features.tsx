@@ -74,13 +74,9 @@ function Points({ points }: { points: string[] }) {
   )
 }
 
-function Plinth({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
-}
-
 export default function Features() {
   return (
-    <section id="features" className="scroll-mt-32 bg-surface-sunken py-20 sm:py-28">
+    <section id="features" className="bg-surface-sunken py-20 sm:py-28">
       <Container>
         <Reveal>
           <SectionHeading
@@ -110,13 +106,11 @@ export default function Features() {
                   delay={140}
                   className={`relative flex justify-center ${reversed ? 'sm:order-1' : ''}`}
                 >
-                  <Plinth>
-                    <PhoneFrame
-                      src={feature.screen}
-                      alt={feature.alt}
-                      className="jm-lift relative w-52 sm:w-60"
-                    />
-                  </Plinth>
+                  <PhoneFrame
+                    src={feature.screen}
+                    alt={feature.alt}
+                    className="jm-lift relative w-52 sm:w-60"
+                  />
                 </Reveal>
               </article>
             )
@@ -136,13 +130,11 @@ export default function Features() {
             </p>
           </Reveal>
           <Reveal delay={140} className="relative mt-12 flex justify-center">
-            <Plinth>
-              <PhoneFrame
-                src="/screens/04-prayer-circle.webp"
-                alt="A Prayer Circle group showing verified check-ins and supportive replies"
-                className="jm-lift relative w-52 sm:w-60"
-              />
-            </Plinth>
+            <PhoneFrame
+              src="/screens/04-prayer-circle.webp"
+              alt="A Prayer Circle group showing verified check-ins and supportive replies"
+              className="jm-lift relative w-52 sm:w-60"
+            />
           </Reveal>
         </article>
 
@@ -151,13 +143,11 @@ export default function Features() {
           {PAIR.map((feature, index) => (
             <Reveal as="article" key={feature.id} delay={index * 120}>
               <div className="relative flex justify-center">
-                <Plinth>
-                  <PhoneFrame
-                    src={feature.screen}
-                    alt={feature.alt}
-                    className="jm-lift relative w-44 sm:w-48"
-                  />
-                </Plinth>
+                <PhoneFrame
+                  src={feature.screen}
+                  alt={feature.alt}
+                  className="jm-lift relative w-44 sm:w-48"
+                />
               </div>
               <h3 className="mt-8 text-xl leading-snug text-foreground sm:text-2xl">
                 {feature.title}
