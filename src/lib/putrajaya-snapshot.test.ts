@@ -5,8 +5,8 @@ const sum = (xs: readonly { value: number }[]) => xs.reduce((a, x) => a + x.valu
 
 describe('Putrajaya snapshot consistency', () => {
   const total = S.stats[0].value
-  it('prayer-labelled visits sum to 1,333 and with unlabelled to the total', () => {
-    expect(sum(S.prayer.items)).toBe(1333)
+  it('prayer-labelled visits sum to 1,346 and with unlabelled to the total', () => {
+    expect(sum(S.prayer.items)).toBe(1346)
     expect(sum(S.prayer.items) + S.prayer.unlabelled).toBe(total)
   })
   it('venue types sum to the total', () => expect(sum(S.venueTypes)).toBe(total))
