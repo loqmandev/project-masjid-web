@@ -61,7 +61,7 @@ src/
     invite.ts         # Invite code normaliser + app/intent URL builders
     app-association.ts # AASA + assetlinks builders, var parsing, 404 response
     worker-env.ts     # Reads Worker vars via a dynamic `cloudflare:workers` import
-  styles.css          # Light-only design tokens, .eyebrow / .path-rule / .prose-jm
+  styles.css          # Light-only brand tokens, .on-deep / .eyebrow / .path-rule / .prose-jm
 public/
   screens/*.webp      # App screenshots, optimised from ../store-assets-v2/public/screenshots/source
   logo.png · og-image.png · icon-*.png · apple-touch-icon.png · favicon.ico
@@ -123,15 +123,27 @@ otherwise. Never publish placeholder IDs — the OS caches a bad document. The a
 **Path Aliases**: `@/` → `src/`.
 
 ### Brand Mark
-The logo is the shipped app icon, mirrored from
-`../project-masjid-mobile/assets/images/icon.png` into `public/logo.png` and the icon set.
-It is a complete lockup (dome + crescent + "Jejak Masjid"). Never redraw or substitute it —
-regenerate from the mobile asset if it changes.
+Follows the JM brand kit (`../Jejak-Masjid-complete-brand-kit/`, spec
+`docs/specs-archive/SPEC_brand-guidelines.md`). Logo art in `public/brand/` is the exact approved
+artwork, never redrawn, recoloured, cropped or retyped:
+- `jm-lockup-on-light.svg` (dark-teal/gold) on ivory, white or mist; `jm-lockup-on-dark.svg`
+  (ivory/gold) on deep teal `#003130` only. Never place a logo on brand teal `#00A9A5` or a photo.
+- `jm-symbol-on-{light,dark}.png` (256 px) for compact spots. `ui/Logo.tsx`: `Wordmark` and
+  `LogoMark` take `tone: 'light' | 'dark'`.
+- Full lockup renders >= 180 px wide (guide minimum); below that use the symbol. The header shows
+  the symbol below `sm` (64 px bar) and the lockup from `sm` (96 px bar).
+- `logo.png`, favicon, `icon-*.png`, `apple-touch-icon.png` and OG images are still the app icon
+  (used by JSON-LD/manifest); unchanged by the rebrand.
 
 ### Design System
-Light-only "journal" surface: warm paper `#fbfaf6`, teal `#00807d`, gold `#b98900` used sparingly.
-Newsreader (serif) for headings, Inter for body, both from Google Fonts. `.path-rule` is the
-recurring dotted-footpath motif. Prefer lines and whitespace over filled shapes and gradients.
+Light-only. Palette: deep teal `#003130` (hero, CTA block, footer, page title band, primary
+buttons on light), ivory `#F7F6F0` (page), mist `#E6F7F7` (alternate sections), white 20 px cards,
+dark teal `#154C46` (hover), brand teal `#00A9A5` (thin rules, icons, focus ring inside deep-teal
+blocks only), gold `#FFCC00` (small bars, CTA buttons on deep teal). Gold and `#00A9A5` are never
+text on light surfaces. Deep-teal blocks carry `.on-deep` (ivory text, gold eyebrows, teal ring).
+Fonts self-hosted in `public/fonts/` from `@fontsource-variable` 5.3.0: **Nunito 800** for
+headings/CTAs, **Plus Jakarta Sans** for body. No italics, no gradients. `.path-rule` (dotted
+footpath) remains the motif. Focus ring is deep teal on light surfaces (3:1 rule).
 
 ### Environment Variables
 Two Worker vars (the values are public by nature, but either binding kind works — the code
@@ -163,9 +175,6 @@ The old waitlist (Google Sheets + Resend) was removed in full, along with
 ### Known Follow-ups
 - App Store badge is the Malay (`_MY`) artwork while the Play badge is English. Swap one for
   consistency using Apple/Google marketing resources — badges must not be redrawn by hand.
-- The header pairs the app icon with a text wordmark; the icon's own baked-in "Jejak Masjid"
-  text is illegible at 36px. A symbol-only (dome) variant from the design source would read
-  better, but must come from the brand owner rather than be cropped here.
 - `pnpm test` runs from `vitest.config.ts`, which deliberately omits the Cloudflare/Start
   plugins (under `vite.config.ts` the workerd runner fails to load CJS deps). Component tests
   would need `environment: 'jsdom'` added there.
