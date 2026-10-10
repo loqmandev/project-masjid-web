@@ -1,6 +1,7 @@
 import { Container } from '@/components/ui/Section'
 import CommitteeSnapshot from '@/components/CommitteeSnapshot'
-import { SITE } from '@/lib/site'
+import { MessageCircle } from 'lucide-react'
+import { COMMITTEE_WHATSAPP_URL, SITE } from '@/lib/site'
 
 const MODULES = [
   {
@@ -89,12 +90,23 @@ export default function ForCommittees() {
             <p className="max-w-lg text-lg text-foreground">
               Ada ruang, pengajar atau idea program?<br />Mari bincangkan rintis bersama.
             </p>
-            <a
-              href={enquiry}
-              className="jm-press inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-primary px-6 py-3 font-display text-sm font-extrabold text-primary-foreground transition-colors hover:bg-primary-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-            >
-              Bincang kerjasama melalui e-mel
-            </a>
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+              <a
+                href={COMMITTEE_WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="jm-press inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 font-display text-sm font-extrabold text-primary-foreground transition-colors hover:bg-primary-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+              >
+                <MessageCircle className="size-4" aria-hidden="true" />
+                Bincang melalui WhatsApp
+              </a>
+              <a
+                href={enquiry}
+                className="jm-press inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border-2 border-primary/25 bg-transparent px-6 py-3 font-display text-sm font-extrabold text-primary transition-colors hover:border-primary/50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+              >
+                Atau melalui e-mel
+              </a>
+            </div>
           </div>
         </div>
       </Container>

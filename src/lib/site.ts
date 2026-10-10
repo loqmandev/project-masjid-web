@@ -19,6 +19,7 @@ export const APP_STORE_URL =
 export const PLAY_STORE_URL =
   'https://play.google.com/store/apps/details?id=my.lonasoft.jejakmasjidmobile'
 export const GOOGLE_GROUP_URL = 'https://groups.google.com/g/jejakmasjid'
+export const COMMITTEE_WHATSAPP_URL = 'https://wa.me/message/IIUIRAT4AKQVJ1'
 
 /** Nav destinations shared by the header and footer. */
 export const SECTIONS = [
