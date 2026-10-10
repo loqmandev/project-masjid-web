@@ -25,6 +25,7 @@ export const SECTIONS = [
   { href: '/#journey', label: 'The journey' },
   { href: '/#features', label: 'What it does' },
   { href: '/#how', label: 'How it works' },
+  { href: '/#committees', label: 'For committees' },
   { href: '/#faq', label: 'Questions' },
 ] as const
 

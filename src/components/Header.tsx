@@ -29,7 +29,7 @@ export default function Header() {
           <Wordmark />
         </Link>
 
-        <nav className="hidden items-center gap-7 md:flex" aria-label="Main">
+        <nav className="hidden items-center gap-6 lg:flex" aria-label="Main">
           {SECTIONS.map((item) => (
             <a
               key={item.href}
@@ -50,7 +50,7 @@ export default function Header() {
           </a>
           <button
             type="button"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-foreground md:hidden"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-foreground lg:hidden"
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-label={open ? 'Close menu' : 'Open menu'}
@@ -62,7 +62,7 @@ export default function Header() {
       </Container>
 
       {open ? (
-        <div id="mobile-nav" className="border-t border-border bg-background md:hidden">
+        <div id="mobile-nav" className="border-t border-border bg-background lg:hidden">
           <Container className="flex flex-col py-2">
             {SECTIONS.map((item) => (
               <a

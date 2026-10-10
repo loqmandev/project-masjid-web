@@ -5,6 +5,7 @@ import { fileURLToPath, URL } from 'url'
 // Start plugins boot a workerd runner that fails to load CJS test deps. Unit
 // tests here cover plain modules in src/lib and need neither.
 export default defineConfig({
+  esbuild: { jsx: 'automatic' },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

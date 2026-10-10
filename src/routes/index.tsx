@@ -4,6 +4,7 @@ import Cta from '@/components/Cta'
 import Assurances from '@/components/Assurances'
 import Faq from '@/components/Faq'
 import Features from '@/components/Features'
+import ForCommittees from '@/components/ForCommittees'
 import Footer from '@/components/Footer'
 import Header from '@/components/Header'
 import Hero from '@/components/Hero'
@@ -30,6 +31,7 @@ function App() {
         <Journey />
         <Features />
         <HowItWorks />
+        <ForCommittees />
         <Faq />
         <Cta />
       </main>
