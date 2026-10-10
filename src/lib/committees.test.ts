@@ -2,7 +2,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import ForCommittees from '@/components/ForCommittees'
-import { SECTIONS, SITE } from './site'
+import { COMMITTEE_WHATSAPP_URL, SECTIONS, SITE } from './site'
 
 const html = renderToStaticMarkup(createElement(ForCommittees))
 
@@ -26,7 +26,10 @@ describe('committee partnership section', () => {
 
   it('offers a real enquiry rather than a fake booking or registration', () => {
     expect(html).toContain(`mailto:${SITE.email}?subject=${encodeURIComponent('Minat rintis komuniti Jejak Masjid')}`)
-    expect(html).toContain('Bincang kerjasama melalui e-mel')
+    expect(html).toContain('Atau melalui e-mel')
+    expect(html).toContain('Bincang melalui WhatsApp')
+    expect(html).toContain(`href="${COMMITTEE_WHATSAPP_URL}"`)
+    expect(html).toContain('rel="noopener noreferrer"')
     expect(html).not.toContain('<form')
     expect(html).not.toContain('href="#"')
   })
