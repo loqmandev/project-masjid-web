@@ -26,10 +26,10 @@ export const PUTRAJAYA_SNAPSHOT = {
     subtitle: 'Bilangan kunjungan selesai; bukan jemaah unik',
     items: [
       { name: 'Surau Al-Quddus PPAM Saderi', value: 333, unique: 13 },
+      { name: 'Surau PICC, Level C', value: 198, unique: 5 },
       { name: 'Surau Al-Muttaqin 5R6', value: 189, unique: 6 },
       { name: 'Surau Nur Perdana P10', value: 182, unique: 9 },
       { name: 'Surau Jannatul Firdaus PPAM', value: 178, unique: 8 },
-      { name: 'Surau HWUM', value: 94, unique: 2 },
     ],
   },
   venueTypes: [
