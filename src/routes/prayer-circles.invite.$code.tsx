@@ -63,7 +63,7 @@ function InvitePage() {
 
   return (
     <InviteShell>
-      <LogoMark className="mx-auto h-14 w-14" />
+      <LogoMark className="mx-auto h-16 w-16" />
       <h1 className="mt-7 text-[2rem] leading-tight text-foreground sm:text-4xl">
         You're invited to a prayer circle
       </h1>
@@ -98,7 +98,7 @@ function InvitePage() {
 function IncompleteInvitePage() {
   return (
     <InviteShell>
-      <LogoMark className="mx-auto h-14 w-14" />
+      <LogoMark className="mx-auto h-16 w-16" />
       <h1 className="mt-7 text-[2rem] leading-tight text-foreground sm:text-4xl">
         This invite link looks incomplete
       </h1>
@@ -108,7 +108,7 @@ function IncompleteInvitePage() {
       </p>
       <a
         href="/download"
-        className="jm-press mt-9 inline-flex min-h-12 items-center justify-center rounded-full bg-primary px-7 py-3 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-strong"
+        className="jm-press mt-9 inline-flex min-h-12 items-center justify-center rounded-full bg-primary px-7 py-3 font-display text-base font-extrabold text-primary-foreground transition-colors hover:bg-primary-strong"
       >
         Download the app
       </a>
@@ -121,10 +121,6 @@ function InviteShell({ children }: { children: React.ReactNode }) {
     <>
       <Header />
       <main className="relative overflow-hidden">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(120%_100%_at_50%_0%,var(--color-primary-tint)_0%,transparent_70%)]"
-        />
         <Container className="relative max-w-xl py-14 text-center sm:py-20">{children}</Container>
       </main>
       <Footer />
@@ -147,7 +143,7 @@ function OpenInAppButton({ invite }: { invite: Invite }) {
   return (
     <a
       href={href}
-      className="jm-press mt-9 inline-flex min-h-12 w-full max-w-xs items-center justify-center rounded-full bg-primary px-7 py-3 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-strong"
+      className="jm-press mt-9 inline-flex min-h-12 w-full max-w-xs items-center justify-center rounded-full bg-primary px-7 py-3 font-display text-base font-extrabold text-primary-foreground transition-colors hover:bg-primary-strong"
     >
       Open in Jejak Masjid
     </a>
@@ -174,7 +170,7 @@ function CodeBlock({ code }: { code: string }) {
   }
 
   return (
-    <div className="mx-auto mt-10 max-w-xs rounded-2xl border border-border bg-surface px-5 py-6">
+    <div className="mx-auto mt-10 max-w-xs rounded-[20px] border border-border bg-surface px-5 py-6">
       <p className="text-sm text-subtle-foreground">Invite code</p>
       <p
         className="mt-2 font-mono text-[1.75rem] leading-none tracking-[0.12em] text-foreground select-all"
@@ -185,7 +181,7 @@ function CodeBlock({ code }: { code: string }) {
       <button
         type="button"
         onClick={copy}
-        className="jm-press mt-5 inline-flex min-h-11 items-center justify-center rounded-full border border-border-strong px-5 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
+        className="jm-press mt-5 inline-flex min-h-11 items-center justify-center rounded-full border border-border-strong px-5 py-2 font-display text-sm font-extrabold text-foreground transition-colors hover:border-primary hover:bg-primary-tint"
       >
         {copied ? 'Copied' : 'Copy code'}
       </button>
@@ -199,7 +195,7 @@ function CodeBlock({ code }: { code: string }) {
 function Step({ n, children }: { n: number; children: React.ReactNode }) {
   return (
     <li className="flex items-start gap-3">
-      <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-tint text-xs font-semibold text-primary-strong">
+      <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-tint text-xs font-bold text-primary-strong">
         {n}
       </span>
       <span className="leading-relaxed">{children}</span>

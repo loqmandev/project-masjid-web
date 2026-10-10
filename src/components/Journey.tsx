@@ -24,7 +24,7 @@ const PRINCIPLES = [
 
 export default function Journey() {
   return (
-    <section id="journey" className="scroll-mt-24 py-20 sm:py-28">
+    <section id="journey" className="py-20 sm:py-28">
       <Container>
         <Reveal>
           <SectionHeading
@@ -45,7 +45,7 @@ export default function Journey() {
                 aria-hidden
                 className="mb-6 hidden h-6 w-6 items-center justify-center rounded-full border border-border-strong bg-background sm:flex"
               >
-                <span className="h-2 w-2 rounded-full bg-primary" />
+                <span className="h-2 w-2 rounded-full bg-brand-teal" />
               </span>
               <h3 className="font-display text-2xl text-foreground">{item.term}</h3>
               <p className="mt-3 leading-relaxed text-muted-foreground">

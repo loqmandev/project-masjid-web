@@ -7,70 +7,78 @@
    family covers every weight we use.
 --------------------------------------------------------------------------- */
 
+/*
+ * Self-hosted latin variable fonts (wght axis), from @fontsource-variable at 5.3.0:
+ *   https://cdn.jsdelivr.net/npm/@fontsource-variable/nunito@5.3.0/files/nunito-latin-wght-normal.woff2
+ *   https://cdn.jsdelivr.net/npm/@fontsource-variable/plus-jakarta-sans@5.3.0/files/plus-jakarta-sans-latin-wght-normal.woff2
+ * Both SIL OFL 1.1. Not runtime dependencies; the woff2 files live in public/fonts.
+ */
 @font-face {
-  font-family: 'Newsreader';
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url('/fonts/nunito-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Plus Jakarta Sans';
   font-style: normal;
   font-weight: 200 800;
   font-display: swap;
-  src: url('/fonts/newsreader-latin.woff2') format('woff2');
+  src: url('/fonts/plus-jakarta-sans-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
     U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
     U+2212, U+2215, U+FEFF, U+FFFD;
 }
-
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-  src: url('/fonts/inter-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
-    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-    U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-/* ---------------------------------------------------------------------------
-   Jejak Masjid — design tokens
-   Light "journal" surface: warm paper, teal path, gold used sparingly.
-   Light-only by design — there is no dark palette. Ref: BRAND.md.
---------------------------------------------------------------------------- */
 
 :root {
   color-scheme: light;
 
   /* Surfaces */
-  --background: #fbfaf6;
+  --background: #f7f6f0;
   --surface: #ffffff;
-  --surface-sunken: #f3f1ea;
+  --surface-sunken: #e6f7f7;
   --card: #ffffff;
-  --card-foreground: #00302f;
+  --card-foreground: #003130;
 
   /* Ink */
-  --foreground: #00302f;
-  --muted-foreground: #55655f;
-  --subtle-foreground: #7d8a85;
+  --foreground: #003130;
+  --muted-foreground: #3f5b58;
+  --subtle-foreground: #4f6b68;
 
   /* Brand */
-  --primary: #00807d;
-  --primary-strong: #005f5d;
-  --primary-foreground: #ffffff;
-  --primary-tint: #e6f4f3;
-  --accent: #b98900;
-  --accent-tint: #fdf4dd;
-  --accent-foreground: #4a3600;
+  --primary: #003130;
+  --primary-strong: #154c46;
+  --primary-foreground: #f7f6f0;
+  --primary-tint: #e6f7f7;
+  --accent: #ffcc00;
+  --accent-tint: #fff6cc;
+  --accent-foreground: #003130;
 
   /* Lines */
-  --border: #e3ded2;
-  --border-strong: #cfc8b7;
+  --border: #d5e6e4;
+  --border-strong: #b4cfcc;
   --ring: #00a9a5;
+
+  /* Brand extras. Brand teal is for rules, rings and icons only, never body text on light. */
+  --brand-teal: #00a9a5;
+  --deep: #003130;
+  --deep-foreground: #f7f6f0;
+  --deep-muted: #b9c5c0; /* ivory at 75% over #003130 */
+  --deep-line: #154c46;
 
   --destructive: #b3261e;
   --destructive-foreground: #ffffff;
 
   --radius: 0.875rem;
 
-  --font-display: 'Newsreader', ui-serif, Georgia, 'Times New Roman', serif;
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+  --font-display: 'Nunito', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
     'Helvetica Neue', sans-serif;
 }
 
@@ -93,6 +101,11 @@
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-ring: var(--ring);
+  --color-brand-teal: var(--brand-teal);
+  --color-deep: var(--deep);
+  --color-deep-foreground: var(--deep-foreground);
+  --color-deep-muted: var(--deep-muted);
+  --color-deep-line: var(--deep-line);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
 
@@ -114,7 +127,12 @@
   html {
     scroll-behavior: smooth;
     /* Offset anchor targets so the sticky header never covers a heading. */
-    scroll-padding-top: 6rem;
+    scroll-padding-top: 5rem;
+  }
+  @media (min-width: 640px) {
+    html {
+      scroll-padding-top: 7rem;
+    }
   }
 
   body {
@@ -122,7 +140,6 @@
     background-color: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);
-    font-feature-settings: 'cv05', 'ss01';
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -132,12 +149,12 @@
   h3,
   .font-display {
     font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: -0.015em;
+    font-weight: 800;
+    letter-spacing: -0.01em;
   }
 
   :focus-visible {
-    outline: 2px solid var(--ring);
+    outline: 2px solid var(--primary);
     outline-offset: 3px;
     border-radius: 4px;
   }
@@ -165,7 +182,7 @@
   /* Small caps label used above section headings. */
   .eyebrow {
     font-size: 0.72rem;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--primary);
@@ -173,10 +190,19 @@
 
   /* Dotted footpath — the recurring "jejak" motif. */
   .path-rule {
-    height: 1px;
-    background-image: radial-gradient(circle, var(--border-strong) 1px, transparent 1px);
-    background-size: 10px 1px;
-    background-repeat: repeat-x;
+    height: 0;
+    border-top: 2px dotted var(--border-strong);
+  }
+
+  /* Deep-teal colour blocks (hero, CTA, footer, page band). */
+  .on-deep :focus-visible {
+    outline-color: var(--ring);
+  }
+  .on-deep .eyebrow {
+    color: var(--accent);
+  }
+  .on-deep .path-rule {
+    border-top-color: color-mix(in srgb, var(--brand-teal) 45%, var(--deep));
   }
 
   /* Long-form legal / support copy. */
@@ -210,7 +236,7 @@
   }
   .prose-jm strong {
     color: var(--foreground);
-    font-weight: 600;
+    font-weight: 700;
   }
   .prose-jm a {
     color: var(--primary);

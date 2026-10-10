@@ -18,7 +18,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { name: 'theme-color', content: '#00807d' },
+      { name: 'theme-color', content: '#003130' },
       { name: 'apple-mobile-web-app-title', content: SITE.name },
       { name: 'author', content: SITE.legalName },
       // Smart App Banner for Safari on iOS.
@@ -32,14 +32,14 @@ export const Route = createRootRoute({
         rel: 'preload',
         as: 'font',
         type: 'font/woff2',
-        href: '/fonts/newsreader-latin.woff2',
+        href: '/fonts/nunito-latin.woff2',
         crossOrigin: 'anonymous',
       },
       {
         rel: 'preload',
         as: 'font',
         type: 'font/woff2',
-        href: '/fonts/inter-latin.woff2',
+        href: '/fonts/plus-jakarta-sans-latin.woff2',
         crossOrigin: 'anonymous',
       },
       { rel: 'icon', href: '/favicon.ico', sizes: '48x48' },

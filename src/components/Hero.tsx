@@ -7,20 +7,19 @@ const step = (i: number) => ({ '--i': i }) as React.CSSProperties
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden pt-10 pb-14 sm:pt-16 sm:pb-20">
-      {/* A soft teal wash at the top, fading into paper. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(120%_100%_at_50%_0%,var(--color-primary-tint)_0%,transparent_70%)]"
-      />
-
+    <section className="on-deep relative overflow-hidden bg-deep pt-14 pb-16 sm:pt-20 sm:pb-24">
       <Container className="relative">
         {/* Four text elements only: headline, subtext, brand line, CTAs. */}
         <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
           <div className="jm-enter text-center lg:text-left">
+            <span
+              aria-hidden
+              style={step(0)}
+              className="mx-auto mb-6 block h-[5px] w-16 rounded-full bg-accent lg:mx-0"
+            />
             <h1
               style={step(0)}
-              className="text-[2.6rem] leading-[1.08] text-foreground sm:text-6xl"
+              className="text-[2.1rem] leading-[1.1] text-deep-foreground sm:text-5xl lg:text-[3.4rem]"
             >
               Remember where
               <br className="hidden sm:block" /> you prayed.
@@ -28,14 +27,14 @@ export default function Hero() {
 
             <p
               style={step(1)}
-              className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground lg:mx-0"
+              className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-deep-muted lg:mx-0"
             >
               Jejak Masjid helps you find the masjid nearest you, check in when you arrive,
               and keep a private record of the places that have become part of your prayer
               journey.
             </p>
 
-            <p style={step(2)} className="mt-5 font-display text-xl italic text-primary">
+            <p style={step(2)} className="mt-5 font-display text-xl font-bold text-deep-foreground">
               Langkah kecil, jejak yang bermakna.
             </p>
 
