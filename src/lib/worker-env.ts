@@ -10,7 +10,16 @@ export interface AjkEnv {
     prepare(sql: string): Statement
     batch(statements: Statement[]): Promise<unknown[]>
   }
-  EMAIL?: { send(message: unknown): Promise<unknown> }
+  EMAIL?: {
+    send(message: {
+      to: string
+      from: { email: string; name?: string }
+      subject: string
+      text?: string
+      html?: string
+      replyTo?: string
+    }): Promise<unknown>
+  }
   AJK_INTEREST_NOTIFY_TO?: string
   TURNSTILE_SECRET_KEY?: string
   TURNSTILE_SITE_KEY?: string

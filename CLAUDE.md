@@ -176,8 +176,8 @@ The old waitlist (Google Sheets + Resend) was removed in full, along with
 Spec `SPEC_ajk-interest-form.md`. Page `src/routes/ajk.tsx` + `components/AjkInterestForm.tsx` (works without JS),
 POST `/api/ajk-interest` → `lib/ajk-interest-server.tsx` (same-origin, 8 KB cap, honeypot, validate, then 5 valid
 submissions/hour per salted IP hash, duplicate = same phone + masjid within 24 h). Leads in D1 **`jm-web-db`**
-(binding `WEB_DB`, id `18abc900-…`, migrations in `migrations/`, applied remotely 2026-10-11). E-mail alert via the
-`send_email` binding `EMAIL` to secret `AJK_INTEREST_NOTIFY_TO` (best-effort; never fails a submission). Turnstile is
+(binding `WEB_DB`, id `18abc900-…`, migrations in `migrations/`, applied remotely 2026-10-11). E-mail alert via the Cloudflare Email Service structured `send()` on the
+`send_email` binding `EMAIL` (from `ajk@notify.jejakmasjid.my`, same as the shop; not Email Routing) to secret `AJK_INTEREST_NOTIFY_TO` (best-effort; never fails a submission). Turnstile is
 supported but deliberately not configured (owner). Read leads:
 `./node_modules/.bin/wrangler d1 execute jm-web-db --remote --command "SELECT created_at,name,role,masjid_name,area,state,phone,needs,status FROM ajk_interest ORDER BY created_at DESC"`.
 Local: `pnpm db:migrate:local`. Audience copy is KL-first (owner 2026-10-11).
