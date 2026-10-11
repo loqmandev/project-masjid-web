@@ -1,21 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   handleInterest,
-  encodeSubject,
   notifyInterest,
   hashIp,
   readInput,
   verifyTurnstile,
 } from './ajk-interest-server'
-vi.mock('cloudflare:email', () => ({
-  EmailMessage: class {
-    constructor(
-      public from: string,
-      public to: string,
-      public raw: string,
-    ) {}
-  },
-}))
 const request = (body = '{}', type = 'application/json') =>
   new Request('https://jejakmasjid.my/api/ajk-interest', {
     method: 'POST',
@@ -28,24 +18,6 @@ const request = (body = '{}', type = 'application/json') =>
   })
 afterEach(() => vi.unstubAllGlobals())
 describe('notification', () => {
-  it.each([
-    'Minat AJK: Masjid Sultan Mizan Zainal Abidin (Presint 3, Putrajaya)',
-    'Minat AJK: ' + 'éم😀'.repeat(80),
-  ])('folds MIME subject safely: %s', (subject) => {
-    const encoded = encodeSubject(subject)
-    const words = encoded.split('\r\n ')
-    expect(words.every((word) => word.length <= 75)).toBe(true)
-    expect(
-      ('Subject: ' + encoded).split('\r\n').every((line) => line.length <= 78),
-    ).toBe(true)
-    expect(
-      words
-        .map((word) =>
-          Buffer.from(word.slice(10, -2), 'base64').toString('utf8'),
-        )
-        .join(''),
-    ).toBe(subject)
-  })
   const data = {
     name: 'QA',
     role: 'ajk',
@@ -65,7 +37,37 @@ describe('notification', () => {
     await notifyInterest({ EMAIL: { send } }, data, 'id', 'now', 'qa')
     expect(send).not.toHaveBeenCalled()
   })
-  it('uses EmailMessage and contains send failure', async () => {
+  it('sends the structured Email Service payload', async () => {
+    const send = vi.fn().mockResolvedValue({})
+    await notifyInterest(
+      { EMAIL: { send }, AJK_INTEREST_NOTIFY_TO: 'qa@example.test' },
+      data,
+      'id',
+      'now',
+      'qa',
+    )
+    expect(send).toHaveBeenCalledOnce()
+    const message = send.mock.calls[0][0]
+    expect(message).toMatchObject({
+      to: 'qa@example.test',
+      from: { email: 'ajk@notify.jejakmasjid.my' },
+      subject: 'Minat AJK: Masjid Ujian (Putrajaya)',
+    })
+    expect(message.text).toContain('masjid_name: Masjid Ujian')
+  })
+  it('rejects a recipient containing CR/LF', async () => {
+    const send = vi.fn()
+    await notifyInterest(
+      { EMAIL: { send }, AJK_INTEREST_NOTIFY_TO: 'a@b.test\r\nBcc: x@y.test' },
+      data,
+      'id',
+      'now',
+      'qa',
+    )
+    expect(send).not.toHaveBeenCalled()
+  })
+  it('contains send failure and logs without PII', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {})
     const send = vi.fn().mockRejectedValue(new Error('mail rejected'))
     await expect(
       notifyInterest(
@@ -76,12 +78,11 @@ describe('notification', () => {
         'qa',
       ),
     ).resolves.toBeUndefined()
-    expect(send).toHaveBeenCalledOnce()
-    expect(send.mock.calls[0][0]).toMatchObject({
-      from: 'noreply@jejakmasjid.my',
-      to: 'qa@example.test',
-      raw: expect.stringContaining('Content-Type: text/plain; charset=utf-8'),
-    })
+    expect(log).toHaveBeenCalledWith(
+      '[ajk-interest] notify failed',
+      'Error: mail rejected',
+    )
+    log.mockRestore()
   })
 })
 describe('valid-submission rate limit', () => {

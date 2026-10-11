@@ -237,26 +237,6 @@ export async function verifyTurnstile(
   }
 }
 
-const encodeBase64 = (value: string) =>
-  btoa(String.fromCharCode(...new TextEncoder().encode(value)))
-
-/** RFC 2047: each encoded-word <=75 chars, never split a UTF-8 code point. */
-export function encodeSubject(subject: string) {
-  const chunks: string[] = []
-  let chunk = ''
-  for (const character of subject) {
-    if (new TextEncoder().encode(chunk + character).length > 42) {
-      chunks.push(chunk)
-      chunk = ''
-    }
-    chunk += character
-  }
-  if (chunk) chunks.push(chunk)
-  return chunks
-    .map((value) => `=?UTF-8?B?${encodeBase64(value)}?=`)
-    .join('\r\n ')
-}
-
 export async function notifyInterest(
   env: AjkEnv,
   data: Interest,
@@ -268,7 +248,6 @@ export async function notifyInterest(
   try {
     // Shop pattern: binding-only, best-effort send. send_email uses EmailMessage (the
     // shop now uses Email Sending's structured object API instead of Email Routing).
-    const { EmailMessage } = await import('cloudflare:email')
     const to = env.AJK_INTEREST_NOTIFY_TO
     if (/[\r\n]/.test(to)) return
     const subject = `Minat AJK: ${data.masjid_name} (${data.area})`
@@ -285,21 +264,17 @@ export async function notifyInterest(
           `${key}: ${Array.isArray(value) ? value.join(', ') : value}`,
       )
       .join('\n')
-    const raw = [
-      `From: Jejak Masjid <noreply@jejakmasjid.my>`,
-      `To: ${to}`,
-      `Subject: ${encodeSubject(subject)}`,
-      'MIME-Version: 1.0',
-      'Content-Type: text/plain; charset=utf-8',
-      'Content-Transfer-Encoding: base64',
-      '',
-      encodeBase64(body)
-        .match(/.{1,76}/g)!
-        .join('\r\n'),
-    ].join('\r\n')
-    await env.EMAIL.send(new EmailMessage('noreply@jejakmasjid.my', to, raw))
-  } catch {
-    /* No PII in logs, and notification never changes durable success. */
+    await env.EMAIL.send({
+      to,
+      from: { email: 'ajk@notify.jejakmasjid.my', name: 'Jejak Masjid' },
+      subject,
+      text: body,
+    })
+  } catch (error) {
+    console.error(
+      '[ajk-interest] notify failed',
+      error instanceof Error ? `${error.name}: ${error.message}` : 'unknown',
+    )
   }
 }
 
