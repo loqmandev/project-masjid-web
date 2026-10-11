@@ -21,6 +21,24 @@ const PrivacyPolicy = () => {
           <li>Profile picture, which can be sourced from your third-party provider (Google, Apple) or uploaded by you.</li>
         </ul>
 
+        <h3>Borang minat dashboard AJK / AJK dashboard interest form</h3>
+        <p lang="ms">
+          Borang minat AJK mengumpul nama, jawatan, nama dan jenis masjid atau surau, kawasan, negeri,
+          nombor WhatsApp, e-mel pilihan, keperluan utama, anggaran jemaah pilihan, catatan pilihan dan
+          persetujuan anda. Kami menggunakannya untuk menghubungi anda tentang rintis dashboard AJK.
+          Untuk mencegah spam, kami juga menyimpan cap masa, sumber borang, jenis pelayar dan hash
+          alamat IP (bukan alamat IP asal). Maklumat ini dipadam 12 bulan selepas rintis dibuka di
+          kawasan anda, atau atas permintaan melalui <a href="mailto:admin@jejakmasjid.my">admin@jejakmasjid.my</a>.
+        </p>
+        <p lang="en">
+          The AJK interest form collects your name, committee role, masjid or surau name and type,
+          area, state, WhatsApp number, optional email, main needs, optional congregation size,
+          optional notes and consent. We use this information to contact you about the AJK dashboard
+          pilot. To prevent spam, we also store timestamps, form source, browser user agent and an
+          IP address hash (not the original IP address). This information is deleted 12 months after
+          the pilot opens in your area, or on request at <a href="mailto:admin@jejakmasjid.my">admin@jejakmasjid.my</a>.
+        </p>
+
         <h3>Location Data</h3>
         <p>
           We use your device location for two things: showing you masjids near you, and confirming that a check-in and check-out actually took place at the masjid you selected.

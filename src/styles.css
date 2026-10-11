@@ -181,6 +181,20 @@
 }
 
 @layer components {
+  /* AJK form: generous touch targets and visible, token-based error states. */
+  .ajk-label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+  .ajk-input {
+    width: 100%; min-width: 0; min-height: 44px; padding: 0.75rem;
+    border: 1px solid var(--border-strong); border-radius: 0.75rem;
+    background: var(--surface); color: var(--foreground); font: inherit;
+  }
+  .ajk-input::placeholder { color: var(--subtle-foreground); }
+  .ajk-input[aria-invalid='true'] { border-color: var(--destructive); }
+  .ajk-choice { display: flex; min-height: 44px; align-items: center; gap: 0.75rem; padding-block: 0.5rem; line-height: 1.6; cursor: pointer; }
+  .ajk-choice input { flex-shrink: 0; width: 20px; height: 20px; accent-color: var(--primary); }
+  .ajk-choice.items-start { align-items: flex-start; }
+  .ajk-form fieldset { min-width: 0; }
+
   /* Small caps label used above section headings. */
   .eyebrow {
     font-size: 0.72rem;

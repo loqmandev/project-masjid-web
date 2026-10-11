@@ -6,6 +6,13 @@
     "nodejs_compat"
   ],
   "main": "@tanstack/react-start/server-entry",
+  "d1_databases": [{
+    "binding": "WEB_DB",
+    "database_name": "jm-web-db",
+    "database_id": "18abc900-f2fd-4f51-8d44-51713ea42bd8",
+    "migrations_dir": "migrations"
+  }],
+  "send_email": [{ "name": "EMAIL" }],
   "routes": [
     {
       "custom_domain": true,

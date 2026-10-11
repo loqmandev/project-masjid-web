@@ -45,7 +45,7 @@ export default function ForCommittees() {
             <p className="mt-6 max-w-lg border-l-2 border-brand-teal pl-4 text-sm leading-relaxed text-muted-foreground">
               <strong className="font-semibold text-foreground">Cadangan pembangunan.</strong>{' '}
               Modul ini belum tersedia. Kami ingin membentuk dan menguji pendekatan ini
-              bersama pihak masjid dan surau, bermula di Putrajaya.
+              bersama pihak masjid dan surau, bermula di Kuala Lumpur dan Putrajaya.
             </p>
           </div>
 
@@ -86,23 +86,26 @@ export default function ForCommittees() {
               </p>
             </div>
           </div>
-          <div className="mt-10 flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-10 flex flex-col items-start gap-5">
             <p className="max-w-lg text-lg text-foreground">
               Ada ruang, pengajar atau idea program?<br />Mari bincangkan rintis bersama.
             </p>
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+              <a href="/ajk" className="jm-press inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-6 py-3 text-center font-display text-sm font-extrabold text-primary-foreground hover:bg-primary-strong">
+                Daftar minat dashboard AJK
+              </a>
               <a
                 href={COMMITTEE_WHATSAPP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="jm-press inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 font-display text-sm font-extrabold text-primary-foreground transition-colors hover:bg-primary-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                className="jm-press inline-flex min-h-11 items-center justify-center gap-2 rounded-full border-2 border-primary/25 px-6 py-3 font-display text-sm font-extrabold text-primary transition-colors hover:border-primary/50"
               >
                 <MessageCircle className="size-4" aria-hidden="true" />
                 Bincang melalui WhatsApp
               </a>
               <a
                 href={enquiry}
-                className="jm-press inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border-2 border-primary/25 bg-transparent px-6 py-3 font-display text-sm font-extrabold text-primary transition-colors hover:border-primary/50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                className="inline-flex min-h-11 items-center justify-center px-3 py-2 text-sm text-primary underline underline-offset-4"
               >
                 Atau melalui e-mel
               </a>
