@@ -172,6 +172,16 @@ The old waitlist (Google Sheets + Resend) was removed in full, along with
 `SHEET_ID`, `GOOGLE_SERVICE_ACCOUNT_JSON`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL` and
 `APP_DOMAIN`. Any of those still set as Worker secrets can be deleted.
 
+### AJK interest form (`/ajk`) — 2026-10-11
+Spec `SPEC_ajk-interest-form.md`. Page `src/routes/ajk.tsx` + `components/AjkInterestForm.tsx` (works without JS),
+POST `/api/ajk-interest` → `lib/ajk-interest-server.tsx` (same-origin, 8 KB cap, honeypot, validate, then 5 valid
+submissions/hour per salted IP hash, duplicate = same phone + masjid within 24 h). Leads in D1 **`jm-web-db`**
+(binding `WEB_DB`, id `18abc900-…`, migrations in `migrations/`, applied remotely 2026-10-11). E-mail alert via the
+`send_email` binding `EMAIL` to secret `AJK_INTEREST_NOTIFY_TO` (best-effort; never fails a submission). Turnstile is
+supported but deliberately not configured (owner). Read leads:
+`./node_modules/.bin/wrangler d1 execute jm-web-db --remote --command "SELECT created_at,name,role,masjid_name,area,state,phone,needs,status FROM ajk_interest ORDER BY created_at DESC"`.
+Local: `pnpm db:migrate:local`. Audience copy is KL-first (owner 2026-10-11).
+
 ### Known Follow-ups
 - App Store badge is the Malay (`_MY`) artwork while the Play badge is English. Swap one for
   consistency using Apple/Google marketing resources — badges must not be redrawn by hand.
