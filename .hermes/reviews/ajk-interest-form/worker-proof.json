@@ -1,0 +1,468 @@
+{
+  "synthetic_data_only": true,
+  "cases": [
+    {
+      "case": "valid JSON",
+      "status": 200,
+      "cache_control": "private, no-store",
+      "response": {
+        "ok": true,
+        "name": "Penguji Tempatan"
+      }
+    },
+    {
+      "case": "duplicate preserves original",
+      "status": 200,
+      "cache_control": "private, no-store",
+      "response": {
+        "ok": true,
+        "name": "Nama Diubah"
+      }
+    },
+    {
+      "case": "invalid fields",
+      "status": 422,
+      "cache_control": "private, no-store",
+      "response": {
+        "ok": false,
+        "errors": {
+          "name": "Nama penuh: sila isi 2\u201380 aksara.",
+          "phone": "Sila isi nombor WhatsApp Malaysia yang sah, cth. 012-345 6789."
+        }
+      }
+    },
+    {
+      "case": "honeypot pretends success even invalid",
+      "status": 200,
+      "cache_control": "private, no-store",
+      "response": {
+        "ok": true,
+        "name": "Bot Tempatan"
+      }
+    },
+    {
+      "case": "rate submission 1",
+      "status": 200,
+      "cache_control": "private, no-store",
+      "response": {
+        "ok": true,
+        "name": "Penguji Tempatan"
+      }
+    },
+    {
+      "case": "rate submission 2",
+      "status": 200,
+      "cache_control": "private, no-store",
+      "response": {
+        "ok": true,
+        "name": "Penguji Tempatan"
+      }
+    },
+    {
+      "case": "rate submission 3",
+      "status": 200,
+      "cache_control": "private, no-store",
+      "response": {
+        "ok": true,
+        "name": "Penguji Tempatan"
+      }
+    },
+    {
+      "case": "rate submission 4",
+      "status": 200,
+      "cache_control": "private, no-store",
+      "response": {
+        "ok": true,
+        "name": "Penguji Tempatan"
+      }
+    },
+    {
+      "case": "rate submission 5",
+      "status": 200,
+      "cache_control": "private, no-store",
+      "response": {
+        "ok": true,
+        "name": "Penguji Tempatan"
+      }
+    },
+    {
+      "case": "rate submission 6",
+      "status": 429,
+      "cache_control": "private, no-store",
+      "response": {
+        "ok": false,
+        "errors": {
+          "form": "Beberapa borang telah dihantar. Sila cuba lagi selepas satu jam."
+        }
+      }
+    },
+    {
+      "case": "native HTML validation retains values",
+      "status": 422,
+      "cache_control": "private, no-store",
+      "html_bytes": 7341
+    },
+    {
+      "case": "native HTML success",
+      "status": 200,
+      "cache_control": "private, no-store",
+      "html_bytes": 960
+    },
+    {
+      "case": "untrusted origin",
+      "status": 403,
+      "cache_control": "private, no-store",
+      "response": {
+        "ok": false,
+        "errors": {
+          "form": "Sila hantar borang dari laman Jejak Masjid."
+        }
+      }
+    },
+    {
+      "case": "missing origin",
+      "status": 403,
+      "cache_control": "private, no-store",
+      "response": {
+        "ok": false,
+        "errors": {
+          "form": "Sila hantar borang dari laman Jejak Masjid."
+        }
+      }
+    },
+    {
+      "case": "body >8KB",
+      "status": 413,
+      "cache_control": "private, no-store",
+      "response": {
+        "ok": false,
+        "errors": {
+          "form": "Borang tidak dapat dibaca. Sila semak saiz dan format maklumat."
+        }
+      }
+    },
+    {
+      "case": "unsupported type",
+      "status": 415,
+      "cache_control": "private, no-store",
+      "response": {
+        "ok": false,
+        "errors": {
+          "form": "Borang tidak dapat dibaca. Sila semak saiz dan format maklumat."
+        }
+      }
+    },
+    {
+      "case": "malformed JSON",
+      "status": 400,
+      "cache_control": "private, no-store",
+      "response": {
+        "ok": false,
+        "errors": {
+          "form": "Borang tidak dapat dibaca. Sila semak saiz dan format maklumat."
+        }
+      }
+    },
+    {
+      "case": "method GET",
+      "status": 405,
+      "cache_control": "private, no-store",
+      "html_bytes": 0
+    },
+    {
+      "case": "method HEAD",
+      "status": 405,
+      "cache_control": "private, no-store",
+      "html_bytes": 0
+    },
+    {
+      "case": "method PUT",
+      "status": 405,
+      "cache_control": "private, no-store",
+      "html_bytes": 0
+    },
+    {
+      "case": "method PATCH",
+      "status": 405,
+      "cache_control": "private, no-store",
+      "html_bytes": 0
+    },
+    {
+      "case": "method DELETE",
+      "status": 405,
+      "cache_control": "private, no-store",
+      "html_bytes": 0
+    },
+    {
+      "case": "method OPTIONS",
+      "status": 405,
+      "cache_control": "private, no-store",
+      "html_bytes": 0
+    },
+    {
+      "case": "atomic concurrent rate limit",
+      "statuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        429
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "id": "dc1b6e46-1b34-4b25-8477-af52934d4ad2",
+      "created_at": "2026-10-11T00:33:36.819Z",
+      "name": "Penguji Tempatan",
+      "role": "ajk",
+      "masjid_name": "Masjid Ujian Tempatan",
+      "venue_type": "masjid",
+      "area": "Presint 16",
+      "state": "W.P. Putrajaya",
+      "phone": "60123456789",
+      "email": "qa@example.test",
+      "needs": "[\"hebahan_program\"]",
+      "congregation_size": "null",
+      "notes": "null",
+      "notes_is_null": 1,
+      "consent_at": "2026-10-11T00:33:36.819Z",
+      "ip_hash": "d692b1fa2a3ca5f939b45161b292c3c5e4eabc9f740230558864fd10fb5579ad",
+      "user_agent": "Python-urllib/3.14",
+      "source": "local-proof",
+      "status": "new"
+    },
+    {
+      "id": "ed361803-32f6-45d1-928e-6ecb35f61893",
+      "created_at": "2026-10-11T00:33:36.916Z",
+      "name": "Penguji Tempatan",
+      "role": "ajk",
+      "masjid_name": "Masjid Rate 0",
+      "venue_type": "masjid",
+      "area": "Presint 16",
+      "state": "W.P. Putrajaya",
+      "phone": "60123456789",
+      "email": "qa@example.test",
+      "needs": "[\"hebahan_program\"]",
+      "congregation_size": "null",
+      "notes": "null",
+      "notes_is_null": 1,
+      "consent_at": "2026-10-11T00:33:36.916Z",
+      "ip_hash": "dedbc1b58cffb1a7c752b1b782e32f99b0110f9ec35fedfa317ec7898895ff81",
+      "user_agent": "Python-urllib/3.14",
+      "source": "local-proof",
+      "status": "new"
+    },
+    {
+      "id": "4fc8b342-a336-455b-a777-36a3ae140b9d",
+      "created_at": "2026-10-11T00:33:36.950Z",
+      "name": "Penguji Tempatan",
+      "role": "ajk",
+      "masjid_name": "Masjid Rate 1",
+      "venue_type": "masjid",
+      "area": "Presint 16",
+      "state": "W.P. Putrajaya",
+      "phone": "60123456789",
+      "email": "qa@example.test",
+      "needs": "[\"hebahan_program\"]",
+      "congregation_size": "null",
+      "notes": "null",
+      "notes_is_null": 1,
+      "consent_at": "2026-10-11T00:33:36.950Z",
+      "ip_hash": "dedbc1b58cffb1a7c752b1b782e32f99b0110f9ec35fedfa317ec7898895ff81",
+      "user_agent": "Python-urllib/3.14",
+      "source": "local-proof",
+      "status": "new"
+    },
+    {
+      "id": "3a7bae9e-5378-4214-8a3d-d8ae2c47d37c",
+      "created_at": "2026-10-11T00:33:36.979Z",
+      "name": "Penguji Tempatan",
+      "role": "ajk",
+      "masjid_name": "Masjid Rate 2",
+      "venue_type": "masjid",
+      "area": "Presint 16",
+      "state": "W.P. Putrajaya",
+      "phone": "60123456789",
+      "email": "qa@example.test",
+      "needs": "[\"hebahan_program\"]",
+      "congregation_size": "null",
+      "notes": "null",
+      "notes_is_null": 1,
+      "consent_at": "2026-10-11T00:33:36.979Z",
+      "ip_hash": "dedbc1b58cffb1a7c752b1b782e32f99b0110f9ec35fedfa317ec7898895ff81",
+      "user_agent": "Python-urllib/3.14",
+      "source": "local-proof",
+      "status": "new"
+    },
+    {
+      "id": "ea1b3f35-ec41-480e-bc96-3b09ca82be24",
+      "created_at": "2026-10-11T00:33:37.049Z",
+      "name": "Penguji Tempatan",
+      "role": "ajk",
+      "masjid_name": "Masjid Rate 3",
+      "venue_type": "masjid",
+      "area": "Presint 16",
+      "state": "W.P. Putrajaya",
+      "phone": "60123456789",
+      "email": "qa@example.test",
+      "needs": "[\"hebahan_program\"]",
+      "congregation_size": "null",
+      "notes": "null",
+      "notes_is_null": 1,
+      "consent_at": "2026-10-11T00:33:37.049Z",
+      "ip_hash": "dedbc1b58cffb1a7c752b1b782e32f99b0110f9ec35fedfa317ec7898895ff81",
+      "user_agent": "Python-urllib/3.14",
+      "source": "local-proof",
+      "status": "new"
+    },
+    {
+      "id": "65277e97-55d9-439d-a628-5111bfab5524",
+      "created_at": "2026-10-11T00:33:37.174Z",
+      "name": "Penguji Tempatan",
+      "role": "ajk",
+      "masjid_name": "Masjid Rate 4",
+      "venue_type": "masjid",
+      "area": "Presint 16",
+      "state": "W.P. Putrajaya",
+      "phone": "60123456789",
+      "email": "qa@example.test",
+      "needs": "[\"hebahan_program\"]",
+      "congregation_size": "null",
+      "notes": "null",
+      "notes_is_null": 1,
+      "consent_at": "2026-10-11T00:33:37.174Z",
+      "ip_hash": "dedbc1b58cffb1a7c752b1b782e32f99b0110f9ec35fedfa317ec7898895ff81",
+      "user_agent": "Python-urllib/3.14",
+      "source": "local-proof",
+      "status": "new"
+    },
+    {
+      "id": "516ffc06-6a63-4431-8351-0272e1a8b958",
+      "created_at": "2026-10-11T00:33:37.591Z",
+      "name": "Penguji Tempatan",
+      "role": "ajk",
+      "masjid_name": "Surau Native",
+      "venue_type": "surau",
+      "area": "Presint 16",
+      "state": "W.P. Putrajaya",
+      "phone": "60123456789",
+      "email": "qa@example.test",
+      "needs": "[\"hebahan_program\"]",
+      "congregation_size": "null",
+      "notes": "null",
+      "notes_is_null": 1,
+      "consent_at": "2026-10-11T00:33:37.591Z",
+      "ip_hash": "e0d9e03a690e722dbb3ba27757c2a09ed77510c1f0e88e1d4108a36e09609845",
+      "user_agent": "Python-urllib/3.14",
+      "source": "local-proof",
+      "status": "new"
+    },
+    {
+      "id": "d30723d7-a9c1-4a29-bfce-22f2d4436685",
+      "created_at": "2026-10-11T00:33:37.769Z",
+      "name": "Penguji Tempatan",
+      "role": "ajk",
+      "masjid_name": "Masjid Concurrent 1",
+      "venue_type": "masjid",
+      "area": "Presint 16",
+      "state": "W.P. Putrajaya",
+      "phone": "60123456789",
+      "email": "qa@example.test",
+      "needs": "[\"hebahan_program\"]",
+      "congregation_size": "null",
+      "notes": "null",
+      "notes_is_null": 1,
+      "consent_at": "2026-10-11T00:33:37.769Z",
+      "ip_hash": "c315b928bcc72df28ce1e5af384ec709d80af9886a7f5073a714fbb8d0bef7d7",
+      "user_agent": "Python-urllib/3.14",
+      "source": "local-proof",
+      "status": "new"
+    },
+    {
+      "id": "5208e5a8-5d16-4d0a-aa49-93e8854bb49c",
+      "created_at": "2026-10-11T00:33:37.897Z",
+      "name": "Penguji Tempatan",
+      "role": "ajk",
+      "masjid_name": "Masjid Concurrent 0",
+      "venue_type": "masjid",
+      "area": "Presint 16",
+      "state": "W.P. Putrajaya",
+      "phone": "60123456789",
+      "email": "qa@example.test",
+      "needs": "[\"hebahan_program\"]",
+      "congregation_size": "null",
+      "notes": "null",
+      "notes_is_null": 1,
+      "consent_at": "2026-10-11T00:33:37.897Z",
+      "ip_hash": "c315b928bcc72df28ce1e5af384ec709d80af9886a7f5073a714fbb8d0bef7d7",
+      "user_agent": "Python-urllib/3.14",
+      "source": "local-proof",
+      "status": "new"
+    },
+    {
+      "id": "2158a292-8c20-4f7b-8fba-a25e5ef8bc3e",
+      "created_at": "2026-10-11T00:33:37.898Z",
+      "name": "Penguji Tempatan",
+      "role": "ajk",
+      "masjid_name": "Masjid Concurrent 2",
+      "venue_type": "masjid",
+      "area": "Presint 16",
+      "state": "W.P. Putrajaya",
+      "phone": "60123456789",
+      "email": "qa@example.test",
+      "needs": "[\"hebahan_program\"]",
+      "congregation_size": "null",
+      "notes": "null",
+      "notes_is_null": 1,
+      "consent_at": "2026-10-11T00:33:37.898Z",
+      "ip_hash": "c315b928bcc72df28ce1e5af384ec709d80af9886a7f5073a714fbb8d0bef7d7",
+      "user_agent": "Python-urllib/3.14",
+      "source": "local-proof",
+      "status": "new"
+    },
+    {
+      "id": "5b8dd5fe-446d-4426-aac5-1c77f098d9b9",
+      "created_at": "2026-10-11T00:33:37.898Z",
+      "name": "Penguji Tempatan",
+      "role": "ajk",
+      "masjid_name": "Masjid Concurrent 3",
+      "venue_type": "masjid",
+      "area": "Presint 16",
+      "state": "W.P. Putrajaya",
+      "phone": "60123456789",
+      "email": "qa@example.test",
+      "needs": "[\"hebahan_program\"]",
+      "congregation_size": "null",
+      "notes": "null",
+      "notes_is_null": 1,
+      "consent_at": "2026-10-11T00:33:37.898Z",
+      "ip_hash": "c315b928bcc72df28ce1e5af384ec709d80af9886a7f5073a714fbb8d0bef7d7",
+      "user_agent": "Python-urllib/3.14",
+      "source": "local-proof",
+      "status": "new"
+    },
+    {
+      "id": "de33ae33-8e77-4fbe-9582-98ef05c935ae",
+      "created_at": "2026-10-11T00:33:37.899Z",
+      "name": "Penguji Tempatan",
+      "role": "ajk",
+      "masjid_name": "Masjid Concurrent 4",
+      "venue_type": "masjid",
+      "area": "Presint 16",
+      "state": "W.P. Putrajaya",
+      "phone": "60123456789",
+      "email": "qa@example.test",
+      "needs": "[\"hebahan_program\"]",
+      "congregation_size": "null",
+      "notes": "null",
+      "notes_is_null": 1,
+      "consent_at": "2026-10-11T00:33:37.899Z",
+      "ip_hash": "c315b928bcc72df28ce1e5af384ec709d80af9886a7f5073a714fbb8d0bef7d7",
+      "user_agent": "Python-urllib/3.14",
+      "source": "local-proof",
+      "status": "new"
+    }
+  ]
+}

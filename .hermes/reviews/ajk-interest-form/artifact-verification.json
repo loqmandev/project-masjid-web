@@ -1,0 +1,16 @@
+{
+  "implementation_commit": "44d1d8a4ddb9007b9ec63d79637b3cb68c53e175",
+  "tested_build_files_matching_dist": 68,
+  "screenshots": {
+    "ajk-1280.png": "efa8eea990b807ad799ca6841900de3e6979378235a667c183183a8ac1947f9c",
+    "ajk-390.png": "331f32560c3d10a3a46f573c5dbf31b243d046a38041922e480ced22ab1f5d16",
+    "committees-1280.png": "d46ac325a4882d77fbeaae6f9e0d7471adc29ad5e25f61ea296f19a02b492742",
+    "committees-390.png": "66779f5ab601371d39785ecf61d22e434ec95ca2615f2797d29fb88333058615",
+    "native-error-390.png": "3a4b8a73e1c16b1f09a529fdd7055c25cf49c77405455531652007449d4bd6f7",
+    "success-enhanced-390.png": "db56efdd5793fe4a17158f350d4531a72c8f6f67d3d3bf349f05b31460053b1c",
+    "success-native-390.png": "c49b4ca8fe5c63f3a8896369d86da39fe4d1adf2d63c52148525fb3ecc8131d8"
+  },
+  "worker_cases": 24,
+  "api_rows": 12,
+  "final_rows_including_browser_proof": 14
+}

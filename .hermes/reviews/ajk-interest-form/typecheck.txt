@@ -1,0 +1,1 @@
+src/routes/download.tsx(8,21): error TS2339: Property 'request' does not exist on type 'ServerFnCtx<Register, "GET", undefined, undefined>'.

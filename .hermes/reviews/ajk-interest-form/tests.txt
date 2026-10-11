@@ -1,0 +1,18 @@
+> project-masjid-web@ test /home/loqman/Documents/project-masjid/project-masjid-web
+> vitest run
+
+
+ RUN  v3.2.4 /home/loqman/Documents/project-masjid/project-masjid-web
+
+ ✓ src/lib/putrajaya-snapshot.test.ts (4 tests) 5ms
+ ✓ src/lib/ajk-interest.test.ts (54 tests) 12ms
+ ✓ src/lib/company.test.ts (2 tests) 5ms
+ ✓ src/lib/app-association.test.ts (12 tests) 11ms
+ ✓ src/lib/invite.test.ts (9 tests) 9ms
+ ✓ src/lib/ajk-interest-server.test.ts (21 tests) 57ms
+ ✓ src/lib/committees.test.ts (7 tests) 356ms
+
+ Test Files  7 passed (7)
+      Tests  109 passed (109)
+   Start at  08:33:07
+   Duration  1.72s (transform 591ms, setup 0ms, collect 1.15s, tests 455ms, environment 556ms, prepare 896ms)
