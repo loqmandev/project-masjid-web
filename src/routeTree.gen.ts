@@ -16,7 +16,9 @@ import { Route as GoogleGroupsRouteImport } from './routes/google-groups'
 import { Route as DownloadRouteImport } from './routes/download'
 import { Route as BetaIosRouteImport } from './routes/beta-ios'
 import { Route as BetaAndroidRouteImport } from './routes/beta-android'
+import { Route as AjkRouteImport } from './routes/ajk'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiAjkInterestRouteImport } from './routes/api.ajk-interest'
 import { Route as DotwellKnownAssetlinksDotjsonRouteImport } from './routes/[.]well-known.assetlinks[.]json'
 import { Route as DotwellKnownAppleAppSiteAssociationRouteImport } from './routes/[.]well-known.apple-app-site-association'
 import { Route as PrayerCirclesInviteCodeRouteImport } from './routes/prayer-circles.invite.$code'
@@ -56,9 +58,19 @@ const BetaAndroidRoute = BetaAndroidRouteImport.update({
   path: '/beta-android',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AjkRoute = AjkRouteImport.update({
+  id: '/ajk',
+  path: '/ajk',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAjkInterestRoute = ApiAjkInterestRouteImport.update({
+  id: '/api/ajk-interest',
+  path: '/api/ajk-interest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DotwellKnownAssetlinksDotjsonRoute =
@@ -81,6 +93,7 @@ const PrayerCirclesInviteCodeRoute = PrayerCirclesInviteCodeRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ajk': typeof AjkRoute
   '/beta-android': typeof BetaAndroidRoute
   '/beta-ios': typeof BetaIosRoute
   '/download': typeof DownloadRoute
@@ -90,10 +103,12 @@ export interface FileRoutesByFullPath {
   '/tos': typeof TosRoute
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
+  '/api/ajk-interest': typeof ApiAjkInterestRoute
   '/prayer-circles/invite/$code': typeof PrayerCirclesInviteCodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ajk': typeof AjkRoute
   '/beta-android': typeof BetaAndroidRoute
   '/beta-ios': typeof BetaIosRoute
   '/download': typeof DownloadRoute
@@ -103,11 +118,13 @@ export interface FileRoutesByTo {
   '/tos': typeof TosRoute
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
+  '/api/ajk-interest': typeof ApiAjkInterestRoute
   '/prayer-circles/invite/$code': typeof PrayerCirclesInviteCodeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ajk': typeof AjkRoute
   '/beta-android': typeof BetaAndroidRoute
   '/beta-ios': typeof BetaIosRoute
   '/download': typeof DownloadRoute
@@ -117,12 +134,14 @@ export interface FileRoutesById {
   '/tos': typeof TosRoute
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
+  '/api/ajk-interest': typeof ApiAjkInterestRoute
   '/prayer-circles/invite/$code': typeof PrayerCirclesInviteCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ajk'
     | '/beta-android'
     | '/beta-ios'
     | '/download'
@@ -132,10 +151,12 @@ export interface FileRouteTypes {
     | '/tos'
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
+    | '/api/ajk-interest'
     | '/prayer-circles/invite/$code'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ajk'
     | '/beta-android'
     | '/beta-ios'
     | '/download'
@@ -145,10 +166,12 @@ export interface FileRouteTypes {
     | '/tos'
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
+    | '/api/ajk-interest'
     | '/prayer-circles/invite/$code'
   id:
     | '__root__'
     | '/'
+    | '/ajk'
     | '/beta-android'
     | '/beta-ios'
     | '/download'
@@ -158,11 +181,13 @@ export interface FileRouteTypes {
     | '/tos'
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
+    | '/api/ajk-interest'
     | '/prayer-circles/invite/$code'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AjkRoute: typeof AjkRoute
   BetaAndroidRoute: typeof BetaAndroidRoute
   BetaIosRoute: typeof BetaIosRoute
   DownloadRoute: typeof DownloadRoute
@@ -172,6 +197,7 @@ export interface RootRouteChildren {
   TosRoute: typeof TosRoute
   DotwellKnownAppleAppSiteAssociationRoute: typeof DotwellKnownAppleAppSiteAssociationRoute
   DotwellKnownAssetlinksDotjsonRoute: typeof DotwellKnownAssetlinksDotjsonRoute
+  ApiAjkInterestRoute: typeof ApiAjkInterestRoute
   PrayerCirclesInviteCodeRoute: typeof PrayerCirclesInviteCodeRoute
 }
 
@@ -226,11 +252,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BetaAndroidRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ajk': {
+      id: '/ajk'
+      path: '/ajk'
+      fullPath: '/ajk'
+      preLoaderRoute: typeof AjkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ajk-interest': {
+      id: '/api/ajk-interest'
+      path: '/api/ajk-interest'
+      fullPath: '/api/ajk-interest'
+      preLoaderRoute: typeof ApiAjkInterestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.well-known/assetlinks.json': {
@@ -259,6 +299,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AjkRoute: AjkRoute,
   BetaAndroidRoute: BetaAndroidRoute,
   BetaIosRoute: BetaIosRoute,
   DownloadRoute: DownloadRoute,
@@ -269,6 +310,7 @@ const rootRouteChildren: RootRouteChildren = {
   DotwellKnownAppleAppSiteAssociationRoute:
     DotwellKnownAppleAppSiteAssociationRoute,
   DotwellKnownAssetlinksDotjsonRoute: DotwellKnownAssetlinksDotjsonRoute,
+  ApiAjkInterestRoute: ApiAjkInterestRoute,
   PrayerCirclesInviteCodeRoute: PrayerCirclesInviteCodeRoute,
 }
 export const routeTree = rootRouteImport

@@ -6,6 +6,14 @@
     "nodejs_compat"
   ],
   "main": "@tanstack/react-start/server-entry",
+  "d1_databases": [{
+    "binding": "WEB_DB",
+    "database_name": "jm-web-db",
+    // DEPLOY BLOCKED: operator must create D1 and replace this ID at go-live.
+    "database_id": "00000000-0000-0000-0000-000000000000",
+    "migrations_dir": "migrations"
+  }],
+  "send_email": [{ "name": "EMAIL" }],
   "routes": [
     {
       "custom_domain": true,
