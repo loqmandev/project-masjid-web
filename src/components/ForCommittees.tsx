@@ -45,7 +45,7 @@ export default function ForCommittees() {
             <p className="mt-6 max-w-lg border-l-2 border-brand-teal pl-4 text-sm leading-relaxed text-muted-foreground">
               <strong className="font-semibold text-foreground">Cadangan pembangunan.</strong>{' '}
               Modul ini belum tersedia. Kami ingin membentuk dan menguji pendekatan ini
-              bersama pihak masjid dan surau, bermula di Putrajaya.
+              bersama pihak masjid dan surau, bermula di Kuala Lumpur dan Putrajaya.
             </p>
           </div>
 

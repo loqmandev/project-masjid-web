@@ -84,6 +84,73 @@ describe('notification', () => {
     })
   })
 })
+describe('valid-submission rate limit', () => {
+  const valid = {
+    name: 'Penguji Tempatan', role: 'ajk', masjid_name: 'Masjid Ujian',
+    venue_type: 'masjid', area: 'Kampung Baru', state: 'W.P. Kuala Lumpur',
+    phone: '0123456789', needs: ['hebahan_program'], consent: 'on',
+  }
+  // Stateful D1 boundary double; real SQL is also exercised by local Wrangler proof.
+  function database() {
+    let attempts = 0
+    let leads = 0
+    const prepare = vi.fn((sql: string) => {
+      const statement = {
+        bind: (..._values: unknown[]) => statement,
+        first: async <T>() => ({ salt: 'local-test-salt' }) as T,
+        run: async () => {
+          if (sql.startsWith('INSERT INTO ajk_interest_attempts')) {
+            const changes = attempts < 5 ? 1 : 0
+            attempts += changes
+            return { meta: { changes } }
+          }
+          if (sql.startsWith('INSERT INTO ajk_interest\n')) leads++
+          return { meta: { changes: 1 } }
+        },
+      }
+      return statement
+    })
+    return {
+      env: { WEB_DB: { prepare, batch: async () => [] } },
+      prepare, counts: () => ({ attempts, leads }),
+    }
+  }
+  function submission(input: Record<string, unknown>) {
+    const req = request(JSON.stringify(input))
+    req.headers.set('CF-Connecting-IP', '192.0.2.80')
+    return req
+  }
+  it('six invalid submissions do not consume quota before a valid correction', async () => {
+    const db = database()
+    for (let n = 0; n < 6; n++) {
+      expect((await handleInterest(submission({ ...valid, phone: 'bad' }), db.env)).status).toBe(422)
+    }
+    expect(db.prepare).not.toHaveBeenCalled()
+    expect((await handleInterest(submission(valid), db.env)).status).toBe(200)
+    expect(db.counts()).toEqual({ attempts: 1, leads: 1 })
+  })
+  it('rejects the sixth valid submission from the same IP', async () => {
+    const db = database()
+    const statuses = []
+    for (let n = 0; n < 6; n++) {
+      statuses.push((await handleInterest(submission({ ...valid, masjid_name: `Masjid Ujian ${n}` }), db.env)).status)
+    }
+    expect(statuses).toEqual([200, 200, 200, 200, 200, 429])
+    expect(db.counts()).toEqual({ attempts: 5, leads: 5 })
+  })
+  it('failed Turnstile checks do not consume quota', async () => {
+    const db = database()
+    const env = { ...db.env, TURNSTILE_SITE_KEY: 'test-site', TURNSTILE_SECRET_KEY: 'test-secret' }
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json({ success: false })))
+    for (let n = 0; n < 6; n++) {
+      expect((await handleInterest(submission({ ...valid, 'cf-turnstile-response': 'rejected' }), env)).status).toBe(422)
+    }
+    expect(db.prepare).not.toHaveBeenCalled()
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json({ success: true, hostname: 'jejakmasjid.my' })))
+    expect((await handleInterest(submission({ ...valid, 'cf-turnstile-response': 'verified' }), env)).status).toBe(200)
+    expect(db.counts()).toEqual({ attempts: 1, leads: 1 })
+  })
+})
 describe('request boundary', () => {
   it('reads JSON and repeated native needs', async () => {
     expect(await readInput(request('{"name":"QA"}'))).toEqual({ name: 'QA' })

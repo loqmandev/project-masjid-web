@@ -343,19 +343,6 @@ export async function handleInterest(request: Request, env: AjkEnv) {
   if (!env.WEB_DB)
     return fail(503, 'Borang belum tersedia. Sila cuba lagi kemudian.', input)
   try {
-    const now = new Date()
-    // CF-Connecting-IP is assigned by Cloudflare; never trust X-Forwarded-For.
-    const limit = await rateLimit(
-      env,
-      request.headers.get('CF-Connecting-IP') || 'unknown',
-      now,
-    )
-    if (!limit.allowed)
-      return fail(
-        429,
-        'Beberapa borang telah dihantar. Sila cuba lagi selepas satu jam.',
-        input,
-      )
     const result = validateInterest(input)
     if (!result.ok) return reply(request, result, 422, input, siteKey)
     if (!(await verifyTurnstile(request, input, env)))
@@ -371,6 +358,19 @@ export async function handleInterest(request: Request, env: AjkEnv) {
         422,
         input,
         siteKey,
+      )
+    const now = new Date()
+    // CF-Connecting-IP is assigned by Cloudflare; never trust X-Forwarded-For.
+    const limit = await rateLimit(
+      env,
+      request.headers.get('CF-Connecting-IP') || 'unknown',
+      now,
+    )
+    if (!limit.allowed)
+      return fail(
+        429,
+        'Beberapa borang telah dihantar. Sila cuba lagi selepas satu jam.',
+        input,
       )
     const data = result.data
     const id = crypto.randomUUID()

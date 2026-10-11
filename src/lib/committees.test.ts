@@ -13,6 +13,15 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 const html = renderToStaticMarkup(createElement(ForCommittees))
 
 describe('AJK interest form', () => {
+  it('targets Kuala Lumpur without preselecting a state', () => {
+    render(createElement(AjkInterestForm))
+    expect(screen.getByLabelText('Kawasan').getAttribute('placeholder')).toBe('cth. Kampung Baru, Kuala Lumpur')
+    const state = screen.getByLabelText('Negeri') as HTMLSelectElement
+    expect(state.value).toBe('')
+    expect(Array.from(state.options).filter((option) => option.value)[0].text).toBe('W.P. Kuala Lumpur')
+    expect(state.options).toHaveLength(17)
+  })
+
   it('renders a native URL-encoded POST form with all fields and no mandatory scripts', () => {
     const markup = renderToStaticMarkup(createElement(AjkInterestForm, { source: 'video' }))
     expect(markup).toContain('method="post"')
@@ -80,6 +89,7 @@ describe('committee partnership section', () => {
   })
 
   it('clearly distinguishes the proposed modules from available app features', () => {
+    expect(html).toContain('bermula di Kuala Lumpur dan Putrajaya.')
     expect(html).toContain('Cadangan pembangunan.')
     expect(html).toContain('Modul ini belum tersedia.')
     expect(html.match(/<article /g)).toHaveLength(3)

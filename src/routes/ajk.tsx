@@ -70,7 +70,7 @@ function AjkPage() {
               Dashboard AJK Jejak Masjid
             </h1>
             <p className="mt-5 leading-relaxed text-deep-muted">
-              Percuma untuk masjid dan surau. Rintis bermula di Putrajaya.
+              Percuma untuk masjid dan surau. Kini dibuka untuk masjid &amp; surau di Kuala Lumpur.
             </p>
           </Container>
         </header>

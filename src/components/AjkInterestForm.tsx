@@ -11,6 +11,7 @@ const ROLES = {
   lain: 'Lain-lain',
 }
 const STATES = [
+  'W.P. Kuala Lumpur',
   'Johor',
   'Kedah',
   'Kelantan',
@@ -24,7 +25,6 @@ const STATES = [
   'Sarawak',
   'Selangor',
   'Terengganu',
-  'W.P. Kuala Lumpur',
   'W.P. Labuan',
   'W.P. Putrajaya',
 ]
@@ -336,7 +336,7 @@ export default function AjkInterestForm({
           required: true,
           minLength: 2,
           maxLength: 80,
-          placeholder: 'cth. Presint 16, Putrajaya',
+          placeholder: 'cth. Kampung Baru, Kuala Lumpur',
           autoComplete: 'address-level2',
         })}
         {select(
