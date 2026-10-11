@@ -6,6 +6,7 @@
     "nodejs_compat"
   ],
   "main": "@tanstack/react-start/server-entry",
+  "vars": { "MASJID_PAGES_ENABLED": "false", "JM_API_BASE": "https://apiv2.jejakmasjid.my" },
   "d1_databases": [{
     "binding": "WEB_DB",
     "database_name": "jm-web-db",

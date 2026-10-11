@@ -1,0 +1,10 @@
+import { describe,it,expect,vi,afterEach } from 'vitest'
+import { apiGet,validSlug,validProgramId,validSitemapPage,getMasjidPage,getProgram } from './jm-api'
+afterEach(()=>vi.unstubAllGlobals())
+describe('public API boundary',()=>{
+ it('validates slug, id and sitemap without normalization',async()=>{expect(validSlug('surau-test')).toBe(true);for(const v of ['ab','-test','../foo','Test'])expect(validSlug(v)).toBe(false);expect(validProgramId('a_-1')).toBe(true);expect(validProgramId('a/b')).toBe(false);expect(validSitemapPage('0')).toBe(false);expect(validSitemapPage('01')).toBe(false);expect(validSitemapPage('999')).toBe(true);expect((await getMasjidPage('../x')).status).toBe(404);expect((await getProgram('a/b')).status).toBe(404)})
+ it('flag off never fetches',async()=>{const f=vi.fn();vi.stubGlobal('fetch',f);expect((await apiGet('/api/x',{ttl:300},{})).status).toBe(404);expect(f).not.toHaveBeenCalled()})
+ it('uses binding and caches full URL with TTL',async()=>{const f=vi.fn().mockResolvedValue(new Response('{"ok":true}'));const put=vi.fn();vi.stubGlobal('caches',{default:{match:vi.fn(),put}});const r=await apiGet('/api/x',{ttl:300},{MASJID_PAGES_ENABLED:'true',JM_API_BASE:'http://localhost:8787',JM_API:{fetch:f}});expect(r.body).toEqual({ok:true});expect(f.mock.calls[0][0].url).toBe('http://localhost:8787/api/x');expect(put.mock.calls[0][0]).toBe('http://localhost:8787/api/x');expect(put.mock.calls[0][1].headers.get('cache-control')).toContain('300')})
+ it('timeouts become 503; not cached',async()=>{vi.stubGlobal('fetch',vi.fn().mockRejectedValue(new DOMException('timeout','TimeoutError')));expect((await apiGet('/api/x',{ttl:1},{MASJID_PAGES_ENABLED:'true'})).status).toBe(503)})
+ it('404 remains 404; upstream failures are 503',async()=>{const f=vi.fn().mockResolvedValueOnce(new Response('',{status:404})).mockResolvedValueOnce(new Response('',{status:500}));vi.stubGlobal('fetch',f);expect((await apiGet('/api/x',{ttl:1},{MASJID_PAGES_ENABLED:'true'})).status).toBe(404);expect((await apiGet('/api/x',{ttl:1},{MASJID_PAGES_ENABLED:'true'})).status).toBe(503)})
+})

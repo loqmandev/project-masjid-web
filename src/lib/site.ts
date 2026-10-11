@@ -1,3 +1,5 @@
+export const API_PUBLIC_URL = 'https://apiv2.jejakmasjid.my'
+
 export const SITE = {
   name: 'Jejak Masjid',
   legalName: 'JEJAK MANFAAT DIGITAL SOLUTIONS',
