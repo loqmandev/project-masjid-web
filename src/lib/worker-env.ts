@@ -39,11 +39,12 @@ export async function getAjkPublicConfig() {
  * `cloudflare:workers` module never reaches the client bundle.
  * Server-only: call from a server route handler.
  */
-export type WebEnv = AssociationEnv & AjkEnv & {
-  MASJID_PAGES_ENABLED?: string
-  JM_API_BASE?: string
-  JM_API?: { fetch(request: Request): Promise<Response> }
-}
+export type WebEnv = AssociationEnv &
+  AjkEnv & {
+    MASJID_PAGES_ENABLED?: string
+    JM_API_BASE?: string
+    JM_API?: { fetch(request: Request): Promise<Response> }
+  }
 export async function getWorkerEnv(): Promise<WebEnv> {
   const { env } = await import('cloudflare:workers')
   return env as WebEnv
