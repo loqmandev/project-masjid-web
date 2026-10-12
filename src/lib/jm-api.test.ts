@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import {
   apiGet,
+  publicCacheKey,
   validSlug,
   validProgramId,
   validSitemapPage,
@@ -36,14 +37,16 @@ describe('public API boundary', () => {
       { ttl: 300 },
       {
         MASJID_PAGES_ENABLED: 'true',
-        JM_API_BASE: 'http://localhost:8787',
+        JM_API_BASE: 'http://localhost:8797',
         JM_API: { fetch: f },
       },
     )
     expect(r.body).toEqual({ ok: true })
-    expect(f.mock.calls[0][0].url).toBe('http://localhost:8787/api/x')
-    expect(put.mock.calls[0][0]).toBe('http://localhost:8787/api/x')
-    expect(put.mock.calls[0][1].headers.get('cache-control')).toContain('300')
+    expect(f.mock.calls[0][0].url).toBe('http://localhost:8797/api/x')
+    expect(put.mock.calls[0][0]).toBe(
+      publicCacheKey('http://localhost:8797/api/x'),
+    )
+    expect(put.mock.calls[0][1].headers.get('cache-control')).toContain('60')
   })
   it('timeouts become 503; not cached', async () => {
     vi.stubGlobal(

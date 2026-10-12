@@ -1,6 +1,35 @@
 import type { PublicMasjidPage, PublicProgramDetail } from './masjid-types'
 import { SITE } from './site'
 import { directionsUrl, localISO } from './masjid-format'
+import { trustedImage } from './masjid-seo'
+
+export function countryAddress(state: string) {
+  const malaysianStates = new Set([
+    'johor',
+    'kedah',
+    'kelantan',
+    'melaka',
+    'malacca',
+    'negeri sembilan',
+    'pahang',
+    'perak',
+    'perlis',
+    'pulau pinang',
+    'penang',
+    'sabah',
+    'sarawak',
+    'selangor',
+    'terengganu',
+    'kuala lumpur',
+    'putrajaya',
+    'labuan',
+  ])
+  const name = state
+    .toLowerCase()
+    .replace(/^(wilayah persekutuan|w\.?p\.?)\s+/, '')
+    .trim()
+  return malaysianStates.has(name) ? { addressCountry: 'MY' } : {}
+}
 export function jsonLdScript(value: unknown) {
   const escapes: Record<string, string> = {
     '<': '\\u003c',
@@ -25,15 +54,18 @@ export function mosqueJsonLd(page: PublicMasjidPage) {
       streetAddress: m.address,
       addressLocality: m.districtName,
       addressRegion: m.stateName,
-      addressCountry: 'MY',
+      ...countryAddress(m.stateName),
     },
     geo: { '@type': 'GeoCoordinates', latitude: m.lat, longitude: m.lng },
     hasMap: directionsUrl(m.lat, m.lng),
     ...(page.profile?.contactPhone
       ? { telephone: page.profile.contactPhone }
       : {}),
-    ...(page.profile?.coverUrl ? { image: page.profile.coverUrl } : {}),
+    ...(trustedImage(page.profile?.coverUrl)
+      ? { image: trustedImage(page.profile?.coverUrl) }
+      : {}),
     event: page.upcomingPrograms
+      .filter((p) => p.status === 'published')
       .slice(0, 10)
       .map((p) => ({
         '@type': 'Event',
@@ -61,12 +93,14 @@ export function eventJsonLd(p: PublicProgramDetail) {
         '@type': 'PostalAddress',
         addressLocality: p.masjid.districtName,
         addressRegion: p.masjid.stateName,
-        addressCountry: 'MY',
+        ...countryAddress(p.masjid.stateName),
       },
     },
     organizer: { '@type': 'Organization', name: p.masjid.name, url },
     isAccessibleForFree: true,
-    ...(p.posterUrl ? { image: p.posterUrl } : {}),
+    ...(trustedImage(p.posterUrl, true)
+      ? { image: trustedImage(p.posterUrl, true) }
+      : {}),
     ...(p.description ? { description: p.description } : {}),
     ...(p.sponsorName
       ? { sponsor: { '@type': 'Organization', name: p.sponsorName } }

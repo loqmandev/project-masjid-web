@@ -9,12 +9,14 @@ export default function PageLayout({
   title,
   updated,
   intro,
+  actions,
   children,
 }: {
   eyebrow?: string
   title: string
   updated?: string
   intro?: ReactNode
+  actions?: ReactNode
   children: ReactNode
 }) {
   return (
@@ -23,16 +25,24 @@ export default function PageLayout({
       <main>
         <header className="on-deep bg-deep py-16 sm:py-20">
           <Container className="max-w-3xl text-center">
-            <span aria-hidden className="mx-auto mb-6 block h-[5px] w-16 rounded-full bg-accent" />
+            <span
+              aria-hidden
+              className="mx-auto mb-6 block h-[5px] w-16 rounded-full bg-accent"
+            />
             {eyebrow ? <p className="eyebrow mb-3">{eyebrow}</p> : null}
-            <h1 className="text-3xl leading-tight text-deep-foreground sm:text-5xl">{title}</h1>
+            <h1 className="text-3xl leading-tight text-deep-foreground sm:text-5xl">
+              {title}
+            </h1>
             {intro ? (
               <p className="mx-auto mt-5 max-w-xl leading-relaxed text-deep-muted">
                 {intro}
               </p>
             ) : null}
+            {actions}
             {updated ? (
-              <p className="mt-6 text-sm text-deep-muted">Last updated: {updated}</p>
+              <p className="mt-6 text-sm text-deep-muted">
+                Last updated: {updated}
+              </p>
             ) : null}
           </Container>
         </header>

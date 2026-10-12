@@ -1,8 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
-import {
-  setResponseStatus,
-  setResponseHeader,
-} from '@tanstack/react-start/server'
+import { setResponseHeader } from '@tanstack/react-start/server'
+import { validPrayerTimes } from './masjid-format'
 import { notFound, redirect } from '@tanstack/react-router'
 import {
   getMasjidPage,
@@ -11,10 +9,9 @@ import {
   validSlug,
   validProgramId,
 } from './jm-api'
-function unavailable() {
-  setResponseStatus(503)
+function unavailable(): never {
   setResponseHeader('Cache-Control', 'no-store')
-  return { unavailable: true as const }
+  throw new Error('JM_API_UNAVAILABLE')
 }
 export const loadMasjid = createServerFn({ method: 'GET' })
   .inputValidator((data: { slug: string }) => data)
@@ -28,14 +25,10 @@ export const loadMasjid = createServerFn({ method: 'GET' })
       throw redirect({ href: `/masjid/${r.body.redirect}`, statusCode: 301 })
     }
     const prayers = await getPrayerTimes(r.body.masjid.lat, r.body.masjid.lng)
-    const p = prayers.body as {
-      country?: string
-      times?: Record<string, string>
-    } | null
+    const times = prayers.status === 200 ? validPrayerTimes(prayers.body) : null
     return {
-      unavailable: false as const,
       page: r.body,
-      prayers: p?.country === 'MY' ? (p.times ?? null) : null,
+      prayers: times,
     }
   })
 export const loadProgram = createServerFn({ method: 'GET' })
@@ -51,5 +44,5 @@ export const loadProgram = createServerFn({ method: 'GET' })
         href: `/masjid/${r.body.masjid.slug}/p/${r.body.id}`,
         statusCode: 301,
       })
-    return { unavailable: false as const, program: r.body }
+    return { program: r.body }
   })

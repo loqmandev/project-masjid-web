@@ -14,3 +14,14 @@ it('has complete audience and category labels', () => {
   expect(Object.keys(categoryLabels)).toHaveLength(8)
   expect(audienceLabels.belia).toBe('Youth (belia)')
 })
+
+import { prayerTime, recurringTime, validPrayerTimes } from './masjid-format'
+it('formats UTC prayers and local recurring classes as 12-hour MYT', () => {
+  expect(prayerTime('2026-10-12T12:30:00Z')).toBe('8:30 pm')
+  expect(prayerTime('2026-10-11T20:52:00Z')).toBe('4:52 am')
+  expect(recurringTime('21:00')).toBe('9:00 pm')
+  expect(recurringTime('00:00')).toBe('12:00 am')
+  expect(
+    validPrayerTimes({ country: 'MY', times: { subuh: 'bad' } }),
+  ).toBeNull()
+})

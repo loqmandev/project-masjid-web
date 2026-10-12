@@ -21,3 +21,28 @@ it('Event has MYT dates and cancelled status', () => {
   expect(e.startDate).toBe('2099-10-12T20:30:00+08:00')
   expect(e.isAccessibleForFree).toBe(true)
 })
+
+it('omits cancelled event refs and derives country only for Malaysian states', () => {
+  const m = mosqueJsonLd({
+    ...page,
+    upcomingPrograms: [
+      program,
+      { ...program, id: 'cancelled', status: 'cancelled' },
+    ],
+  })
+  expect(m.event).toHaveLength(1)
+  expect(m.event[0].url).not.toContain('cancelled')
+  expect(m.address.addressCountry).toBe('MY')
+  expect(
+    mosqueJsonLd({
+      ...page,
+      masjid: { ...page.masjid, stateName: 'Singapore' },
+    }).address,
+  ).not.toHaveProperty('addressCountry')
+  expect(
+    eventJsonLd({
+      ...program,
+      masjid: { ...program.masjid, stateName: 'Singapore' },
+    }).location.address,
+  ).not.toHaveProperty('addressCountry')
+})
