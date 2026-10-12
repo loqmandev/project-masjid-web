@@ -23,7 +23,12 @@ export const Route = createRootRoute({
       { name: 'author', content: SITE.legalName },
       // Smart App Banner for Safari on iOS.
       { name: 'apple-itunes-app', content: 'app-id=6757920248' },
-      ...seo().meta,
+      // Child routes may replace the image without knowing its dimensions.
+      ...seo().meta.filter(
+        (meta) =>
+          meta.property !== 'og:image:width' &&
+          meta.property !== 'og:image:height',
+      ),
     ],
     links: [
       { rel: 'stylesheet', href: appCss },

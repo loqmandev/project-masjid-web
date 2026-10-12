@@ -176,7 +176,6 @@ function AboutSection({ page }: { page: PublicMasjidPage }) {
     p = page.profile
   return (
     <>
-      {' '}
       <section>
         <h2>About this masjid</h2>
         {p?.description?.split(/\n+/).map((text, i) => (
@@ -269,7 +268,6 @@ function NewsSection({ page }: { page: PublicMasjidPage }) {
   )
   return (
     <>
-      {' '}
       {!!posts.length && (
         <section>
           <h2>News</h2>
@@ -292,7 +290,6 @@ function PhotosSection({ page }: { page: PublicMasjidPage }) {
     .slice(0, 8)
   return (
     <>
-      {' '}
       {!!photos.length && (
         <section>
           <h2>Photos</h2>
@@ -313,7 +310,6 @@ function PrayerTimesSection({
 }) {
   return (
     <>
-      {' '}
       {prayers && (
         <section>
           <h2>Today's prayer times</h2>
@@ -337,7 +333,6 @@ function ClaimCta({ page }: { page: PublicMasjidPage }) {
   const m = page.masjid
   return (
     <>
-      {' '}
       <aside className="on-deep my-10 rounded-[20px] bg-deep p-8 text-deep-foreground [&_h2]:text-deep-foreground [&_a]:text-deep-foreground">
         {page.claimed ? (
           <p>
