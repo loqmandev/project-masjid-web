@@ -1,3 +1,40 @@
-import type { PublicMasjidPage,PublicProgramDetail } from './masjid-types'
-export const page:PublicMasjidPage={masjid:{id:'fixture-masjid',slug:'surau-fixture',name:'Surau Fixture',address:'Synthetic street',districtName:'Fixture',stateName:'Putrajaya',lat:2.9,lng:101.7,type:'surau'},claimed:false,indexable:false,profile:null,upcomingPrograms:[],pastProgramCount:0,photos:[],posts:[]}
-export const program:PublicProgramDetail={id:'fixture-program',title:'Fixture program',category:'kelas',audienceTags:['umum'],startsAt:'2099-10-12T12:30:00.000Z',endsAt:'2099-10-12T13:30:00.000Z',venueNote:null,posterUrl:null,foodProvided:false,sponsorName:null,sponsorLogoUrl:null,registrationEnabled:true,spotsLeft:4,status:'published',description:null,seriesId:null,masjid:page.masjid}
+import type { PublicMasjidPage, PublicProgramDetail } from './masjid-types'
+export const page: PublicMasjidPage = {
+  masjid: {
+    id: 'fixture-masjid',
+    slug: 'surau-fixture',
+    name: 'Surau Fixture',
+    address: 'Synthetic street',
+    districtName: 'Fixture',
+    stateName: 'Putrajaya',
+    lat: 2.9,
+    lng: 101.7,
+    type: 'surau',
+  },
+  claimed: false,
+  indexable: false,
+  profile: null,
+  upcomingPrograms: [],
+  pastProgramCount: 0,
+  photos: [],
+  posts: [],
+}
+export const program: PublicProgramDetail = {
+  id: 'fixture-program',
+  title: 'Fixture program',
+  category: 'kelas',
+  audienceTags: ['umum'],
+  startsAt: '2099-10-12T12:30:00.000Z',
+  endsAt: '2099-10-12T13:30:00.000Z',
+  venueNote: null,
+  posterUrl: null,
+  foodProvided: false,
+  sponsorName: null,
+  sponsorLogoUrl: null,
+  registrationEnabled: true,
+  spotsLeft: 4,
+  status: 'published',
+  description: null,
+  seriesId: null,
+  masjid: page.masjid,
+}
