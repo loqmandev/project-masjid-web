@@ -42,6 +42,7 @@ export async function getAjkPublicConfig() {
 export type WebEnv = AssociationEnv &
   AjkEnv & {
     MASJID_PAGES_ENABLED?: string
+    MASJID_AJK_ENABLED?: string
     JM_API_BASE?: string
     JM_API?: { fetch(request: Request): Promise<Response> }
   }

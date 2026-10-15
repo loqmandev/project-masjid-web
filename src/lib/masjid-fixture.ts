@@ -36,5 +36,5 @@ export const program: PublicProgramDetail = {
   status: 'published',
   description: null,
   seriesId: null,
-  masjid: page.masjid,
+  masjid: { ...page.masjid, districtName: 'Fixture' },
 }

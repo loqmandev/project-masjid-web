@@ -68,7 +68,7 @@ export type PublicMasjidPage = {
     slug: string
     name: string
     address: string
-    districtName: string
+    districtName: string | null
     stateName: string
     lat: number
     lng: number

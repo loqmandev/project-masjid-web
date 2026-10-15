@@ -77,3 +77,19 @@ it('trims long descriptions to a sentence, falling back to whole words', () => {
   expect(text.endsWith(' ')).toBe(false)
   expect(sentenceDescription('  A short sentence.  ')).toBe('A short sentence.')
 })
+
+it('ajk off description has prayer times, no Programs; unknown district title is Name · State', () => {
+  const unknown = {
+    ...page,
+    masjid: { ...page.masjid, districtName: 'Unknown District' },
+  }
+  const s = masjidSeo(unknown, false)
+  expect(s.meta[0].title).toContain('Surau Fixture · Putrajaya')
+  expect(s.meta[0].title).not.toContain('Unknown')
+  const d = s.meta.find((m) => m.name === 'description')!.content as string
+  expect(d).toContain('prayer times')
+  expect(d).not.toContain('Programs')
+  expect(d).toContain('in Putrajaya.')
+  const on = masjidSeo(page, true).meta.find((m) => m.name === 'description')!
+  expect(on.content).toContain('Programs, photos and directions')
+})

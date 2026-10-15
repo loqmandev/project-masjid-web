@@ -31,7 +31,7 @@ it('omits cancelled event refs and derives country only for Malaysian states', (
     ],
   })
   expect(m.event).toHaveLength(1)
-  expect(m.event[0].url).not.toContain('cancelled')
+  expect(m.event![0].url).not.toContain('cancelled')
   expect(m.address.addressCountry).toBe('MY')
   expect(
     mosqueJsonLd({
@@ -45,4 +45,16 @@ it('omits cancelled event refs and derives country only for Malaysian states', (
       masjid: { ...program.masjid, stateName: 'Singapore' },
     }).location.address,
   ).not.toHaveProperty('addressCountry')
+})
+
+it('omits event when none are published and addressLocality when district unknown', () => {
+  const m = mosqueJsonLd({
+    ...page,
+    masjid: { ...page.masjid, districtName: 'UNKNOWN' },
+    upcomingPrograms: [{ ...program, status: 'cancelled' }],
+  })
+  expect(m).not.toHaveProperty('event')
+  expect(m.address).not.toHaveProperty('addressLocality')
+  expect(m.address.addressRegion).toBe('Putrajaya')
+  expect(mosqueJsonLd(page).address.addressLocality).toBe('Fixture')
 })

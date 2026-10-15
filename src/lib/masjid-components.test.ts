@@ -11,8 +11,8 @@ import {
 } from '@/components/MasjidPages'
 import { page, program } from './masjid-fixture'
 import type { PublicMasjidPage, PublicMasjidPost } from './masjid-types'
-const render = (p: PublicMasjidPage = page) =>
-  renderToString(createElement(MasjidPage, { page: p, prayers: null }))
+const render = (p: PublicMasjidPage = page, ajk = true) =>
+  renderToString(createElement(MasjidPage, { page: p, prayers: null, ajk }))
 const profile = {
   description: '<script>alert(1)</script>',
   contactPhone: null,
@@ -89,6 +89,7 @@ it('puts app/directions actions in title band with fallback copy', () => {
 it('renders MYT prayer and recurring times, singular history and program 404 copy', () => {
   const html = renderToString(
     createElement(MasjidPage, {
+      ajk: true,
       page: {
         ...page,
         pastProgramCount: 1,
@@ -139,4 +140,60 @@ it('drops untrusted cover/photo/poster/sponsor src and keeps real photo hosts', 
     }),
   )
   expect(detail).not.toContain('tracker.test')
+})
+
+const offPage: PublicMasjidPage = {
+  ...page,
+  photos: [
+    { url: 'https://bucket.jejakmasjid.my/one.jpg' },
+    { url: 'https://bucket.jejakmasjid.my/two.jpg' },
+  ],
+}
+it('ajk off: no programs, news, claim or AJK links; interest card instead', () => {
+  const html = render(offPage, false)
+  for (const s of [
+    'Upcoming programs',
+    'No upcoming programs',
+    'Claim',
+    'AJK',
+    'ajk.jejakmasjid.my',
+    '/p/',
+    'News',
+  ])
+    expect(html).not.toContain(s)
+  for (const s of [
+    'Surau Fixture',
+    'Synthetic street',
+    'Open in Jejak Masjid',
+    'Get directions',
+    'https://bucket.jejakmasjid.my/one.jpg',
+    'https://bucket.jejakmasjid.my/two.jpg',
+    "Are you on this masjid&#x27;s committee?",
+    'Register your interest',
+    'href="https://jejakmasjid.my/ajk"',
+  ])
+    expect(html).toContain(s)
+})
+it('ajk off still hides programs and posts when the data carries them', () => {
+  const html = render(
+    {
+      ...offPage,
+      claimed: true,
+      upcomingPrograms: [program],
+      pastProgramCount: 3,
+      posts: [
+        {
+          id: 'p1',
+          type: 'news',
+          title: 'Secret news',
+          body: 'Secret body',
+          publishedAt: '',
+          expiresAt: '',
+        },
+      ],
+    },
+    false,
+  )
+  for (const s of ['Fixture program', 'Upcoming programs', 'Secret', 'News', '/p/', 'ajk.jejakmasjid.my', 'held here'])
+    expect(html).not.toContain(s)
 })

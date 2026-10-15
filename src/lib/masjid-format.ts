@@ -69,3 +69,28 @@ export const recurringTime = (time: string) =>
   /^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(time)
     ? prayerTime(`2000-01-01T${time}:00+08:00`)
     : time
+
+const titleCaseWord = (w: string) =>
+  /\d/.test(w) ? w : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+function cleanPart(v: string | null | undefined): string | null {
+  const t = v?.trim()
+  return t || null
+}
+export function placeParts(
+  districtName: string | null | undefined,
+  stateName: string | null | undefined,
+): { district: string | null; state: string | null; line: string } {
+  let district = cleanPart(districtName)
+  const state = cleanPart(stateName)
+  if (district && /^unknown(\s+district)?$/i.test(district)) district = null
+  if (district && !/[a-z]/.test(district))
+    district = district
+      .split(' - ')
+      .map((seg) => seg.split(/\s+/).map(titleCaseWord).join(' '))
+      .join(' - ')
+  return {
+    district,
+    state,
+    line: [district, state].filter(Boolean).join(' \u00b7 '),
+  }
+}
