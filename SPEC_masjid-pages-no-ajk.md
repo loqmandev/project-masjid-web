@@ -175,3 +175,14 @@ are secrets (`npx wrangler secret list`).
 
 **Flipping on AJK later.** It needs `MASJID_AJK_ENABLED="true"` here, together with the backend `AJK_*` flags and shop
 `NUXT_AJK_ENABLED`, which brings `ajk.jejakmasjid.my` up.
+
+
+## Amendment R1 (2026-10-15, after Opus review `.hermes/reviews/masjid-pages-no-ajk/REVIEW-opus.md`)
+
+R1-1 (M3) place line and SEO text:
+- strip a leading Sabah division code from the district before display (`PBS - KOTA KINABALU` → `Kota Kinabalu`), same regex as the backend `^\s*[A-Za-z]{2,4}\s+-\s+`;
+- treat `ZON N` districts like unknown ones (omit them; show the state);
+- title-case state names everywhere they are displayed or emitted (`SELANGOR` → `Selangor`, `KUALA LUMPUR` → `Kuala Lumpur`, `WP PUTRAJAYA` → `WP Putrajaya`, keep `WP` upper-case), including JSON-LD `addressRegion`;
+- the SEO description uses a comma, not a middle dot, between district and state (`in Petaling, Selangor.`).
+R1-2 (L1) `mosqueJsonLd` takes the `ajk` value and emits `event` only when `ajk` is true.
+Tests for each case, including a Sabah page, a ZON page and the JSON-LD with AJK on/off.
