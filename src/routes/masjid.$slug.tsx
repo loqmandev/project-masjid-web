@@ -17,7 +17,7 @@ export const Route = createFileRoute('/masjid/$slug')({
           scripts: [
             {
               type: 'application/ld+json',
-              children: jsonLdScript(mosqueJsonLd(loaderData.page)),
+              children: jsonLdScript(mosqueJsonLd(loaderData.page, loaderData.ajk)),
             },
           ],
         }

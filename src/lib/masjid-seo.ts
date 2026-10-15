@@ -48,8 +48,8 @@ export function masjidSeo(p: PublicMasjidPage, ajk = false) {
     description:
       text ||
       (ajk
-        ? `${m.name} in ${place.line}. Programs, photos and directions on Jejak Masjid.`
-        : `${m.name} in ${place.line}. Photos, prayer times and directions on Jejak Masjid.`),
+        ? `${m.name} in ${place.prose}. Programs, photos and directions on Jejak Masjid.`
+        : `${m.name} in ${place.prose}. Photos, prayer times and directions on Jejak Masjid.`),
     path: `/masjid/${m.slug}`,
     noindex: !p.indexable,
     image:

@@ -29,7 +29,7 @@ it('formats UTC prayers and local recurring classes as 12-hour MYT', () => {
 import { placeParts } from './masjid-format'
 it('placeParts cleans unknown, empty and ALL CAPS districts', () => {
   expect(placeParts('Unknown District', 'Selangor').line).toBe('Selangor')
-  expect(placeParts('UNKNOWN', 'Kedah')).toEqual({
+  expect(placeParts('UNKNOWN', 'Kedah')).toMatchObject({
     district: null,
     state: 'Kedah',
     line: 'Kedah',
@@ -37,10 +37,21 @@ it('placeParts cleans unknown, empty and ALL CAPS districts', () => {
   expect(placeParts('', 'Melaka').line).toBe('Melaka')
   expect(placeParts(null, 'Johor').line).toBe('Johor')
   expect(placeParts('TAW - SEMPORNA', 'Sabah').line).toBe(
-    'Taw - Semporna \u00b7 Sabah',
+    'Semporna \u00b7 Sabah',
   )
-  expect(placeParts('JOHOR BAHRU', 'JOHOR').line).toBe('Johor Bahru \u00b7 JOHOR')
-  expect(placeParts('Petaling', 'Selangor').line).toBe('Petaling \u00b7 Selangor')
+  expect(placeParts('PBS - KOTA KINABALU', 'SABAH')).toMatchObject({
+    district: 'Kota Kinabalu',
+    state: 'Sabah',
+    prose: 'Kota Kinabalu, Sabah',
+  })
+  expect(placeParts('ZON 6', 'KUALA LUMPUR')).toMatchObject({
+    district: null,
+    line: 'Kuala Lumpur',
+  })
+  expect(placeParts('JOHOR BAHRU', 'JOHOR').line).toBe('Johor Bahru \u00b7 Johor')
+  expect(placeParts('PETALING', 'SELANGOR').prose).toBe('Petaling, Selangor')
+  expect(placeParts('Presint 16', 'WP PUTRAJAYA').state).toBe('WP Putrajaya')
+  expect(placeParts('x', 'W.P. LABUAN').state).toBe('W.P. Labuan')
   expect(placeParts('Presint 16', 'Putrajaya').line).toBe(
     'Presint 16 \u00b7 Putrajaya',
   )

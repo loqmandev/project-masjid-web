@@ -40,19 +40,22 @@ export function jsonLdScript(value: unknown) {
   }
   return JSON.stringify(value).replace(/[<>&\u2028\u2029]/g, (c) => escapes[c])
 }
-export function mosqueJsonLd(page: PublicMasjidPage) {
+export function mosqueJsonLd(page: PublicMasjidPage, ajk = false) {
   const m = page.masjid,
     url = `${SITE.url}/masjid/${m.slug}`,
-    district = placeParts(m.districtName, m.stateName).district,
-    events = page.upcomingPrograms
-      .filter((p) => p.status === 'published')
-      .slice(0, 10)
-      .map((p) => ({
-        '@type': 'Event',
-        url: `${url}/p/${p.id}`,
-        name: p.title,
-        startDate: localISO(p.startsAt),
-      }))
+    place = placeParts(m.districtName, m.stateName),
+    district = place.district,
+    events = !ajk
+      ? []
+      : page.upcomingPrograms
+          .filter((p) => p.status === 'published')
+          .slice(0, 10)
+          .map((p) => ({
+            '@type': 'Event',
+            url: `${url}/p/${p.id}`,
+            name: p.title,
+            startDate: localISO(p.startsAt),
+          }))
   return {
     '@context': 'https://schema.org',
     '@type': 'Mosque',
@@ -63,7 +66,7 @@ export function mosqueJsonLd(page: PublicMasjidPage) {
       '@type': 'PostalAddress',
       streetAddress: m.address,
       ...(district ? { addressLocality: district } : {}),
-      addressRegion: m.stateName,
+      addressRegion: place.state ?? m.stateName,
       ...countryAddress(m.stateName),
     },
     geo: { '@type': 'GeoCoordinates', latitude: m.lat, longitude: m.lng },

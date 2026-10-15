@@ -93,3 +93,22 @@ it('ajk off description has prayer times, no Programs; unknown district title is
   const on = masjidSeo(page, true).meta.find((m) => m.name === 'description')!
   expect(on.content).toContain('Programs, photos and directions')
 })
+
+it('title and description use clean place text for Sabah and ZON masjids', () => {
+  const sabah = masjidSeo(
+    { ...page, masjid: { ...page.masjid, districtName: 'PBS - KOTA KINABALU', stateName: 'SABAH' } },
+    false,
+  )
+  expect(sabah.meta[0].title).toContain('Surau Fixture \u00b7 Kota Kinabalu')
+  expect(sabah.meta.find((m) => m.name === 'description')!.content).toContain(
+    'in Kota Kinabalu, Sabah.',
+  )
+  const zon = masjidSeo(
+    { ...page, masjid: { ...page.masjid, districtName: 'ZON 6', stateName: 'KUALA LUMPUR' } },
+    false,
+  )
+  expect(zon.meta[0].title).toContain('Surau Fixture \u00b7 Kuala Lumpur')
+  expect(zon.meta.find((m) => m.name === 'description')!.content).toContain(
+    'in Kuala Lumpur.',
+  )
+})

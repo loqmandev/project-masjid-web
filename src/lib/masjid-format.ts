@@ -76,21 +76,36 @@ function cleanPart(v: string | null | undefined): string | null {
   const t = v?.trim()
   return t || null
 }
+const titleCaseState = (state: string) =>
+  state
+    .split(/\s+/)
+    .map((w) => (/^w\.?p\.?$/i.test(w) ? w.toUpperCase() : titleCaseWord(w)))
+    .join(' ')
 export function placeParts(
   districtName: string | null | undefined,
   stateName: string | null | undefined,
-): { district: string | null; state: string | null; line: string } {
+): {
+  district: string | null
+  state: string | null
+  line: string
+  prose: string
+} {
   let district = cleanPart(districtName)
-  const state = cleanPart(stateName)
-  if (district && /^unknown(\s+district)?$/i.test(district)) district = null
+  const rawState = cleanPart(stateName)
+  const state = rawState ? titleCaseState(rawState) : null
+  if (district) district = cleanPart(district.replace(/^\s*[A-Za-z]{2,4}\s+-\s+/, ''))
+  if (
+    district &&
+    (/^unknown(\s+district)?$/i.test(district) || /^zon\s*\d+$/i.test(district))
+  )
+    district = null
   if (district && !/[a-z]/.test(district))
-    district = district
-      .split(' - ')
-      .map((seg) => seg.split(/\s+/).map(titleCaseWord).join(' '))
-      .join(' - ')
+    district = district.split(/\s+/).map(titleCaseWord).join(' ')
+  const parts = [district, state].filter(Boolean)
   return {
     district,
     state,
-    line: [district, state].filter(Boolean).join(' \u00b7 '),
+    line: parts.join(' \u00b7 '),
+    prose: parts.join(', '),
   }
 }
