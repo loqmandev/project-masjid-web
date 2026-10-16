@@ -186,3 +186,12 @@ R1-1 (M3) place line and SEO text:
 - the SEO description uses a comma, not a middle dot, between district and state (`in Petaling, Selangor.`).
 R1-2 (L1) `mosqueJsonLd` takes the `ajk` value and emits `event` only when `ajk` is true.
 Tests for each case, including a Sabah page, a ZON page and the JSON-LD with AJK on/off.
+
+## Round 4: web slug validator
+
+Match the backend's 100-character cap (`59c3a72`, migration `0087`): `validSlug` accepts
+3–100 characters, lowercase `a-z`, digits and hyphens only, starting and ending with a
+letter or digit. Do not normalize input or change the minimum length. Masjid/program
+loaders and redirect validation share this validator; sitemap URLs are not truncated.
+Tests must accept 100 characters, reject 101, and accept the real 94-character Round 3
+dry-run slug `surau-simpang-tiga-permatang-tengah-permatang-pauh-bukit-mertajam-seberang-prai-seberang-perai`.
