@@ -101,6 +101,8 @@ export function placeParts(
     district = null
   if (district && !/[a-z]/.test(district))
     district = district.split(/\s+/).map(titleCaseWord).join(' ')
+  if (district && state && district.toLowerCase() === state.toLowerCase())
+    district = null
   const parts = [district, state].filter(Boolean)
   return {
     district,

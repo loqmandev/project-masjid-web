@@ -1,6 +1,11 @@
 import { it, expect } from 'vitest'
 import { masjidSeo, programSeo, trustedImage } from './masjid-seo'
 import { page, program } from './masjid-fixture'
+it('does not repeat equal district/state in the title or description', () => {
+  const s = masjidSeo({ ...page, masjid: { ...page.masjid, districtName: 'PULAU PINANG', stateName: 'Pulau Pinang' } }, false)
+  expect(s.meta[0].title).toContain('Surau Fixture · Pulau Pinang')
+  expect(s.meta.find(m => m.name === 'description')!.content).toContain('in Pulau Pinang.')
+})
 it('thin pages noindex with canonical and descriptive title', () => {
   const s = masjidSeo(page)
   expect(s.meta).toContainEqual({

@@ -27,6 +27,23 @@ it('formats UTC prayers and local recurring classes as 12-hour MYT', () => {
 })
 
 import { placeParts } from './masjid-format'
+it.each([
+  ['Pulau Pinang', 'Pulau Pinang', 'Pulau Pinang'],
+  ['PULAU PINANG', 'pulau pinang', 'Pulau Pinang'],
+  [' Singapore ', 'SINGAPORE', 'Singapore'],
+  ['MeLaKa', 'MELAKA', 'Melaka'],
+  ['TAW - LABUAN', 'labuan', 'Labuan'],
+])('placeParts displays equal cleaned district/state once: %s / %s', (district, state, expected) => {
+  expect(placeParts(district, state)).toEqual({
+    district: null, state: expected, line: expected, prose: expected,
+  })
+})
+it('placeParts preserves a district without a state and handles both absent', () => {
+  expect(placeParts('Pulau Pinang', null)).toEqual({
+    district: 'Pulau Pinang', state: null, line: 'Pulau Pinang', prose: 'Pulau Pinang',
+  })
+  expect(placeParts(null, null)).toEqual({ district: null, state: null, line: '', prose: '' })
+})
 it('placeParts cleans unknown, empty and ALL CAPS districts', () => {
   expect(placeParts('Unknown District', 'Selangor').line).toBe('Selangor')
   expect(placeParts('UNKNOWN', 'Kedah')).toMatchObject({

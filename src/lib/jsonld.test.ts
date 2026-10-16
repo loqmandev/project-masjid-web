@@ -1,6 +1,11 @@
 import { it, expect } from 'vitest'
 import { jsonLdScript, mosqueJsonLd, eventJsonLd } from './jsonld'
 import { page, program } from './masjid-fixture'
+it('omits addressLocality when the cleaned district equals the region', () => {
+  const m = mosqueJsonLd({ ...page, masjid: { ...page.masjid, districtName: 'PULAU PINANG', stateName: 'Pulau Pinang' } })
+  expect(m.address.addressRegion).toBe('Pulau Pinang')
+  expect(m.address).not.toHaveProperty('addressLocality')
+})
 it('escapes script breakout, ampersands and line separators', () => {
   const text = '</script>&\u2028\u2029'
   const result = jsonLdScript({ text })
