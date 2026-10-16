@@ -6,7 +6,7 @@ import type {
 } from './masjid-types'
 
 export const validSlug = (s: string) =>
-  /^[a-z0-9](?:[a-z0-9-]{1,98}[a-z0-9])$/.test(s)
+  s.length >= 3 && s.length <= 100 && !/[^a-z0-9-]|^-|-$|--/.test(s)
 export const validProgramId = (s: string) => /^[A-Za-z0-9_-]{1,64}$/.test(s)
 export const validSitemapPage = (s: string) => /^[1-9][0-9]{0,2}$/.test(s)
 export type ApiResult<T> = { status: number; body: T | null }

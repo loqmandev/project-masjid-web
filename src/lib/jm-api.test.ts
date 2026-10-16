@@ -13,7 +13,7 @@ describe('public API boundary', () => {
   it('validates slug, id and sitemap without normalization', async () => {
     expect(validSlug('surau-test')).toBe(true)
     expect(validSlug('a-1')).toBe(true)
-    for (const v of ['', 'a', 'ab', '-test', 'test-', '../foo', 'Test', 'a_b', 'a b'])
+    for (const v of ['', 'a', 'ab', '-test', 'test-', '../foo', 'Test', 'a_b', 'a b', 'a--b', 'a---b', '--', 'test\n', 'test\r', 'a\u0000b', 'café'])
       expect(validSlug(v)).toBe(false)
     expect(validProgramId('a_-1')).toBe(true)
     expect(validProgramId('a/b')).toBe(false)
@@ -24,12 +24,12 @@ describe('public API boundary', () => {
     expect((await getProgram('a/b')).status).toBe(404)
   })
   it('accepts a 100-character slug', () => {
-    const slug = `a${'-'.repeat(98)}1`
+    const slug = `${'a'.repeat(98)}-1`
     expect(slug).toHaveLength(100)
     expect(validSlug(slug)).toBe(true)
   })
   it('rejects a 101-character slug', () => {
-    const slug = `a${'-'.repeat(99)}1`
+    const slug = `${'a'.repeat(99)}-1`
     expect(slug).toHaveLength(101)
     expect(validSlug(slug)).toBe(false)
   })
