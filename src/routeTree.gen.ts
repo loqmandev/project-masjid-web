@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TosRouteImport } from './routes/tos'
 import { Route as SupportRouteImport } from './routes/support'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as GoogleGroupsRouteImport } from './routes/google-groups'
 import { Route as DownloadRouteImport } from './routes/download'
@@ -18,10 +19,13 @@ import { Route as BetaIosRouteImport } from './routes/beta-ios'
 import { Route as BetaAndroidRouteImport } from './routes/beta-android'
 import { Route as AjkRouteImport } from './routes/ajk'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MasjidSlugRouteImport } from './routes/masjid.$slug'
 import { Route as ApiAjkInterestRouteImport } from './routes/api.ajk-interest'
 import { Route as DotwellKnownAssetlinksDotjsonRouteImport } from './routes/[.]well-known.assetlinks[.]json'
 import { Route as DotwellKnownAppleAppSiteAssociationRouteImport } from './routes/[.]well-known.apple-app-site-association'
+import { Route as SitemapsMasjidPageRouteImport } from './routes/sitemaps.masjid.$page'
 import { Route as PrayerCirclesInviteCodeRouteImport } from './routes/prayer-circles.invite.$code'
+import { Route as MasjidSlugPProgramIdRouteImport } from './routes/masjid.$slug_.p.$programId'
 
 const TosRoute = TosRouteImport.update({
   id: '/tos',
@@ -31,6 +35,11 @@ const TosRoute = TosRouteImport.update({
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -68,6 +77,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MasjidSlugRoute = MasjidSlugRouteImport.update({
+  id: '/masjid/$slug',
+  path: '/masjid/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAjkInterestRoute = ApiAjkInterestRouteImport.update({
   id: '/api/ajk-interest',
   path: '/api/ajk-interest',
@@ -85,9 +99,19 @@ const DotwellKnownAppleAppSiteAssociationRoute =
     path: '/.well-known/apple-app-site-association',
     getParentRoute: () => rootRouteImport,
   } as any)
+const SitemapsMasjidPageRoute = SitemapsMasjidPageRouteImport.update({
+  id: '/sitemaps/masjid/$page',
+  path: '/sitemaps/masjid/$page',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrayerCirclesInviteCodeRoute = PrayerCirclesInviteCodeRouteImport.update({
   id: '/prayer-circles/invite/$code',
   path: '/prayer-circles/invite/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasjidSlugPProgramIdRoute = MasjidSlugPProgramIdRouteImport.update({
+  id: '/masjid/$slug_/p/$programId',
+  path: '/masjid/$slug/p/$programId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -99,12 +123,16 @@ export interface FileRoutesByFullPath {
   '/download': typeof DownloadRoute
   '/google-groups': typeof GoogleGroupsRoute
   '/privacy': typeof PrivacyRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/tos': typeof TosRoute
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/api/ajk-interest': typeof ApiAjkInterestRoute
+  '/masjid/$slug': typeof MasjidSlugRoute
   '/prayer-circles/invite/$code': typeof PrayerCirclesInviteCodeRoute
+  '/sitemaps/masjid/$page': typeof SitemapsMasjidPageRoute
+  '/masjid/$slug/p/$programId': typeof MasjidSlugPProgramIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -114,12 +142,16 @@ export interface FileRoutesByTo {
   '/download': typeof DownloadRoute
   '/google-groups': typeof GoogleGroupsRoute
   '/privacy': typeof PrivacyRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/tos': typeof TosRoute
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/api/ajk-interest': typeof ApiAjkInterestRoute
+  '/masjid/$slug': typeof MasjidSlugRoute
   '/prayer-circles/invite/$code': typeof PrayerCirclesInviteCodeRoute
+  '/sitemaps/masjid/$page': typeof SitemapsMasjidPageRoute
+  '/masjid/$slug/p/$programId': typeof MasjidSlugPProgramIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -130,12 +162,16 @@ export interface FileRoutesById {
   '/download': typeof DownloadRoute
   '/google-groups': typeof GoogleGroupsRoute
   '/privacy': typeof PrivacyRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/tos': typeof TosRoute
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/api/ajk-interest': typeof ApiAjkInterestRoute
+  '/masjid/$slug': typeof MasjidSlugRoute
   '/prayer-circles/invite/$code': typeof PrayerCirclesInviteCodeRoute
+  '/sitemaps/masjid/$page': typeof SitemapsMasjidPageRoute
+  '/masjid/$slug_/p/$programId': typeof MasjidSlugPProgramIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -147,12 +183,16 @@ export interface FileRouteTypes {
     | '/download'
     | '/google-groups'
     | '/privacy'
+    | '/sitemap.xml'
     | '/support'
     | '/tos'
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
     | '/api/ajk-interest'
+    | '/masjid/$slug'
     | '/prayer-circles/invite/$code'
+    | '/sitemaps/masjid/$page'
+    | '/masjid/$slug/p/$programId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -162,12 +202,16 @@ export interface FileRouteTypes {
     | '/download'
     | '/google-groups'
     | '/privacy'
+    | '/sitemap.xml'
     | '/support'
     | '/tos'
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
     | '/api/ajk-interest'
+    | '/masjid/$slug'
     | '/prayer-circles/invite/$code'
+    | '/sitemaps/masjid/$page'
+    | '/masjid/$slug/p/$programId'
   id:
     | '__root__'
     | '/'
@@ -177,12 +221,16 @@ export interface FileRouteTypes {
     | '/download'
     | '/google-groups'
     | '/privacy'
+    | '/sitemap.xml'
     | '/support'
     | '/tos'
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
     | '/api/ajk-interest'
+    | '/masjid/$slug'
     | '/prayer-circles/invite/$code'
+    | '/sitemaps/masjid/$page'
+    | '/masjid/$slug_/p/$programId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -193,12 +241,16 @@ export interface RootRouteChildren {
   DownloadRoute: typeof DownloadRoute
   GoogleGroupsRoute: typeof GoogleGroupsRoute
   PrivacyRoute: typeof PrivacyRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRoute
   TosRoute: typeof TosRoute
   DotwellKnownAppleAppSiteAssociationRoute: typeof DotwellKnownAppleAppSiteAssociationRoute
   DotwellKnownAssetlinksDotjsonRoute: typeof DotwellKnownAssetlinksDotjsonRoute
   ApiAjkInterestRoute: typeof ApiAjkInterestRoute
+  MasjidSlugRoute: typeof MasjidSlugRoute
   PrayerCirclesInviteCodeRoute: typeof PrayerCirclesInviteCodeRoute
+  SitemapsMasjidPageRoute: typeof SitemapsMasjidPageRoute
+  MasjidSlugPProgramIdRoute: typeof MasjidSlugPProgramIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -215,6 +267,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/support'
       preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -266,6 +325,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/masjid/$slug': {
+      id: '/masjid/$slug'
+      path: '/masjid/$slug'
+      fullPath: '/masjid/$slug'
+      preLoaderRoute: typeof MasjidSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/ajk-interest': {
       id: '/api/ajk-interest'
       path: '/api/ajk-interest'
@@ -287,11 +353,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotwellKnownAppleAppSiteAssociationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemaps/masjid/$page': {
+      id: '/sitemaps/masjid/$page'
+      path: '/sitemaps/masjid/$page'
+      fullPath: '/sitemaps/masjid/$page'
+      preLoaderRoute: typeof SitemapsMasjidPageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/prayer-circles/invite/$code': {
       id: '/prayer-circles/invite/$code'
       path: '/prayer-circles/invite/$code'
       fullPath: '/prayer-circles/invite/$code'
       preLoaderRoute: typeof PrayerCirclesInviteCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masjid/$slug_/p/$programId': {
+      id: '/masjid/$slug_/p/$programId'
+      path: '/masjid/$slug/p/$programId'
+      fullPath: '/masjid/$slug/p/$programId'
+      preLoaderRoute: typeof MasjidSlugPProgramIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -305,13 +385,17 @@ const rootRouteChildren: RootRouteChildren = {
   DownloadRoute: DownloadRoute,
   GoogleGroupsRoute: GoogleGroupsRoute,
   PrivacyRoute: PrivacyRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRoute,
   TosRoute: TosRoute,
   DotwellKnownAppleAppSiteAssociationRoute:
     DotwellKnownAppleAppSiteAssociationRoute,
   DotwellKnownAssetlinksDotjsonRoute: DotwellKnownAssetlinksDotjsonRoute,
   ApiAjkInterestRoute: ApiAjkInterestRoute,
+  MasjidSlugRoute: MasjidSlugRoute,
   PrayerCirclesInviteCodeRoute: PrayerCirclesInviteCodeRoute,
+  SitemapsMasjidPageRoute: SitemapsMasjidPageRoute,
+  MasjidSlugPProgramIdRoute: MasjidSlugPProgramIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

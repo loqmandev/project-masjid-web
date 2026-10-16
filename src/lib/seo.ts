@@ -27,7 +27,9 @@ export function seo({
   type = 'website',
   socialTitle,
 }: SeoInput = {}) {
-  const fullTitle = title ? `${title} | ${SITE.name}` : `${SITE.name}: ${SITE.tagline}`
+  const fullTitle = title
+    ? `${title} | ${SITE.name}`
+    : `${SITE.name}: ${SITE.tagline}`
   const cardTitle = socialTitle ?? fullTitle
   const canonical = absoluteUrl(path)
   const imageUrl = absoluteUrl(image)
@@ -37,7 +39,9 @@ export function seo({
     { name: 'description', content: description },
     {
       name: 'robots',
-      content: noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large',
+      content: noindex
+        ? 'noindex, nofollow'
+        : 'index, follow, max-image-preview:large',
     },
 
     { property: 'og:type', content: type },
@@ -47,8 +51,12 @@ export function seo({
     { property: 'og:description', content: description },
     { property: 'og:url', content: canonical },
     { property: 'og:image', content: imageUrl },
-    { property: 'og:image:width', content: '1200' },
-    { property: 'og:image:height', content: '630' },
+    ...(image === SITE.ogImage
+      ? [
+          { property: 'og:image:width', content: '1200' },
+          { property: 'og:image:height', content: '630' },
+        ]
+      : []),
     { property: 'og:image:alt', content: `${SITE.name}: ${SITE.tagline}` },
 
     { name: 'twitter:card', content: 'summary_large_image' },
@@ -56,7 +64,6 @@ export function seo({
     { name: 'twitter:description', content: description },
     { name: 'twitter:image', content: imageUrl },
   ]
-
 
   return {
     meta,
@@ -117,7 +124,9 @@ export function structuredData() {
 }
 
 /** FAQPage JSON-LD — lets the homepage FAQ qualify for rich results. */
-export function faqStructuredData(items: ReadonlyArray<{ q: string; a: string }>) {
+export function faqStructuredData(
+  items: ReadonlyArray<{ q: string; a: string }>,
+) {
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
