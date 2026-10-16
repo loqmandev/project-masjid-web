@@ -13,11 +13,11 @@ export const Route = createFileRoute('/masjid/$slug')({
   head: ({ loaderData }) =>
     loaderData
       ? {
-          ...masjidSeo(loaderData.page),
+          ...masjidSeo(loaderData.page, loaderData.ajk),
           scripts: [
             {
               type: 'application/ld+json',
-              children: jsonLdScript(mosqueJsonLd(loaderData.page)),
+              children: jsonLdScript(mosqueJsonLd(loaderData.page, loaderData.ajk)),
             },
           ],
         }
@@ -28,5 +28,5 @@ export const Route = createFileRoute('/masjid/$slug')({
 })
 function Page() {
   const d = Route.useLoaderData()
-  return <MasjidPage page={d.page} prayers={d.prayers} />
+  return <MasjidPage page={d.page} prayers={d.prayers} ajk={d.ajk} />
 }

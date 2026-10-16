@@ -12,6 +12,7 @@ import {
   prayerTime,
   recurringTime,
   PRAYER_KEYS,
+  placeParts,
 } from '@/lib/masjid-format'
 import type {
   PublicMasjidPage,
@@ -127,9 +128,11 @@ function Photo({
 export function MasjidPage({
   page,
   prayers,
+  ajk,
 }: {
   page: PublicMasjidPage
   prayers: Record<string, string> | null
+  ajk: boolean
 }) {
   const m = page.masjid,
     p = page.profile,
@@ -139,7 +142,7 @@ export function MasjidPage({
   return (
     <PageLayout
       title={m.name}
-      intro={`${m.districtName} · ${m.stateName}`}
+      intro={placeParts(m.districtName, m.stateName).line}
       actions={
         <div className="mt-8">
           <div className="flex flex-wrap items-center justify-center gap-5">
@@ -157,15 +160,15 @@ export function MasjidPage({
         </div>
       }
     >
-      <ViewBeacon kind="masjid" id={m.id} />
+      {ajk && <ViewBeacon kind="masjid" id={m.id} />}
       {cover && <Photo url={cover} alt={m.name} eager />}
       <AboutSection page={page} />
       <div className="path-rule my-10" aria-hidden />
-      <ProgramsSection page={page} />
-      <NewsSection page={page} />
+      {ajk && <ProgramsSection page={page} />}
+      {ajk && <NewsSection page={page} />}
       <PhotosSection page={page} />
       <PrayerTimesSection prayers={prayers} />
-      <ClaimCta page={page} />
+      <ClaimCta page={page} ajk={ajk} />
       <StoreBadges />
     </PageLayout>
   )
@@ -329,12 +332,17 @@ function PrayerTimesSection({
     </>
   )
 }
-function ClaimCta({ page }: { page: PublicMasjidPage }) {
+function ClaimCta({ page, ajk }: { page: PublicMasjidPage; ajk: boolean }) {
   const m = page.masjid
   return (
     <>
       <aside className="on-deep my-10 rounded-[20px] bg-deep p-8 text-deep-foreground [&_h2]:text-deep-foreground [&_a]:text-deep-foreground">
-        {page.claimed ? (
+        {!ajk ? (
+          <>
+            <h2>Are you on this masjid's committee?</h2>
+            <a href="https://jejakmasjid.my/ajk">Register your interest</a>
+          </>
+        ) : page.claimed ? (
           <p>
             Managed by the AJK of {m.name} · Are you AJK here?{' '}
             <a href="https://ajk.jejakmasjid.my/login">Sign in</a>

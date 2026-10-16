@@ -1,5 +1,6 @@
 import type { PublicMasjidPage, PublicProgramDetail } from './masjid-types'
 import { seo } from './seo'
+import { placeParts } from './masjid-format'
 export function trustedImage(url: string | null | undefined, program = false) {
   if (!url) return undefined
   try {
@@ -37,14 +38,18 @@ export function sentenceDescription(
   const boundary = prefix.lastIndexOf(' ')
   return (boundary > 0 ? prefix.slice(0, boundary) : prefix).trimEnd()
 }
-export function masjidSeo(p: PublicMasjidPage) {
+export function masjidSeo(p: PublicMasjidPage, ajk = false) {
   const m = p.masjid,
-    text = sentenceDescription(p.profile?.description)
+    text = sentenceDescription(p.profile?.description),
+    place = placeParts(m.districtName, m.stateName),
+    placeShort = place.district || place.state
   return seo({
-    title: `${m.name} · ${m.districtName}`,
+    title: placeShort ? `${m.name} · ${placeShort}` : m.name,
     description:
       text ||
-      `${m.name} in ${m.districtName}, ${m.stateName}. Programs, photos and directions on Jejak Masjid.`,
+      (ajk
+        ? `${m.name} in ${place.prose}. Programs, photos and directions on Jejak Masjid.`
+        : `${m.name} in ${place.prose}. Photos, prayer times and directions on Jejak Masjid.`),
     path: `/masjid/${m.slug}`,
     noindex: !p.indexable,
     image:

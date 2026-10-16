@@ -1,6 +1,6 @@
 import type { PublicMasjidPage, PublicProgramDetail } from './masjid-types'
 import { SITE } from './site'
-import { directionsUrl, localISO } from './masjid-format'
+import { directionsUrl, localISO, placeParts } from './masjid-format'
 import { trustedImage } from './masjid-seo'
 
 export function countryAddress(state: string) {
@@ -40,9 +40,22 @@ export function jsonLdScript(value: unknown) {
   }
   return JSON.stringify(value).replace(/[<>&\u2028\u2029]/g, (c) => escapes[c])
 }
-export function mosqueJsonLd(page: PublicMasjidPage) {
+export function mosqueJsonLd(page: PublicMasjidPage, ajk = false) {
   const m = page.masjid,
-    url = `${SITE.url}/masjid/${m.slug}`
+    url = `${SITE.url}/masjid/${m.slug}`,
+    place = placeParts(m.districtName, m.stateName),
+    district = place.district,
+    events = !ajk
+      ? []
+      : page.upcomingPrograms
+          .filter((p) => p.status === 'published')
+          .slice(0, 10)
+          .map((p) => ({
+            '@type': 'Event',
+            url: `${url}/p/${p.id}`,
+            name: p.title,
+            startDate: localISO(p.startsAt),
+          }))
   return {
     '@context': 'https://schema.org',
     '@type': 'Mosque',
@@ -52,8 +65,8 @@ export function mosqueJsonLd(page: PublicMasjidPage) {
     address: {
       '@type': 'PostalAddress',
       streetAddress: m.address,
-      addressLocality: m.districtName,
-      addressRegion: m.stateName,
+      ...(district ? { addressLocality: district } : {}),
+      addressRegion: place.state ?? m.stateName,
       ...countryAddress(m.stateName),
     },
     geo: { '@type': 'GeoCoordinates', latitude: m.lat, longitude: m.lng },
@@ -64,15 +77,7 @@ export function mosqueJsonLd(page: PublicMasjidPage) {
     ...(trustedImage(page.profile?.coverUrl)
       ? { image: trustedImage(page.profile?.coverUrl) }
       : {}),
-    event: page.upcomingPrograms
-      .filter((p) => p.status === 'published')
-      .slice(0, 10)
-      .map((p) => ({
-        '@type': 'Event',
-        url: `${url}/p/${p.id}`,
-        name: p.title,
-        startDate: localISO(p.startsAt),
-      })),
+    ...(events.length ? { event: events } : {}),
   }
 }
 export function eventJsonLd(p: PublicProgramDetail) {

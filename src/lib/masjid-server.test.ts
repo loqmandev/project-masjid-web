@@ -9,6 +9,10 @@ vi.mock('@tanstack/react-start', () => ({
   }),
 }))
 vi.mock('@tanstack/react-start/server', () => ({ setResponseHeader: vi.fn() }))
+let ajkVar: string | undefined
+vi.mock('./worker-env', () => ({
+  getWorkerEnv: async () => ({ MASJID_AJK_ENABLED: ajkVar }),
+}))
 vi.mock('./jm-api', async (importOriginal) => ({
   ...(await importOriginal<typeof import('./jm-api')>()),
   getMasjidPage: vi.fn(),
@@ -21,6 +25,7 @@ import { setResponseHeader } from '@tanstack/react-start/server'
 
 beforeEach(() => {
   vi.clearAllMocks()
+  ajkVar = 'true'
   vi.mocked(getMasjidPage).mockResolvedValue({ status: 200, body: page })
   vi.mocked(getProgram).mockResolvedValue({ status: 200, body: program })
   vi.mocked(getPrayerTimes).mockResolvedValue({ status: 503, body: null })
@@ -141,4 +146,34 @@ it('validates all five Malaysian prayers and drops incomplete or invalid data', 
       (await loadMasjid({ data: { slug: page.masjid.slug } })).prayers,
     ).toBeNull()
   }
+})
+
+it('loadProgram is 404 without any backend call unless AJK is exactly "true"', async () => {
+  for (const v of [undefined, 'false', 'TRUE', '1', '']) {
+    ajkVar = v
+    expect(
+      isNotFound(
+        await loadProgram({
+          data: { slug: 'surau-test', id: program.id },
+        }).catch((e) => e),
+      ),
+    ).toBe(true)
+  }
+  expect(getProgram).not.toHaveBeenCalled()
+  ajkVar = 'true'
+  expect(
+    (await loadProgram({ data: { slug: page.masjid.slug, id: program.id } }))
+      .program.id,
+  ).toBe(program.id)
+})
+it('loadMasjid returns ajk:true only for exactly "true"', async () => {
+  const run = async (v: string | undefined) => {
+    ajkVar = v
+    return (await loadMasjid({ data: { slug: page.masjid.slug } })).ajk
+  }
+  expect(await run(undefined)).toBe(false)
+  expect(await run('false')).toBe(false)
+  expect(await run('TRUE')).toBe(false)
+  expect(await run('1')).toBe(false)
+  expect(await run('true')).toBe(true)
 })

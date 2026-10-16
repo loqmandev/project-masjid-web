@@ -12,7 +12,8 @@ afterEach(() => vi.unstubAllGlobals())
 describe('public API boundary', () => {
   it('validates slug, id and sitemap without normalization', async () => {
     expect(validSlug('surau-test')).toBe(true)
-    for (const v of ['ab', '-test', '../foo', 'Test'])
+    expect(validSlug('a-1')).toBe(true)
+    for (const v of ['', 'a', 'ab', '-test', 'test-', '../foo', 'Test', 'a_b', 'a b', 'a--b', 'a---b', '--', 'test\n', 'test\r', 'a\u0000b', 'café'])
       expect(validSlug(v)).toBe(false)
     expect(validProgramId('a_-1')).toBe(true)
     expect(validProgramId('a/b')).toBe(false)
@@ -21,6 +22,22 @@ describe('public API boundary', () => {
     expect(validSitemapPage('999')).toBe(true)
     expect((await getMasjidPage('../x')).status).toBe(404)
     expect((await getProgram('a/b')).status).toBe(404)
+  })
+  it('accepts a 100-character slug', () => {
+    const slug = `${'a'.repeat(98)}-1`
+    expect(slug).toHaveLength(100)
+    expect(validSlug(slug)).toBe(true)
+  })
+  it('rejects a 101-character slug', () => {
+    const slug = `${'a'.repeat(99)}-1`
+    expect(slug).toHaveLength(101)
+    expect(validSlug(slug)).toBe(false)
+  })
+  it('accepts the real 94-character slug from the Round 3 dry run', () => {
+    const slug =
+      'surau-simpang-tiga-permatang-tengah-permatang-pauh-bukit-mertajam-seberang-prai-seberang-perai'
+    expect(slug).toHaveLength(94)
+    expect(validSlug(slug)).toBe(true)
   })
   it('flag off never fetches', async () => {
     const f = vi.fn()

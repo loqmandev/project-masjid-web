@@ -69,3 +69,45 @@ export const recurringTime = (time: string) =>
   /^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(time)
     ? prayerTime(`2000-01-01T${time}:00+08:00`)
     : time
+
+const titleCaseWord = (w: string) =>
+  /\d/.test(w) ? w : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+function cleanPart(v: string | null | undefined): string | null {
+  const t = v?.trim()
+  return t || null
+}
+const titleCaseState = (state: string) =>
+  state
+    .split(/\s+/)
+    .map((w) => (/^w\.?p\.?$/i.test(w) ? w.toUpperCase() : titleCaseWord(w)))
+    .join(' ')
+export function placeParts(
+  districtName: string | null | undefined,
+  stateName: string | null | undefined,
+): {
+  district: string | null
+  state: string | null
+  line: string
+  prose: string
+} {
+  let district = cleanPart(districtName)
+  const rawState = cleanPart(stateName)
+  const state = rawState ? titleCaseState(rawState) : null
+  if (district) district = cleanPart(district.replace(/^\s*[A-Za-z]{2,4}\s+-\s+/, ''))
+  if (
+    district &&
+    (/^unknown(\s+district)?$/i.test(district) || /^zon\s*\d+$/i.test(district))
+  )
+    district = null
+  if (district && !/[a-z]/.test(district))
+    district = district.split(/\s+/).map(titleCaseWord).join(' ')
+  if (district && state && district.toLowerCase() === state.toLowerCase())
+    district = null
+  const parts = [district, state].filter(Boolean)
+  return {
+    district,
+    state,
+    line: parts.join(' \u00b7 '),
+    prose: parts.join(', '),
+  }
+}

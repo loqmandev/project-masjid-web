@@ -1,6 +1,11 @@
 import { it, expect } from 'vitest'
 import { masjidSeo, programSeo, trustedImage } from './masjid-seo'
 import { page, program } from './masjid-fixture'
+it('does not repeat equal district/state in the title or description', () => {
+  const s = masjidSeo({ ...page, masjid: { ...page.masjid, districtName: 'PULAU PINANG', stateName: 'Pulau Pinang' } }, false)
+  expect(s.meta[0].title).toContain('Surau Fixture · Pulau Pinang')
+  expect(s.meta.find(m => m.name === 'description')!.content).toContain('in Pulau Pinang.')
+})
 it('thin pages noindex with canonical and descriptive title', () => {
   const s = masjidSeo(page)
   expect(s.meta).toContainEqual({
@@ -76,4 +81,39 @@ it('trims long descriptions to a sentence, falling back to whole words', () => {
   expect(text.length).toBeLessThanOrEqual(150)
   expect(text.endsWith(' ')).toBe(false)
   expect(sentenceDescription('  A short sentence.  ')).toBe('A short sentence.')
+})
+
+it('ajk off description has prayer times, no Programs; unknown district title is Name · State', () => {
+  const unknown = {
+    ...page,
+    masjid: { ...page.masjid, districtName: 'Unknown District' },
+  }
+  const s = masjidSeo(unknown, false)
+  expect(s.meta[0].title).toContain('Surau Fixture · Putrajaya')
+  expect(s.meta[0].title).not.toContain('Unknown')
+  const d = s.meta.find((m) => m.name === 'description')!.content as string
+  expect(d).toContain('prayer times')
+  expect(d).not.toContain('Programs')
+  expect(d).toContain('in Putrajaya.')
+  const on = masjidSeo(page, true).meta.find((m) => m.name === 'description')!
+  expect(on.content).toContain('Programs, photos and directions')
+})
+
+it('title and description use clean place text for Sabah and ZON masjids', () => {
+  const sabah = masjidSeo(
+    { ...page, masjid: { ...page.masjid, districtName: 'PBS - KOTA KINABALU', stateName: 'SABAH' } },
+    false,
+  )
+  expect(sabah.meta[0].title).toContain('Surau Fixture \u00b7 Kota Kinabalu')
+  expect(sabah.meta.find((m) => m.name === 'description')!.content).toContain(
+    'in Kota Kinabalu, Sabah.',
+  )
+  const zon = masjidSeo(
+    { ...page, masjid: { ...page.masjid, districtName: 'ZON 6', stateName: 'KUALA LUMPUR' } },
+    false,
+  )
+  expect(zon.meta[0].title).toContain('Surau Fixture \u00b7 Kuala Lumpur')
+  expect(zon.meta.find((m) => m.name === 'description')!.content).toContain(
+    'in Kuala Lumpur.',
+  )
 })
