@@ -1,4 +1,9 @@
-import type { PublicMasjidPage, PublicProgramDetail } from './masjid-types'
+import type {
+  FacilityCatalogueItem,
+  PublicMasjidPage,
+  PublicProgramDetail,
+} from './masjid-types'
+import { isProvenFacility, publicFacilityDetails } from './masjid-facilities'
 import { SITE } from './site'
 import { directionsUrl, localISO, placeParts } from './masjid-format'
 import { trustedImage } from './masjid-seo'
@@ -40,7 +45,11 @@ export function jsonLdScript(value: unknown) {
   }
   return JSON.stringify(value).replace(/[<>&\u2028\u2029]/g, (c) => escapes[c])
 }
-export function mosqueJsonLd(page: PublicMasjidPage, ajk = false) {
+export function mosqueJsonLd(
+  page: PublicMasjidPage,
+  ajk = false,
+  catalogue: FacilityCatalogueItem[] = [],
+) {
   const m = page.masjid,
     url = `${SITE.url}/masjid/${m.slug}`,
     place = placeParts(m.districtName, m.stateName),
@@ -56,6 +65,15 @@ export function mosqueJsonLd(page: PublicMasjidPage, ajk = false) {
             name: p.title,
             startDate: localISO(p.startsAt),
           }))
+  const amenities = Array.isArray(page.facilities)
+    ? publicFacilityDetails(page.facilities, catalogue)
+        .filter(({ facility }) => isProvenFacility(facility))
+        .map(({ details }) => ({
+          '@type': 'LocationFeatureSpecification',
+          name: details.label,
+          value: true,
+        }))
+    : []
   return {
     '@context': 'https://schema.org',
     '@type': 'Mosque',
@@ -78,6 +96,7 @@ export function mosqueJsonLd(page: PublicMasjidPage, ajk = false) {
       ? { image: trustedImage(page.profile?.coverUrl) }
       : {}),
     ...(events.length ? { event: events } : {}),
+    ...(amenities.length ? { amenityFeature: amenities } : {}),
   }
 }
 export function eventJsonLd(p: PublicProgramDetail) {

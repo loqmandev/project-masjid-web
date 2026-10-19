@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import PageLayout from './PageLayout'
+import MasjidFacilities from './MasjidFacilities'
 import { trustedImage } from '@/lib/masjid-seo'
 import StoreBadges from './ui/StoreBadges'
 import { API_PUBLIC_URL } from '@/lib/site'
@@ -15,6 +16,7 @@ import {
   placeParts,
 } from '@/lib/masjid-format'
 import type {
+  FacilityCatalogueItem,
   PublicMasjidPage,
   PublicProgramCard,
   PublicProgramDetail,
@@ -129,10 +131,12 @@ export function MasjidPage({
   page,
   prayers,
   ajk,
+  facilityCatalogue = [],
 }: {
   page: PublicMasjidPage
   prayers: Record<string, string> | null
   ajk: boolean
+  facilityCatalogue?: FacilityCatalogueItem[]
 }) {
   const m = page.masjid,
     p = page.profile,
@@ -163,6 +167,13 @@ export function MasjidPage({
       {ajk && <ViewBeacon kind="masjid" id={m.id} />}
       {cover && <Photo url={cover} alt={m.name} eager />}
       <AboutSection page={page} />
+      {Array.isArray(page.facilities) && (
+        <MasjidFacilities
+          facilities={page.facilities}
+          catalogue={facilityCatalogue}
+          masjidName={m.name}
+        />
+      )}
       <div className="path-rule my-10" aria-hidden />
       {ajk && <ProgramsSection page={page} />}
       {ajk && <NewsSection page={page} />}
@@ -195,7 +206,7 @@ function AboutSection({ page }: { page: PublicMasjidPage }) {
             <a href={`tel:${p.contactPhone}`}>{p.contactPhone}</a>
           </p>
         )}
-        {!!p?.facilities.length && (
+        {!Array.isArray(page.facilities) && !!p?.facilities.length && (
           <ul>
             {p.facilities.map((f) => (
               <li key={f.code}>{f.label}</li>

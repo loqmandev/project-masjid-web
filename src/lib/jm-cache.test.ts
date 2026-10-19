@@ -5,12 +5,14 @@ vi.mock('./worker-env', () => ({
 import {
   apiGet,
   getMasjidPage,
+  getFacilityCatalogue,
   getProgram,
   getSitemapPage,
   getSitemapCount,
   getPrayerTimes,
   PUBLIC_CACHE_TAG,
 } from './jm-api'
+import { facilityCatalogue } from './masjid-fixture'
 
 const entries = new Map<string, Response>()
 const fetcher = vi.fn()
@@ -120,4 +122,16 @@ it('cache failures never turn healthy content into an outage', async () => {
     status: 200,
     body: { ok: true },
   })
+})
+
+it('caches the raw facility catalogue for 60 seconds under the existing public purge tag', async () => {
+  fetcher.mockImplementation(async () => Response.json(facilityCatalogue))
+  expect(await getFacilityCatalogue()).toEqual({ status: 200, body: facilityCatalogue })
+  expect((await getFacilityCatalogue()).body).toEqual(facilityCatalogue)
+  expect(fetcher).toHaveBeenCalledOnce()
+  expect(fetcher.mock.calls[0][0].url).toBe('https://apiv2.jejakmasjid.my/api/facilities')
+  const [key, response] = [...entries][0]
+  expect(key).toContain('/ajk-public/v1/')
+  expect(response.headers.get('Cache-Control')).toBe('public, max-age=60')
+  expect(response.headers.get('Cache-Tag')).toBe(PUBLIC_CACHE_TAG)
 })

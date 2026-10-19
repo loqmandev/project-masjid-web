@@ -62,6 +62,30 @@ export type PublicProgramDetail = PublicProgramCard & {
     lng: number
   }
 }
+export type FacilityCatalogueItem = {
+  code: string
+  label: string
+  question: string
+  shortDescription: string
+  definition: string
+  photoHint: string
+  tier: 'standard' | 'critical'
+  group: string
+  sortOrder: number
+  noReasons: { key: string; label: string }[]
+}
+export type PublicFacility = {
+  code: string
+  state: 'masjid_verified' | 'confirmed' | 'unconfirmed'
+  stateLabel: 'masjid_verified' | 'confirmed' | 'unconfirmed'
+  summary: {
+    visitorConfirmations: number
+    proofPhotos: number
+    lastCheckedAt: string | null
+    verifiedAt: string | null
+  }
+  photos: { id: string; url: string; createdAt: string }[]
+}
 export type PublicMasjidPage = {
   masjid: {
     id: string
@@ -76,6 +100,8 @@ export type PublicMasjidPage = {
   }
   claimed: boolean
   indexable: boolean
+  // Omitted by the backend when facility info is off (including older backends).
+  facilities?: PublicFacility[]
   profile: null | {
     description: string | null
     contactPhone: string | null

@@ -1,6 +1,7 @@
 import { it, expect } from 'vitest'
 import { jsonLdScript, mosqueJsonLd, eventJsonLd } from './jsonld'
-import { page, program } from './masjid-fixture'
+import { facilityCatalogue, publicFacilities, page, program } from './masjid-fixture'
+import type { PublicFacility } from './masjid-types'
 it('omits addressLocality when the cleaned district equals the region', () => {
   const m = mosqueJsonLd({ ...page, masjid: { ...page.masjid, districtName: 'PULAU PINANG', stateName: 'Pulau Pinang' } })
   expect(m.address.addressRegion).toBe('Pulau Pinang')
@@ -87,4 +88,27 @@ it('Mosque JSON-LD title-cases the region and drops Sabah codes and ZON', () => 
   expect(zon).not.toHaveProperty('addressLocality')
   expect(zon.addressRegion).toBe('Kuala Lumpur')
   expect(ld('Presint 16', 'WP PUTRAJAYA').addressRegion).toBe('WP Putrajaya')
+})
+
+it('includes only proven catalogue-backed amenities regardless of AJK, keeping indexability unchanged', () => {
+  const facilities = [
+    ...publicFacilities,
+    { ...publicFacilities[0], code: 'UNKNOWN' },
+    ...['disputed', 'absent'].map((state) => ({ ...publicFacilities[0], state })),
+  ] as PublicFacility[]
+  for (const ajk of [false, true]) {
+    const data = mosqueJsonLd({ ...page, facilities }, ajk, facilityCatalogue)
+    expect(data.amenityFeature).toEqual([
+      { '@type': 'LocationFeatureSpecification', name: 'Compound parking', value: true },
+      { '@type': 'LocationFeatureSpecification', name: 'Wi-Fi', value: true },
+    ])
+    expect(data['@type']).toBe('Mosque')
+    expect(data['@id']).toBe(mosqueJsonLd(page)['@id'])
+  }
+})
+it('omits facility structured data when disabled, empty, unconfirmed-only or catalogue is unavailable', () => {
+  expect(mosqueJsonLd(page, false, facilityCatalogue)).toEqual(mosqueJsonLd(page))
+  for (const facilities of [[], [publicFacilities[2]]])
+    expect(mosqueJsonLd({ ...page, facilities }, false, facilityCatalogue)).not.toHaveProperty('amenityFeature')
+  expect(mosqueJsonLd({ ...page, facilities: publicFacilities })).not.toHaveProperty('amenityFeature')
 })

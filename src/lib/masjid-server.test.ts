@@ -1,6 +1,6 @@
 import { beforeEach, expect, it, vi } from 'vitest'
 import { isNotFound, isRedirect } from '@tanstack/react-router'
-import { page, program } from './masjid-fixture'
+import { facilityCatalogue, publicFacilities, page, program } from './masjid-fixture'
 
 // Exercise the actual server handlers; only replace the Start transport wrapper.
 vi.mock('@tanstack/react-start', () => ({
@@ -16,10 +16,11 @@ vi.mock('./worker-env', () => ({
 vi.mock('./jm-api', async (importOriginal) => ({
   ...(await importOriginal<typeof import('./jm-api')>()),
   getMasjidPage: vi.fn(),
+  getFacilityCatalogue: vi.fn(),
   getProgram: vi.fn(),
   getPrayerTimes: vi.fn(),
 }))
-import { getMasjidPage, getProgram, getPrayerTimes } from './jm-api'
+import { getMasjidPage, getFacilityCatalogue, getProgram, getPrayerTimes } from './jm-api'
 import { loadMasjid, loadProgram } from './masjid-server'
 import { setResponseHeader } from '@tanstack/react-start/server'
 
@@ -27,6 +28,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   ajkVar = 'true'
   vi.mocked(getMasjidPage).mockResolvedValue({ status: 200, body: page })
+  vi.mocked(getFacilityCatalogue).mockResolvedValue({ status: 200, body: facilityCatalogue })
   vi.mocked(getProgram).mockResolvedValue({ status: 200, body: program })
   vi.mocked(getPrayerTimes).mockResolvedValue({ status: 503, body: null })
 })
@@ -176,4 +178,27 @@ it('loadMasjid returns ajk:true only for exactly "true"', async () => {
   expect(await run('TRUE')).toBe(false)
   expect(await run('1')).toBe(false)
   expect(await run('true')).toBe(true)
+})
+
+it('never loads the catalogue for older/flag-off backend responses', async () => {
+  const result = await loadMasjid({ data: { slug: page.masjid.slug } })
+  expect(result.page).toEqual(page)
+  expect(result.facilityCatalogue).toEqual([])
+  expect(getFacilityCatalogue).not.toHaveBeenCalled()
+})
+it.each([{ facilities: [] }, { facilities: publicFacilities }])('fetches the catalogue once only after the backend enables facilities', async ({ facilities }) => {
+  ajkVar = 'false'
+  vi.mocked(getMasjidPage).mockResolvedValue({ status: 200, body: { ...page, facilities } })
+  const result = await loadMasjid({ data: { slug: page.masjid.slug } })
+  expect(result.page.facilities).toEqual(facilities)
+  expect(result.facilityCatalogue).toEqual(facilityCatalogue)
+  expect(result.ajk).toBe(false)
+  expect(getFacilityCatalogue).toHaveBeenCalledOnce()
+})
+it.each([404, 503])('keeps the masjid page available when the catalogue fails with %s', async (status) => {
+  vi.mocked(getMasjidPage).mockResolvedValue({ status: 200, body: { ...page, facilities: publicFacilities } })
+  vi.mocked(getFacilityCatalogue).mockResolvedValue({ status, body: null })
+  const result = await loadMasjid({ data: { slug: page.masjid.slug } })
+  expect(result.page.masjid).toEqual(page.masjid)
+  expect(result.facilityCatalogue).toEqual([])
 })

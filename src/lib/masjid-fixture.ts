@@ -1,4 +1,80 @@
-import type { PublicMasjidPage, PublicProgramDetail } from './masjid-types'
+import type { FacilityCatalogueItem, PublicFacility, PublicMasjidPage, PublicProgramDetail } from './masjid-types'
+export const facilityCatalogue: FacilityCatalogueItem[] = [
+  {
+    code: 'PARKING_COMPOUND',
+    label: 'Compound parking',
+    question: 'Does this masjid have compound parking?',
+    shortDescription: "Parking inside the masjid's own compound — not outside or by the roadside.",
+    definition: "Cars can park inside the masjid's own compound (behind its gate or on its grounds), not on the street outside.",
+    photoHint: 'The parking inside the gate. No people in the photo.',
+    tier: 'critical',
+    group: 'parking',
+    sortOrder: 2,
+    noReasons: [],
+  },
+  {
+    code: 'WIFI',
+    label: 'Wi-Fi',
+    question: 'Does this masjid have wi-fi?',
+    shortDescription: 'Wi-Fi visitors can use.',
+    definition: 'Wi-Fi visitors can use.',
+    photoHint: 'The facility, clearly visible. No people in the photo.',
+    tier: 'standard',
+    group: 'amenities',
+    sortOrder: 13,
+    noReasons: [],
+  },
+  {
+    code: 'KOLAH',
+    label: 'Kolah',
+    question: 'Does this masjid have kolah?',
+    shortDescription: 'A traditional wudhu pool.',
+    definition: 'A traditional wudhu pool.',
+    photoHint: 'The facility, clearly visible. No people in the photo.',
+    tier: 'standard',
+    group: 'wudhu',
+    sortOrder: 11,
+    noReasons: [],
+  },
+]
+export const publicFacilities: PublicFacility[] = [
+  {
+    code: 'WIFI',
+    state: 'confirmed',
+    stateLabel: 'confirmed',
+    summary: {
+      visitorConfirmations: 4,
+      proofPhotos: 2,
+      lastCheckedAt: '2026-10-12 12:30:00',
+      verifiedAt: null,
+    },
+    photos: [],
+  },
+  {
+    code: 'PARKING_COMPOUND',
+    state: 'masjid_verified',
+    stateLabel: 'masjid_verified',
+    summary: {
+      visitorConfirmations: 0,
+      proofPhotos: 0,
+      lastCheckedAt: '2026-10-01T10:00:00Z',
+      verifiedAt: '2026-10-01T10:00:00Z',
+    },
+    photos: [],
+  },
+  {
+    code: 'KOLAH',
+    state: 'unconfirmed',
+    stateLabel: 'unconfirmed',
+    summary: {
+      visitorConfirmations: 1,
+      proofPhotos: 0,
+      lastCheckedAt: null,
+      verifiedAt: null,
+    },
+    photos: [],
+  },
+]
 export const page: PublicMasjidPage = {
   masjid: {
     id: 'fixture-masjid',
