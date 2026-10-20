@@ -1,5 +1,5 @@
 import type {
-  FacilityCatalogueItem,
+  FacilityCatalogueDetails,
   PublicMasjidPage,
   PublicProgramDetail,
 } from './masjid-types'
@@ -48,7 +48,7 @@ export function jsonLdScript(value: unknown) {
 export function mosqueJsonLd(
   page: PublicMasjidPage,
   ajk = false,
-  catalogue: FacilityCatalogueItem[] = [],
+  catalogue: FacilityCatalogueDetails[] = [],
 ) {
   const m = page.masjid,
     url = `${SITE.url}/masjid/${m.slug}`,

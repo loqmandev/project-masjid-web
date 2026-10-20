@@ -39,6 +39,22 @@ export const loadMasjid = createServerFn({ method: 'GET' })
       facilityCatalogue:
         catalogue?.status === 200 && Array.isArray(catalogue.body)
           ? catalogue.body
+              // Separate cache entries can mix an enabled page with the legacy
+              // { code, label } catalogue during a rollout or flag rollback.
+              .filter(
+                (item) =>
+                  item &&
+                  typeof item.code === 'string' &&
+                  typeof item.label === 'string' &&
+                  typeof item.group === 'string' &&
+                  typeof item.sortOrder === 'number' &&
+                  Number.isFinite(item.sortOrder),
+              )
+              .map(
+                ({ code, label, shortDescription, definition, group, sortOrder }) => ({
+                  code, label, shortDescription, definition, group, sortOrder,
+                }),
+              )
           : [],
     }
   })

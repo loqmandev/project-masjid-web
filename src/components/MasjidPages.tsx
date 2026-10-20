@@ -16,7 +16,7 @@ import {
   placeParts,
 } from '@/lib/masjid-format'
 import type {
-  FacilityCatalogueItem,
+  FacilityCatalogueDetails,
   PublicMasjidPage,
   PublicProgramCard,
   PublicProgramDetail,
@@ -136,7 +136,7 @@ export function MasjidPage({
   page: PublicMasjidPage
   prayers: Record<string, string> | null
   ajk: boolean
-  facilityCatalogue?: FacilityCatalogueItem[]
+  facilityCatalogue?: FacilityCatalogueDetails[]
 }) {
   const m = page.masjid,
     p = page.profile,

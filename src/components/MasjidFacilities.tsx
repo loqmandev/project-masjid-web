@@ -5,7 +5,7 @@ import {
   publicFacilityDetails,
 } from '@/lib/masjid-facilities'
 import { trustedImage } from '@/lib/masjid-seo'
-import type { FacilityCatalogueItem, PublicFacility } from '@/lib/masjid-types'
+import type { FacilityCatalogueDetails, PublicFacility } from '@/lib/masjid-types'
 
 type FacilityDetails = ReturnType<typeof publicFacilityDetails>[number]
 const groupLabels: Record<string, string> = {
@@ -97,7 +97,7 @@ export default function MasjidFacilities({
   masjidName,
 }: {
   facilities: PublicFacility[]
-  catalogue: FacilityCatalogueItem[]
+  catalogue: FacilityCatalogueDetails[]
   masjidName: string
 }) {
   const items = publicFacilityDetails(facilities, catalogue)
@@ -110,7 +110,7 @@ export default function MasjidFacilities({
   )
   const groups = new Map<string, FacilityDetails[]>()
   for (const item of proven) {
-    const group = item.details.group
+    const group = item.details.group ?? ''
     groups.set(group, [...(groups.get(group) ?? []), item])
   }
   return (
@@ -119,7 +119,7 @@ export default function MasjidFacilities({
       {proven.length > 8 ? (
         [...groups].map(([group, grouped]) => (
           <div key={group}>
-            <h3>{groupLabels[group] ?? group.replace(/_/g, ' ')}</h3>
+            <h3>{groupLabels[group] ?? (group ? group.replace(/_/g, ' ') : 'Other')}</h3>
             <FacilityChips items={grouped} masjidName={masjidName} />
           </div>
         ))

@@ -327,7 +327,8 @@
   .facility-chip::-webkit-details-marker {
     display: none;
   }
-  .prose-jm .facility-chip::after {
+  .prose-jm details[open] > summary.facility-chip::after,
+  .prose-jm details > summary.facility-chip::after {
     content: none;
   }
   .facility-chip:focus-visible {

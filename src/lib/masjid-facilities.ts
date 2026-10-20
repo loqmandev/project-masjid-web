@@ -1,4 +1,4 @@
-import type { FacilityCatalogueItem, PublicFacility } from './masjid-types'
+import type { FacilityCatalogueDetails, PublicFacility } from './masjid-types'
 
 export const isProvenFacility = (facility: PublicFacility) =>
   facility.state === 'masjid_verified' || facility.state === 'confirmed'
@@ -7,7 +7,7 @@ export const isProvenFacility = (facility: PublicFacility) =>
 // legacy profile list or an unknown/hidden state into a proven facility.
 export function publicFacilityDetails(
   facilities: PublicFacility[],
-  catalogue: FacilityCatalogueItem[],
+  catalogue: FacilityCatalogueDetails[],
 ) {
   const byCode = new Map(catalogue.map((item) => [item.code, item]))
   return facilities
@@ -50,7 +50,9 @@ export function facilityTrustLine(facility: PublicFacility) {
   const checked = facilityDate(summary.lastCheckedAt)
   return [
     `Confirmed by ${summary.visitorConfirmations} ${summary.visitorConfirmations === 1 ? 'visitor' : 'visitors'}`,
-    `${summary.proofPhotos} ${summary.proofPhotos === 1 ? 'photo' : 'photos'}`,
+    ...(summary.proofPhotos > 0
+      ? [`${summary.proofPhotos} ${summary.proofPhotos === 1 ? 'photo' : 'photos'}`]
+      : []),
     ...(checked ? [`last checked ${checked}`] : []),
   ].join(' · ')
 }

@@ -102,6 +102,20 @@ it('groups more than eight proven items, keeping catalogue order within each gro
   expect(render(facilities.slice(0, 8), catalogue).querySelector('h3')).toBeNull()
 })
 
+it.each([
+  { group: '', label: 'Other' },
+  { group: undefined, label: 'Other' },
+  { group: 'visitor_services', label: 'visitor services' },
+])('uses a safe heading for group $group', ({ group, label }) => {
+  const catalogue = Array.from({ length: 9 }, (_, i) => ({
+    ...facilityCatalogue[0], code: `FAC_${i}`, group: group as string,
+  }))
+  const facilities = catalogue.map(({ code }) => ({ ...publicFacilities[0], code }))
+  const doc = render(facilities, catalogue)
+  expect(doc.querySelector('h3')?.textContent).toBe(label)
+  expect(doc.querySelectorAll('.facility-chip')).toHaveLength(9)
+})
+
 it('ignores hidden states even if an upstream response includes them', () => {
   const facilities = ['disputed', 'absent'].map((state, i) => ({
     ...publicFacilities[i], state,
@@ -176,4 +190,16 @@ it('formats nullable/D1 dates in Malaysia consistently, with singular counts', (
   expect(facilityTrustLine({ ...item, summary: { ...item.summary, lastCheckedAt: null } })).toBe('Confirmed by 1 visitor · 1 photo')
   expect(facilityTrustLine({ ...item, summary: { ...item.summary, lastCheckedAt: 'bad' } })).not.toContain('Invalid')
   expect(facilityTrustLine({ ...publicFacilities[1], summary: { ...item.summary, verifiedAt: null } })).toBe('Masjid verified')
+})
+
+it.each([
+  { lastCheckedAt: '2026-10-12 12:30:00', expected: 'Confirmed by 3 visitors · last checked 12 Oct 2026' },
+  { lastCheckedAt: null, expected: 'Confirmed by 3 visitors' },
+])('omits zero photos from the trust line with lastCheckedAt=$lastCheckedAt', ({ lastCheckedAt, expected }) => {
+  const facility = {
+    ...publicFacilities[0],
+    summary: { ...publicFacilities[0].summary, visitorConfirmations: 3, proofPhotos: 0, lastCheckedAt },
+  }
+  expect(facilityTrustLine(facility)).toBe(expected)
+  expect(render([facility]).querySelector('.facility-trust')?.textContent).toBe(expected)
 })

@@ -74,6 +74,10 @@ export type FacilityCatalogueItem = {
   sortOrder: number
   noReasons: { key: string; label: string }[]
 }
+export type FacilityCatalogueDetails = Pick<
+  FacilityCatalogueItem,
+  'code' | 'label' | 'shortDescription' | 'definition' | 'group' | 'sortOrder'
+>
 export type PublicFacility = {
   code: string
   state: 'masjid_verified' | 'confirmed' | 'unconfirmed'
