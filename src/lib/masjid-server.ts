@@ -5,6 +5,7 @@ import { getWorkerEnv } from './worker-env'
 import { notFound, redirect } from '@tanstack/react-router'
 import {
   getMasjidPage,
+  getFacilityCatalogue,
   getProgram,
   getPrayerTimes,
   validSlug,
@@ -25,13 +26,36 @@ export const loadMasjid = createServerFn({ method: 'GET' })
       if (!validSlug(r.body.redirect)) return unavailable()
       throw redirect({ href: `/masjid/${r.body.redirect}`, statusCode: 301 })
     }
-    const prayers = await getPrayerTimes(r.body.masjid.lat, r.body.masjid.lng)
+    const [prayers, catalogue] = await Promise.all([
+      getPrayerTimes(r.body.masjid.lat, r.body.masjid.lng),
+      Array.isArray(r.body.facilities) ? getFacilityCatalogue() : null,
+    ])
     const times = prayers.status === 200 ? validPrayerTimes(prayers.body) : null
     const env = await getWorkerEnv()
     return {
       page: r.body,
       prayers: times,
       ajk: env.MASJID_AJK_ENABLED === 'true',
+      facilityCatalogue:
+        catalogue?.status === 200 && Array.isArray(catalogue.body)
+          ? catalogue.body
+              // Separate cache entries can mix an enabled page with the legacy
+              // { code, label } catalogue during a rollout or flag rollback.
+              .filter(
+                (item) =>
+                  item &&
+                  typeof item.code === 'string' &&
+                  typeof item.label === 'string' &&
+                  typeof item.group === 'string' &&
+                  typeof item.sortOrder === 'number' &&
+                  Number.isFinite(item.sortOrder),
+              )
+              .map(
+                ({ code, label, shortDescription, definition, group, sortOrder }) => ({
+                  code, label, shortDescription, definition, group, sortOrder,
+                }),
+              )
+          : [],
     }
   })
 export const loadProgram = createServerFn({ method: 'GET' })

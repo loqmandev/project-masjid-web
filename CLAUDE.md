@@ -190,3 +190,26 @@ Local: `pnpm db:migrate:local`. Audience copy is KL-first (owner 2026-10-11).
   would need `environment: 'jsdom'` added there.
 - `npx tsc --noEmit` reports one pre-existing error in `src/routes/download.tsx`
   (`request` is not on the server-fn context type); the build is unaffected.
+
+### Facility info on public masjid pages (local implementation, 2026-10-19)
+
+`SPEC_facility-info.md` is implemented behind the backend facility-info flag. The presence of
+the top-level `facilities` array from `GET /api/public/masjids/by-slug/:slug` enables
+`components/MasjidFacilities.tsx` on claimed and unclaimed pages, independently of the web AJK
+flag. An absent array preserves the existing plain `profile.facilities` list and does not
+request the catalogue. An enabled empty array is authoritative; it shows the empty state.
+
+`loadMasjid` fetches the raw `GET /api/facilities` catalogue once per enabled page request,
+using `apiGet`'s existing 60-second cache, web-zone keys and `jm-ajk-public` purge tag.
+Catalogue labels, definitions, groups and sort order drive the section. Proven chips use
+native `details`/`summary` with shield/people icons and accessible status names; reported items
+stay inside a collapsed disclosure. Details show trust dates in Malaysia time and up to four
+trusted photo links. Facility UI uses no points or gold. Only proven, catalogue-backed items
+enter the existing Mosque JSON-LD `amenityFeature`; noindex rules stay unchanged.
+
+If catalogue entries are unavailable, the page remains readable and the section explains that
+some facility details are temporarily unavailable; it does not invent definitions or expose
+codes. Tests cover the backend gate, older-backend parity, states, disclosures, photos, cache,
+loader and structured data. No deployment has been performed. Production currently has
+`MASJID_AJK_ENABLED=true` at runtime (pilot version `f57a1189`) while tracked config says false;
+the future deploy operator must preserve the pilot setting. This change does not edit config.

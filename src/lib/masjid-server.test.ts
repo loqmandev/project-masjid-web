@@ -1,6 +1,16 @@
 import { beforeEach, expect, it, vi } from 'vitest'
+import { createElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { isNotFound, isRedirect } from '@tanstack/react-router'
-import { page, program } from './masjid-fixture'
+import MasjidFacilities from '@/components/MasjidFacilities'
+import { facilityCatalogue, publicFacilities, page, program } from './masjid-fixture'
+import type { FacilityCatalogueItem } from './masjid-types'
+
+const pageCatalogue = facilityCatalogue.map(
+  ({ code, label, shortDescription, definition, group, sortOrder }) => ({
+    code, label, shortDescription, definition, group, sortOrder,
+  }),
+)
 
 // Exercise the actual server handlers; only replace the Start transport wrapper.
 vi.mock('@tanstack/react-start', () => ({
@@ -16,10 +26,11 @@ vi.mock('./worker-env', () => ({
 vi.mock('./jm-api', async (importOriginal) => ({
   ...(await importOriginal<typeof import('./jm-api')>()),
   getMasjidPage: vi.fn(),
+  getFacilityCatalogue: vi.fn(),
   getProgram: vi.fn(),
   getPrayerTimes: vi.fn(),
 }))
-import { getMasjidPage, getProgram, getPrayerTimes } from './jm-api'
+import { getMasjidPage, getFacilityCatalogue, getProgram, getPrayerTimes } from './jm-api'
 import { loadMasjid, loadProgram } from './masjid-server'
 import { setResponseHeader } from '@tanstack/react-start/server'
 
@@ -27,6 +38,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   ajkVar = 'true'
   vi.mocked(getMasjidPage).mockResolvedValue({ status: 200, body: page })
+  vi.mocked(getFacilityCatalogue).mockResolvedValue({ status: 200, body: facilityCatalogue })
   vi.mocked(getProgram).mockResolvedValue({ status: 200, body: program })
   vi.mocked(getPrayerTimes).mockResolvedValue({ status: 503, body: null })
 })
@@ -176,4 +188,75 @@ it('loadMasjid returns ajk:true only for exactly "true"', async () => {
   expect(await run('TRUE')).toBe(false)
   expect(await run('1')).toBe(false)
   expect(await run('true')).toBe(true)
+})
+
+it('never loads the catalogue for older/flag-off backend responses', async () => {
+  const result = await loadMasjid({ data: { slug: page.masjid.slug } })
+  expect(result.page).toEqual(page)
+  expect(result.facilityCatalogue).toEqual([])
+  expect(getFacilityCatalogue).not.toHaveBeenCalled()
+})
+it.each([{ facilities: [] }, { facilities: publicFacilities }])('fetches the catalogue once only after the backend enables facilities', async ({ facilities }) => {
+  ajkVar = 'false'
+  vi.mocked(getMasjidPage).mockResolvedValue({ status: 200, body: { ...page, facilities } })
+  const result = await loadMasjid({ data: { slug: page.masjid.slug } })
+  expect(result.page.facilities).toEqual(facilities)
+  expect(result.facilityCatalogue).toEqual(pageCatalogue)
+  expect(result.ajk).toBe(false)
+  expect(getFacilityCatalogue).toHaveBeenCalledOnce()
+})
+it('drops malformed catalogue entries and hydrates only the six page fields', async () => {
+  const valid = facilityCatalogue[0]
+  const malformed = [
+    null,
+    {},
+    { code: valid.code, label: valid.label },
+    { ...valid, code: null },
+    { ...valid, label: null },
+    { ...valid, label: 123 },
+    { ...valid, group: null },
+    { ...valid, group: 123 },
+    ...[undefined, null, '2', NaN, Infinity, -Infinity].map((sortOrder) => ({ ...valid, sortOrder })),
+  ]
+  vi.mocked(getMasjidPage).mockResolvedValue({ status: 200, body: { ...page, facilities: publicFacilities } })
+  vi.mocked(getFacilityCatalogue).mockResolvedValue({
+    status: 200,
+    body: [...malformed, ...facilityCatalogue] as FacilityCatalogueItem[],
+  })
+  const result = await loadMasjid({ data: { slug: page.masjid.slug } })
+  expect(result.facilityCatalogue).toEqual(pageCatalogue)
+  for (const item of result.facilityCatalogue) {
+    expect(Object.keys(item).sort()).toEqual([
+      'code', 'definition', 'group', 'label', 'shortDescription', 'sortOrder',
+    ])
+  }
+})
+it.each([3, 9])('renders an enabled page with %s proven facilities and a legacy {code,label} catalogue safely', async (count) => {
+  const facilities = Array.from({ length: count }, (_, i) => ({
+    ...publicFacilities[0], code: `FAC_${i}`,
+  }))
+  const legacyCatalogue = facilities.map(({ code }, i) => ({ code, label: `Facility ${i}` }))
+  vi.mocked(getMasjidPage).mockResolvedValue({ status: 200, body: { ...page, facilities } })
+  vi.mocked(getFacilityCatalogue).mockResolvedValue({
+    status: 200, body: legacyCatalogue as FacilityCatalogueItem[],
+  })
+  const result = await loadMasjid({ data: { slug: page.masjid.slug } })
+  expect(result.page.facilities).toHaveLength(count)
+  expect(result.facilityCatalogue).toEqual([])
+  const html = renderToStaticMarkup(createElement(MasjidFacilities, {
+    facilities: result.page.facilities!,
+    catalogue: result.facilityCatalogue,
+    masjidName: result.page.masjid.name,
+  }))
+  expect(html).toContain('Some facility details are resting for a moment.')
+  expect(html).not.toContain('No confirmed facilities yet.')
+  expect(html).not.toContain('class="facility-chip ')
+  expect(html).not.toContain('FAC_')
+})
+it.each([404, 503])('keeps the masjid page available when the catalogue fails with %s', async (status) => {
+  vi.mocked(getMasjidPage).mockResolvedValue({ status: 200, body: { ...page, facilities: publicFacilities } })
+  vi.mocked(getFacilityCatalogue).mockResolvedValue({ status, body: null })
+  const result = await loadMasjid({ data: { slug: page.masjid.slug } })
+  expect(result.page.masjid).toEqual(page.masjid)
+  expect(result.facilityCatalogue).toEqual([])
 })

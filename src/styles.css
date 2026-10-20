@@ -273,6 +273,123 @@
   .prose-jm details[open] > summary::after {
     content: '\2212';
   }
+
+  /* Facility disclosures use only calm teal and neutral colours. Scoped rules
+     keep legacy pages and other long-form accordions unchanged. */
+  .facility-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin-bottom: 1.25rem;
+  }
+  .facility-item {
+    max-width: 100%;
+    min-width: 0;
+  }
+  .facility-item[open] {
+    flex-basis: 100%;
+  }
+  .facility-chip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    width: fit-content;
+    max-width: 100%;
+    min-height: 44px;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid var(--primary);
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.5;
+    list-style: none;
+    cursor: pointer;
+  }
+  .facility-chip svg {
+    flex-shrink: 0;
+  }
+  .facility-chip--masjid_verified {
+    color: var(--primary-foreground);
+    background: var(--primary);
+  }
+  .facility-chip--confirmed {
+    color: var(--primary);
+    background: var(--surface);
+    border-color: var(--brand-teal);
+  }
+  .facility-chip--unconfirmed {
+    color: #626965;
+    border-color: #b5bcb8;
+    border-style: dashed;
+  }
+  .facility-chip::-webkit-details-marker {
+    display: none;
+  }
+  .prose-jm details[open] > summary.facility-chip::after,
+  .prose-jm details > summary.facility-chip::after {
+    content: none;
+  }
+  .facility-chip:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+  }
+  .facility-visitors-icon {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+    width: 24px;
+    height: 20px;
+  }
+  .facility-visitors-check {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    background: var(--surface);
+  }
+  .facility-info {
+    margin-top: 0.65rem;
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    overflow-wrap: anywhere;
+  }
+  .facility-trust {
+    color: var(--foreground);
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+  .facility-photos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 0.65rem;
+  }
+  .facility-photos img {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+  .facility-reported,
+  .facility-help {
+    margin-top: 1rem;
+  }
+  .facility-reported > summary,
+  .facility-help > summary {
+    min-height: 44px;
+    padding-block: 0.6rem;
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .facility-reported > summary {
+    color: #626965;
+  }
+  .facility-help > summary {
+    color: var(--primary);
+    font-size: 0.875rem;
+  }
 }
 
 /* ---------------------------------------------------------------------------

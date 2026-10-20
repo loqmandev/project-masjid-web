@@ -1,5 +1,6 @@
 import { getWorkerEnv, type WebEnv } from './worker-env'
 import type {
+  FacilityCatalogueItem,
   PublicMasjidPage,
   PublicProgramDetail,
   SitemapPage,
@@ -103,6 +104,8 @@ export const getMasjidPage = (slug: string) =>
         { ttl: 60 },
       )
     : Promise.resolve({ status: 404, body: null })
+export const getFacilityCatalogue = () =>
+  apiGet<FacilityCatalogueItem[]>('/api/facilities', { ttl: 60 })
 export const getProgram = (id: string) =>
   validProgramId(id)
     ? apiGet<PublicProgramDetail>(`/api/public/programs/${id}`, { ttl: 60 })
