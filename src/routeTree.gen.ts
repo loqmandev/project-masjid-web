@@ -20,13 +20,22 @@ import { Route as DownloadRouteImport } from './routes/download'
 import { Route as BetaIosRouteImport } from './routes/beta-ios'
 import { Route as BetaAndroidRouteImport } from './routes/beta-android'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MasjidIndexRouteImport } from './routes/masjid.index'
+import { Route as SitemapsAreasRouteImport } from './routes/sitemaps.areas'
 import { Route as MasjidSlugRouteImport } from './routes/masjid.$slug'
+import { Route as EnMosquesRouteImport } from './routes/en_.mosques'
 import { Route as EnCollaborationRouteImport } from './routes/en_.collaboration'
 import { Route as DotwellKnownAssetlinksDotjsonRouteImport } from './routes/[.]well-known.assetlinks[.]json'
 import { Route as DotwellKnownAppleAppSiteAssociationRouteImport } from './routes/[.]well-known.apple-app-site-association'
 import { Route as SitemapsMasjidPageRouteImport } from './routes/sitemaps.masjid.$page'
 import { Route as PrayerCirclesInviteCodeRouteImport } from './routes/prayer-circles.invite.$code'
+import { Route as MasjidDiCountryRouteImport } from './routes/masjid.di.$country'
+import { Route as MasjidDiCountryRegionRouteImport } from './routes/masjid.di.$country_.$region'
 import { Route as MasjidSlugPProgramIdRouteImport } from './routes/masjid.$slug_.p.$programId'
+import { Route as EnMosquesInCountryRouteImport } from './routes/en_.mosques_.in.$country'
+import { Route as MasjidDiCountryRegionDistrictRouteImport } from './routes/masjid.di.$country_.$region_.$district'
+import { Route as EnMosquesInCountryRegionRouteImport } from './routes/en_.mosques_.in.$country_.$region'
+import { Route as EnMosquesInCountryRegionDistrictRouteImport } from './routes/en_.mosques_.in.$country_.$region_.$district'
 
 const TosRoute = TosRouteImport.update({
   id: '/tos',
@@ -83,9 +92,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MasjidIndexRoute = MasjidIndexRouteImport.update({
+  id: '/masjid/',
+  path: '/masjid/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapsAreasRoute = SitemapsAreasRouteImport.update({
+  id: '/sitemaps/areas',
+  path: '/sitemaps/areas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MasjidSlugRoute = MasjidSlugRouteImport.update({
   id: '/masjid/$slug',
   path: '/masjid/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnMosquesRoute = EnMosquesRouteImport.update({
+  id: '/en_/mosques',
+  path: '/en/mosques',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnCollaborationRoute = EnCollaborationRouteImport.update({
@@ -115,11 +139,44 @@ const PrayerCirclesInviteCodeRoute = PrayerCirclesInviteCodeRouteImport.update({
   path: '/prayer-circles/invite/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MasjidDiCountryRoute = MasjidDiCountryRouteImport.update({
+  id: '/masjid/di/$country',
+  path: '/masjid/di/$country',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasjidDiCountryRegionRoute = MasjidDiCountryRegionRouteImport.update({
+  id: '/masjid/di/$country_/$region',
+  path: '/masjid/di/$country/$region',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MasjidSlugPProgramIdRoute = MasjidSlugPProgramIdRouteImport.update({
   id: '/masjid/$slug_/p/$programId',
   path: '/masjid/$slug/p/$programId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnMosquesInCountryRoute = EnMosquesInCountryRouteImport.update({
+  id: '/en_/mosques_/in/$country',
+  path: '/en/mosques/in/$country',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasjidDiCountryRegionDistrictRoute =
+  MasjidDiCountryRegionDistrictRouteImport.update({
+    id: '/masjid/di/$country_/$region_/$district',
+    path: '/masjid/di/$country/$region/$district',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const EnMosquesInCountryRegionRoute =
+  EnMosquesInCountryRegionRouteImport.update({
+    id: '/en_/mosques_/in/$country_/$region',
+    path: '/en/mosques/in/$country/$region',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const EnMosquesInCountryRegionDistrictRoute =
+  EnMosquesInCountryRegionDistrictRouteImport.update({
+    id: '/en_/mosques_/in/$country_/$region_/$district',
+    path: '/en/mosques/in/$country/$region/$district',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -136,10 +193,19 @@ export interface FileRoutesByFullPath {
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/en/collaboration': typeof EnCollaborationRoute
+  '/en/mosques': typeof EnMosquesRoute
   '/masjid/$slug': typeof MasjidSlugRoute
+  '/sitemaps/areas': typeof SitemapsAreasRoute
+  '/masjid/': typeof MasjidIndexRoute
+  '/masjid/di/$country': typeof MasjidDiCountryRoute
   '/prayer-circles/invite/$code': typeof PrayerCirclesInviteCodeRoute
   '/sitemaps/masjid/$page': typeof SitemapsMasjidPageRoute
+  '/en/mosques/in/$country': typeof EnMosquesInCountryRoute
   '/masjid/$slug/p/$programId': typeof MasjidSlugPProgramIdRoute
+  '/masjid/di/$country/$region': typeof MasjidDiCountryRegionRoute
+  '/en/mosques/in/$country/$region': typeof EnMosquesInCountryRegionRoute
+  '/masjid/di/$country/$region/$district': typeof MasjidDiCountryRegionDistrictRoute
+  '/en/mosques/in/$country/$region/$district': typeof EnMosquesInCountryRegionDistrictRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -156,10 +222,19 @@ export interface FileRoutesByTo {
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/en/collaboration': typeof EnCollaborationRoute
+  '/en/mosques': typeof EnMosquesRoute
   '/masjid/$slug': typeof MasjidSlugRoute
+  '/sitemaps/areas': typeof SitemapsAreasRoute
+  '/masjid': typeof MasjidIndexRoute
+  '/masjid/di/$country': typeof MasjidDiCountryRoute
   '/prayer-circles/invite/$code': typeof PrayerCirclesInviteCodeRoute
   '/sitemaps/masjid/$page': typeof SitemapsMasjidPageRoute
+  '/en/mosques/in/$country': typeof EnMosquesInCountryRoute
   '/masjid/$slug/p/$programId': typeof MasjidSlugPProgramIdRoute
+  '/masjid/di/$country/$region': typeof MasjidDiCountryRegionRoute
+  '/en/mosques/in/$country/$region': typeof EnMosquesInCountryRegionRoute
+  '/masjid/di/$country/$region/$district': typeof MasjidDiCountryRegionDistrictRoute
+  '/en/mosques/in/$country/$region/$district': typeof EnMosquesInCountryRegionDistrictRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -177,10 +252,19 @@ export interface FileRoutesById {
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/en_/collaboration': typeof EnCollaborationRoute
+  '/en_/mosques': typeof EnMosquesRoute
   '/masjid/$slug': typeof MasjidSlugRoute
+  '/sitemaps/areas': typeof SitemapsAreasRoute
+  '/masjid/': typeof MasjidIndexRoute
+  '/masjid/di/$country': typeof MasjidDiCountryRoute
   '/prayer-circles/invite/$code': typeof PrayerCirclesInviteCodeRoute
   '/sitemaps/masjid/$page': typeof SitemapsMasjidPageRoute
+  '/en_/mosques_/in/$country': typeof EnMosquesInCountryRoute
   '/masjid/$slug_/p/$programId': typeof MasjidSlugPProgramIdRoute
+  '/masjid/di/$country_/$region': typeof MasjidDiCountryRegionRoute
+  '/en_/mosques_/in/$country_/$region': typeof EnMosquesInCountryRegionRoute
+  '/masjid/di/$country_/$region_/$district': typeof MasjidDiCountryRegionDistrictRoute
+  '/en_/mosques_/in/$country_/$region_/$district': typeof EnMosquesInCountryRegionDistrictRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -199,10 +283,19 @@ export interface FileRouteTypes {
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
     | '/en/collaboration'
+    | '/en/mosques'
     | '/masjid/$slug'
+    | '/sitemaps/areas'
+    | '/masjid/'
+    | '/masjid/di/$country'
     | '/prayer-circles/invite/$code'
     | '/sitemaps/masjid/$page'
+    | '/en/mosques/in/$country'
     | '/masjid/$slug/p/$programId'
+    | '/masjid/di/$country/$region'
+    | '/en/mosques/in/$country/$region'
+    | '/masjid/di/$country/$region/$district'
+    | '/en/mosques/in/$country/$region/$district'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -219,10 +312,19 @@ export interface FileRouteTypes {
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
     | '/en/collaboration'
+    | '/en/mosques'
     | '/masjid/$slug'
+    | '/sitemaps/areas'
+    | '/masjid'
+    | '/masjid/di/$country'
     | '/prayer-circles/invite/$code'
     | '/sitemaps/masjid/$page'
+    | '/en/mosques/in/$country'
     | '/masjid/$slug/p/$programId'
+    | '/masjid/di/$country/$region'
+    | '/en/mosques/in/$country/$region'
+    | '/masjid/di/$country/$region/$district'
+    | '/en/mosques/in/$country/$region/$district'
   id:
     | '__root__'
     | '/'
@@ -239,10 +341,19 @@ export interface FileRouteTypes {
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
     | '/en_/collaboration'
+    | '/en_/mosques'
     | '/masjid/$slug'
+    | '/sitemaps/areas'
+    | '/masjid/'
+    | '/masjid/di/$country'
     | '/prayer-circles/invite/$code'
     | '/sitemaps/masjid/$page'
+    | '/en_/mosques_/in/$country'
     | '/masjid/$slug_/p/$programId'
+    | '/masjid/di/$country_/$region'
+    | '/en_/mosques_/in/$country_/$region'
+    | '/masjid/di/$country_/$region_/$district'
+    | '/en_/mosques_/in/$country_/$region_/$district'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -260,10 +371,19 @@ export interface RootRouteChildren {
   DotwellKnownAppleAppSiteAssociationRoute: typeof DotwellKnownAppleAppSiteAssociationRoute
   DotwellKnownAssetlinksDotjsonRoute: typeof DotwellKnownAssetlinksDotjsonRoute
   EnCollaborationRoute: typeof EnCollaborationRoute
+  EnMosquesRoute: typeof EnMosquesRoute
   MasjidSlugRoute: typeof MasjidSlugRoute
+  SitemapsAreasRoute: typeof SitemapsAreasRoute
+  MasjidIndexRoute: typeof MasjidIndexRoute
+  MasjidDiCountryRoute: typeof MasjidDiCountryRoute
   PrayerCirclesInviteCodeRoute: typeof PrayerCirclesInviteCodeRoute
   SitemapsMasjidPageRoute: typeof SitemapsMasjidPageRoute
+  EnMosquesInCountryRoute: typeof EnMosquesInCountryRoute
   MasjidSlugPProgramIdRoute: typeof MasjidSlugPProgramIdRoute
+  MasjidDiCountryRegionRoute: typeof MasjidDiCountryRegionRoute
+  EnMosquesInCountryRegionRoute: typeof EnMosquesInCountryRegionRoute
+  MasjidDiCountryRegionDistrictRoute: typeof MasjidDiCountryRegionDistrictRoute
+  EnMosquesInCountryRegionDistrictRoute: typeof EnMosquesInCountryRegionDistrictRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -345,11 +465,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/masjid/': {
+      id: '/masjid/'
+      path: '/masjid'
+      fullPath: '/masjid/'
+      preLoaderRoute: typeof MasjidIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemaps/areas': {
+      id: '/sitemaps/areas'
+      path: '/sitemaps/areas'
+      fullPath: '/sitemaps/areas'
+      preLoaderRoute: typeof SitemapsAreasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/masjid/$slug': {
       id: '/masjid/$slug'
       path: '/masjid/$slug'
       fullPath: '/masjid/$slug'
       preLoaderRoute: typeof MasjidSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en_/mosques': {
+      id: '/en_/mosques'
+      path: '/en/mosques'
+      fullPath: '/en/mosques'
+      preLoaderRoute: typeof EnMosquesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en_/collaboration': {
@@ -387,11 +528,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrayerCirclesInviteCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/masjid/di/$country': {
+      id: '/masjid/di/$country'
+      path: '/masjid/di/$country'
+      fullPath: '/masjid/di/$country'
+      preLoaderRoute: typeof MasjidDiCountryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masjid/di/$country_/$region': {
+      id: '/masjid/di/$country_/$region'
+      path: '/masjid/di/$country/$region'
+      fullPath: '/masjid/di/$country/$region'
+      preLoaderRoute: typeof MasjidDiCountryRegionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/masjid/$slug_/p/$programId': {
       id: '/masjid/$slug_/p/$programId'
       path: '/masjid/$slug/p/$programId'
       fullPath: '/masjid/$slug/p/$programId'
       preLoaderRoute: typeof MasjidSlugPProgramIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en_/mosques_/in/$country': {
+      id: '/en_/mosques_/in/$country'
+      path: '/en/mosques/in/$country'
+      fullPath: '/en/mosques/in/$country'
+      preLoaderRoute: typeof EnMosquesInCountryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masjid/di/$country_/$region_/$district': {
+      id: '/masjid/di/$country_/$region_/$district'
+      path: '/masjid/di/$country/$region/$district'
+      fullPath: '/masjid/di/$country/$region/$district'
+      preLoaderRoute: typeof MasjidDiCountryRegionDistrictRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en_/mosques_/in/$country_/$region': {
+      id: '/en_/mosques_/in/$country_/$region'
+      path: '/en/mosques/in/$country/$region'
+      fullPath: '/en/mosques/in/$country/$region'
+      preLoaderRoute: typeof EnMosquesInCountryRegionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en_/mosques_/in/$country_/$region_/$district': {
+      id: '/en_/mosques_/in/$country_/$region_/$district'
+      path: '/en/mosques/in/$country/$region/$district'
+      fullPath: '/en/mosques/in/$country/$region/$district'
+      preLoaderRoute: typeof EnMosquesInCountryRegionDistrictRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -413,10 +596,19 @@ const rootRouteChildren: RootRouteChildren = {
     DotwellKnownAppleAppSiteAssociationRoute,
   DotwellKnownAssetlinksDotjsonRoute: DotwellKnownAssetlinksDotjsonRoute,
   EnCollaborationRoute: EnCollaborationRoute,
+  EnMosquesRoute: EnMosquesRoute,
   MasjidSlugRoute: MasjidSlugRoute,
+  SitemapsAreasRoute: SitemapsAreasRoute,
+  MasjidIndexRoute: MasjidIndexRoute,
+  MasjidDiCountryRoute: MasjidDiCountryRoute,
   PrayerCirclesInviteCodeRoute: PrayerCirclesInviteCodeRoute,
   SitemapsMasjidPageRoute: SitemapsMasjidPageRoute,
+  EnMosquesInCountryRoute: EnMosquesInCountryRoute,
   MasjidSlugPProgramIdRoute: MasjidSlugPProgramIdRoute,
+  MasjidDiCountryRegionRoute: MasjidDiCountryRegionRoute,
+  EnMosquesInCountryRegionRoute: EnMosquesInCountryRegionRoute,
+  MasjidDiCountryRegionDistrictRoute: MasjidDiCountryRegionDistrictRoute,
+  EnMosquesInCountryRegionDistrictRoute: EnMosquesInCountryRegionDistrictRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

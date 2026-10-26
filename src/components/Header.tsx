@@ -1,3 +1,5 @@
+import { useDiscoveryAreas } from './DiscoveryAvailability'
+import { discoveryHome } from '@/lib/discovery'
 import { useLocation } from '@tanstack/react-router'
 import { ChevronDown, Menu, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -8,17 +10,20 @@ import { localeForPath, t, twinForPath } from '@/lib/i18n'
 
 export default function Header() {
   const path = useLocation({ select: location => location.pathname })
-  return <HeaderContent path={path} />
+  const search = useLocation({ select: location => location.searchStr })
+  const areas = useDiscoveryAreas()
+  return <HeaderContent path={path} search={search} discovery={!!areas} />
 }
 
 /** Kept separate so keyboard behavior can be tested without a router harness. */
-export function HeaderContent({ path }: { path: string }) {
+export function HeaderContent({ path, discovery = false, search = '' }: { path: string; discovery?: boolean; search?: string }) {
   const locale = localeForPath(path)
   const copy = t(locale)
-  const twin = twinForPath(path)
+  const twin = twinForPath(path + search)
   const home = locale === 'ms' ? '/' : '/en'
   const anchor = path === home ? '' : home
   const links = [
+    ...(discovery ? [{ href: discoveryHome(locale), label: copy.discovery.nav }] : []),
     { href: `${anchor}#ciri`, label: copy.nav.features },
     { href: `${anchor}#ulasan`, label: copy.nav.reviews },
     { href: `${anchor}#faq`, label: copy.nav.faq },

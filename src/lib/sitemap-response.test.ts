@@ -4,6 +4,7 @@ vi.mock('./jm-api', async (importOriginal) => ({
   getSitemapCount: vi.fn(),
   getSitemapPage: vi.fn(),
 }))
+vi.mock('./discovery-api.server', () => ({ getAreas: vi.fn(async () => null) }))
 vi.mock('./worker-env', () => ({ getWorkerEnv: vi.fn() }))
 import { getSitemapCount, getSitemapPage } from './jm-api'
 import { getWorkerEnv } from './worker-env'
@@ -75,4 +76,14 @@ it('flag off does not request the backend', async () => {
     '/sitemaps/masjid/',
   )
   expect(getSitemapCount).not.toHaveBeenCalled()
+})
+
+it('includes the area sitemap only for a valid cached discovery tree, independently of masjid pages', async () => {
+  const { getAreas } = await import('./discovery-api.server')
+  const { default: fixture } = await import('./fixtures/discovery.json')
+  vi.mocked(getWorkerEnv).mockResolvedValue({ MASJID_PAGES_ENABLED: 'false' })
+  vi.mocked(getAreas).mockResolvedValue(fixture.areas as import('./discovery').Areas)
+  expect(await (await sitemapIndexResponse()).text()).toContain('/sitemaps/areas')
+  vi.mocked(getAreas).mockResolvedValue(null)
+  expect(await (await sitemapIndexResponse()).text()).not.toContain('/sitemaps/areas')
 })

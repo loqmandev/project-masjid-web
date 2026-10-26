@@ -1,6 +1,9 @@
-import { HeadContent, Scripts, createRootRoute, useLocation } from '@tanstack/react-router'
+import { HeadContent, Scripts, Outlet, createRootRoute, useLocation } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+
+import { loadDiscoveryAreas } from '@/lib/discovery-server'
+import { DiscoveryAvailability } from '@/components/DiscoveryAvailability'
 
 import appCss from '../styles.css?url'
 import { SITE } from '@/lib/site'
@@ -15,6 +18,8 @@ import { htmlLangForPath } from '@/lib/i18n'
 const MOTION_INIT = `(function(){try{var q=matchMedia('(prefers-reduced-motion: reduce)');function sync(){if(q.matches){delete document.documentElement.dataset.motion}else{document.documentElement.dataset.motion='on'}}sync();q.addEventListener('change',sync)}catch(e){}})()`
 
 export const Route = createRootRoute({
+  loader: () => loadDiscoveryAreas(),
+  component: DiscoveryShell,
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
@@ -58,6 +63,11 @@ export const Route = createRootRoute({
 
   shellComponent: RootDocument,
 })
+
+function DiscoveryShell() {
+  const areas = Route.useLoaderData()
+  return <DiscoveryAvailability.Provider value={areas}><Outlet /></DiscoveryAvailability.Provider>
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   const path = useLocation({ select: location => location.pathname })
