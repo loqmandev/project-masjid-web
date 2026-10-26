@@ -13,14 +13,15 @@ import { Route as TosRouteImport } from './routes/tos'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as KolaborasiRouteImport } from './routes/kolaborasi'
 import { Route as GoogleGroupsRouteImport } from './routes/google-groups'
+import { Route as EnRouteImport } from './routes/en'
 import { Route as DownloadRouteImport } from './routes/download'
 import { Route as BetaIosRouteImport } from './routes/beta-ios'
 import { Route as BetaAndroidRouteImport } from './routes/beta-android'
-import { Route as AjkRouteImport } from './routes/ajk'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MasjidSlugRouteImport } from './routes/masjid.$slug'
-import { Route as ApiAjkInterestRouteImport } from './routes/api.ajk-interest'
+import { Route as EnCollaborationRouteImport } from './routes/en_.collaboration'
 import { Route as DotwellKnownAssetlinksDotjsonRouteImport } from './routes/[.]well-known.assetlinks[.]json'
 import { Route as DotwellKnownAppleAppSiteAssociationRouteImport } from './routes/[.]well-known.apple-app-site-association'
 import { Route as SitemapsMasjidPageRouteImport } from './routes/sitemaps.masjid.$page'
@@ -47,9 +48,19 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KolaborasiRoute = KolaborasiRouteImport.update({
+  id: '/kolaborasi',
+  path: '/kolaborasi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GoogleGroupsRoute = GoogleGroupsRouteImport.update({
   id: '/google-groups',
   path: '/google-groups',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnRoute = EnRouteImport.update({
+  id: '/en',
+  path: '/en',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DownloadRoute = DownloadRouteImport.update({
@@ -67,11 +78,6 @@ const BetaAndroidRoute = BetaAndroidRouteImport.update({
   path: '/beta-android',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AjkRoute = AjkRouteImport.update({
-  id: '/ajk',
-  path: '/ajk',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -82,9 +88,9 @@ const MasjidSlugRoute = MasjidSlugRouteImport.update({
   path: '/masjid/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAjkInterestRoute = ApiAjkInterestRouteImport.update({
-  id: '/api/ajk-interest',
-  path: '/api/ajk-interest',
+const EnCollaborationRoute = EnCollaborationRouteImport.update({
+  id: '/en_/collaboration',
+  path: '/en/collaboration',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DotwellKnownAssetlinksDotjsonRoute =
@@ -117,18 +123,19 @@ const MasjidSlugPProgramIdRoute = MasjidSlugPProgramIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/ajk': typeof AjkRoute
   '/beta-android': typeof BetaAndroidRoute
   '/beta-ios': typeof BetaIosRoute
   '/download': typeof DownloadRoute
+  '/en': typeof EnRoute
   '/google-groups': typeof GoogleGroupsRoute
+  '/kolaborasi': typeof KolaborasiRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/tos': typeof TosRoute
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
-  '/api/ajk-interest': typeof ApiAjkInterestRoute
+  '/en/collaboration': typeof EnCollaborationRoute
   '/masjid/$slug': typeof MasjidSlugRoute
   '/prayer-circles/invite/$code': typeof PrayerCirclesInviteCodeRoute
   '/sitemaps/masjid/$page': typeof SitemapsMasjidPageRoute
@@ -136,18 +143,19 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/ajk': typeof AjkRoute
   '/beta-android': typeof BetaAndroidRoute
   '/beta-ios': typeof BetaIosRoute
   '/download': typeof DownloadRoute
+  '/en': typeof EnRoute
   '/google-groups': typeof GoogleGroupsRoute
+  '/kolaborasi': typeof KolaborasiRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/tos': typeof TosRoute
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
-  '/api/ajk-interest': typeof ApiAjkInterestRoute
+  '/en/collaboration': typeof EnCollaborationRoute
   '/masjid/$slug': typeof MasjidSlugRoute
   '/prayer-circles/invite/$code': typeof PrayerCirclesInviteCodeRoute
   '/sitemaps/masjid/$page': typeof SitemapsMasjidPageRoute
@@ -156,18 +164,19 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/ajk': typeof AjkRoute
   '/beta-android': typeof BetaAndroidRoute
   '/beta-ios': typeof BetaIosRoute
   '/download': typeof DownloadRoute
+  '/en': typeof EnRoute
   '/google-groups': typeof GoogleGroupsRoute
+  '/kolaborasi': typeof KolaborasiRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/tos': typeof TosRoute
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
-  '/api/ajk-interest': typeof ApiAjkInterestRoute
+  '/en_/collaboration': typeof EnCollaborationRoute
   '/masjid/$slug': typeof MasjidSlugRoute
   '/prayer-circles/invite/$code': typeof PrayerCirclesInviteCodeRoute
   '/sitemaps/masjid/$page': typeof SitemapsMasjidPageRoute
@@ -177,18 +186,19 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/ajk'
     | '/beta-android'
     | '/beta-ios'
     | '/download'
+    | '/en'
     | '/google-groups'
+    | '/kolaborasi'
     | '/privacy'
     | '/sitemap.xml'
     | '/support'
     | '/tos'
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
-    | '/api/ajk-interest'
+    | '/en/collaboration'
     | '/masjid/$slug'
     | '/prayer-circles/invite/$code'
     | '/sitemaps/masjid/$page'
@@ -196,18 +206,19 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/ajk'
     | '/beta-android'
     | '/beta-ios'
     | '/download'
+    | '/en'
     | '/google-groups'
+    | '/kolaborasi'
     | '/privacy'
     | '/sitemap.xml'
     | '/support'
     | '/tos'
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
-    | '/api/ajk-interest'
+    | '/en/collaboration'
     | '/masjid/$slug'
     | '/prayer-circles/invite/$code'
     | '/sitemaps/masjid/$page'
@@ -215,18 +226,19 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/ajk'
     | '/beta-android'
     | '/beta-ios'
     | '/download'
+    | '/en'
     | '/google-groups'
+    | '/kolaborasi'
     | '/privacy'
     | '/sitemap.xml'
     | '/support'
     | '/tos'
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
-    | '/api/ajk-interest'
+    | '/en_/collaboration'
     | '/masjid/$slug'
     | '/prayer-circles/invite/$code'
     | '/sitemaps/masjid/$page'
@@ -235,18 +247,19 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AjkRoute: typeof AjkRoute
   BetaAndroidRoute: typeof BetaAndroidRoute
   BetaIosRoute: typeof BetaIosRoute
   DownloadRoute: typeof DownloadRoute
+  EnRoute: typeof EnRoute
   GoogleGroupsRoute: typeof GoogleGroupsRoute
+  KolaborasiRoute: typeof KolaborasiRoute
   PrivacyRoute: typeof PrivacyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRoute
   TosRoute: typeof TosRoute
   DotwellKnownAppleAppSiteAssociationRoute: typeof DotwellKnownAppleAppSiteAssociationRoute
   DotwellKnownAssetlinksDotjsonRoute: typeof DotwellKnownAssetlinksDotjsonRoute
-  ApiAjkInterestRoute: typeof ApiAjkInterestRoute
+  EnCollaborationRoute: typeof EnCollaborationRoute
   MasjidSlugRoute: typeof MasjidSlugRoute
   PrayerCirclesInviteCodeRoute: typeof PrayerCirclesInviteCodeRoute
   SitemapsMasjidPageRoute: typeof SitemapsMasjidPageRoute
@@ -283,11 +296,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/kolaborasi': {
+      id: '/kolaborasi'
+      path: '/kolaborasi'
+      fullPath: '/kolaborasi'
+      preLoaderRoute: typeof KolaborasiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/google-groups': {
       id: '/google-groups'
       path: '/google-groups'
       fullPath: '/google-groups'
       preLoaderRoute: typeof GoogleGroupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en': {
+      id: '/en'
+      path: '/en'
+      fullPath: '/en'
+      preLoaderRoute: typeof EnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/download': {
@@ -311,13 +338,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BetaAndroidRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ajk': {
-      id: '/ajk'
-      path: '/ajk'
-      fullPath: '/ajk'
-      preLoaderRoute: typeof AjkRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -332,11 +352,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MasjidSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/ajk-interest': {
-      id: '/api/ajk-interest'
-      path: '/api/ajk-interest'
-      fullPath: '/api/ajk-interest'
-      preLoaderRoute: typeof ApiAjkInterestRouteImport
+    '/en_/collaboration': {
+      id: '/en_/collaboration'
+      path: '/en/collaboration'
+      fullPath: '/en/collaboration'
+      preLoaderRoute: typeof EnCollaborationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.well-known/assetlinks.json': {
@@ -379,11 +399,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AjkRoute: AjkRoute,
   BetaAndroidRoute: BetaAndroidRoute,
   BetaIosRoute: BetaIosRoute,
   DownloadRoute: DownloadRoute,
+  EnRoute: EnRoute,
   GoogleGroupsRoute: GoogleGroupsRoute,
+  KolaborasiRoute: KolaborasiRoute,
   PrivacyRoute: PrivacyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRoute,
@@ -391,7 +412,7 @@ const rootRouteChildren: RootRouteChildren = {
   DotwellKnownAppleAppSiteAssociationRoute:
     DotwellKnownAppleAppSiteAssociationRoute,
   DotwellKnownAssetlinksDotjsonRoute: DotwellKnownAssetlinksDotjsonRoute,
-  ApiAjkInterestRoute: ApiAjkInterestRoute,
+  EnCollaborationRoute: EnCollaborationRoute,
   MasjidSlugRoute: MasjidSlugRoute,
   PrayerCirclesInviteCodeRoute: PrayerCirclesInviteCodeRoute,
   SitemapsMasjidPageRoute: SitemapsMasjidPageRoute,

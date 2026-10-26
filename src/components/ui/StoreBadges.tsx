@@ -1,13 +1,16 @@
 import { APP_STORE_URL, PLAY_STORE_URL } from '@/lib/site'
+import { t, type Locale } from '@/lib/i18n'
 
 export default function StoreBadges({
   className = '',
   size = 'default',
   style,
+  locale = 'en',
 }: {
   className?: string
   size?: 'default' | 'compact'
   style?: React.CSSProperties
+  locale?: Locale
 }) {
   const height = size === 'compact' ? 'h-10' : 'h-12'
 
@@ -21,7 +24,7 @@ export default function StoreBadges({
       >
         <img
           src="/app-store-badge.svg"
-          alt="Download Jejak Masjid on the App Store"
+          alt={t(locale).stores.apple}
           className={height}
           width={140}
           height={48}
@@ -35,7 +38,7 @@ export default function StoreBadges({
       >
         <img
           src="/play-store-badge.svg"
-          alt="Get Jejak Masjid on Google Play"
+          alt={t(locale).stores.google}
           className={height}
           width={162}
           height={48}

@@ -181,20 +181,6 @@
 }
 
 @layer components {
-  /* AJK form: generous touch targets and visible, token-based error states. */
-  .ajk-label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
-  .ajk-input {
-    width: 100%; min-width: 0; min-height: 44px; padding: 0.75rem;
-    border: 1px solid var(--border-strong); border-radius: 0.75rem;
-    background: var(--surface); color: var(--foreground); font: inherit;
-  }
-  .ajk-input::placeholder { color: var(--subtle-foreground); }
-  .ajk-input[aria-invalid='true'] { border-color: var(--destructive); }
-  .ajk-choice { display: flex; min-height: 44px; align-items: center; gap: 0.75rem; padding-block: 0.5rem; line-height: 1.6; cursor: pointer; }
-  .ajk-choice input { flex-shrink: 0; width: 20px; height: 20px; accent-color: var(--primary); }
-  .ajk-choice.items-start { align-items: flex-start; }
-  .ajk-form fieldset { min-width: 0; }
-
   /* Small caps label used above section headings. */
   .eyebrow {
     font-size: 0.72rem;
@@ -494,22 +480,46 @@
   animation: jm-open 320ms var(--ease-out) both;
 }
 
-/* Committee snapshot bars: grow from zero, transform only, motion-gated. */
-@keyframes snap-grow-x {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
+/* Homepage revamp: the brand kit remains the only palette and type system. */
+.skip-link { position: fixed; left: 20px; top: -100px; z-index: 100; padding: 12px 20px; border-radius: 8px; background: var(--primary); color: var(--primary-foreground); }
+.skip-link:focus { top: 12px; }
+.header-bar { gap: clamp(12px, 2vw, 28px); }
+.product-nav { position: relative; }
+.product-nav summary::-webkit-details-marker { display: none; }
+.product-list { position: absolute; top: calc(100% + 8px); right: 0; width: 300px; max-width: calc(100vw - 32px); padding: 8px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: 0 14px 36px #00313018; }
+.product-list a { display: block; padding: 12px; border-radius: 10px; }
+.product-list a:hover { background: var(--surface-sunken); }
+.feature-bento { display: grid; grid-template-columns: 1.15fr 1fr 1fr; grid-template-rows: repeat(2, 330px); gap: 20px; }
+.feature-tile { position: relative; overflow: hidden; border: 1px solid var(--border); border-radius: 20px; background: var(--surface); }
+.feature-tile-copy { position: relative; z-index: 1; padding: 28px 26px; }
+.feature-tile-copy h3 { max-width: 21ch; }
+.feature-screen { position: absolute; width: 136px; right: 20px; top: 190px; transform: rotate(6deg); }
+.feature-screen > div { border-radius: 20px; padding: 4px; }
+.feature-screen > div > div { border-radius: 16px; }
+.feature-tile-0 { grid-row: span 2; }
+.feature-tile-0 .feature-screen { top: 255px; right: 50%; width: 235px; transform: translateX(50%) rotate(-5deg); }
+.feature-tile-1, .feature-tile-4 { background: var(--background); }
+.feature-tile-2 { background: var(--surface-sunken); }
+@media (max-width: 1023px) and (min-width: 761px) {
+  .feature-bento { grid-template-columns: 1fr 1fr; grid-template-rows: 430px 350px 350px; }
+  .feature-tile-0 { grid-column: span 2; grid-row: auto; }
+  .feature-tile-0 .feature-tile-copy { max-width: 50%; }
+  .feature-tile-0 .feature-screen { top: 50px; right: 12%; transform: rotate(6deg); }
 }
-@keyframes snap-grow-y {
-  from { transform: scaleY(0); }
-  to { transform: scaleY(1); }
+@media (max-width: 760px) {
+  .feature-bento { grid-template-columns: 1fr; grid-template-rows: none; }
+  .feature-tile { min-height: 370px; }
+  .feature-tile-0 { grid-row: auto; min-height: 570px; }
+  .feature-tile-0 .feature-screen { top: 210px; width: 220px; }
+  .feature-screen { top: 190px; width: 160px; right: 28px; }
+  .feature-tile-copy { padding: 26px; }
 }
-[data-motion='on'] [data-reveal='in'] .snap-bar-x {
-  transform-origin: left center;
-  animation: snap-grow-x 900ms var(--ease-out) both;
-  animation-delay: 150ms;
+@media (max-width: 639px) {
+  .product-nav { position: static; }
+  .product-list { left: 16px; right: 16px; max-width: calc(100% - 32px); margin-inline: auto; }
+  .header-bar { position: relative; gap: 10px; }
+  .header-download { font-size: 12px; padding-inline: 14px; }
 }
-[data-motion='on'] [data-reveal='in'] .snap-bar-y {
-  transform-origin: center bottom;
-  animation: snap-grow-y 900ms var(--ease-out) both;
-  animation-delay: 150ms;
-}
+
+.public-stats { font-variant-numeric: tabular-nums; }
+.stats-bar { background: #00A9A5; }

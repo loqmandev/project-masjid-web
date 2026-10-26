@@ -1,0 +1,232 @@
+{
+  "payloadVersion": 1,
+  "computedAt": "2026-10-27T18:40:12Z",
+  "windowStart": "2026-09-27T16:00:00Z",
+  "windowEnd": "2026-10-27T16:00:00Z",
+  "masjids": {
+    "total": 12000,
+    "masjid": 8000,
+    "surau": 4000,
+    "unclassified": 4,
+    "byCountry": [
+      {
+        "code": "MY",
+        "count": 10000
+      },
+      {
+        "code": "SG",
+        "count": 1000
+      },
+      {
+        "code": "ID",
+        "count": 500
+      },
+      {
+        "code": "SA",
+        "count": 300
+      },
+      {
+        "code": "BN",
+        "count": 100
+      },
+      {
+        "code": "CN",
+        "count": 50
+      },
+      {
+        "code": null,
+        "count": 50
+      }
+    ],
+    "byState": [
+      {
+        "stateCode": "SELANGOR",
+        "count": 4000
+      },
+      {
+        "stateCode": "JOHOR",
+        "count": 2000
+      },
+      {
+        "stateCode": "PERAK",
+        "count": 1000
+      },
+      {
+        "stateCode": "KEDAH",
+        "count": 500
+      },
+      {
+        "stateCode": "KELANTAN",
+        "count": 500
+      },
+      {
+        "stateCode": "NEGERI_SEMBILAN",
+        "count": 500
+      },
+      {
+        "stateCode": "PAHANG",
+        "count": 500
+      },
+      {
+        "stateCode": "SABAH",
+        "count": 300
+      },
+      {
+        "stateCode": "SARAWAK",
+        "count": 200
+      },
+      {
+        "stateCode": "MELAKA",
+        "count": 100
+      },
+      {
+        "stateCode": "PULAU_PINANG",
+        "count": 100
+      },
+      {
+        "stateCode": "TERENGGANU",
+        "count": 100
+      },
+      {
+        "stateCode": "W_P_KUALA_LUMPUR",
+        "count": 100
+      },
+      {
+        "stateCode": "PERLIS",
+        "count": 50
+      },
+      {
+        "stateCode": "W_P_PUTRAJAYA",
+        "count": 50
+      },
+      {
+        "stateCode": "W_P_LABUAN",
+        "count": 0
+      }
+    ]
+  },
+  "visits30d": {
+    "completed": 2400,
+    "uniqueMasjids": 380,
+    "activeVisitors": 250,
+    "byCountry": [
+      {
+        "code": "MY",
+        "completed": 2300,
+        "suppressed": false
+      },
+      {
+        "code": "SG",
+        "completed": 80,
+        "suppressed": false
+      },
+      {
+        "code": "ID",
+        "completed": 10,
+        "suppressed": false
+      },
+      {
+        "code": "SA",
+        "completed": 0,
+        "suppressed": false
+      },
+      {
+        "code": "BN",
+        "completed": null,
+        "suppressed": true
+      },
+      {
+        "code": "CN",
+        "completed": 0,
+        "suppressed": false
+      },
+      {
+        "code": null,
+        "completed": null,
+        "suppressed": true
+      }
+    ],
+    "byState": [
+      {
+        "stateCode": "SELANGOR",
+        "completed": 1600,
+        "suppressed": false
+      },
+      {
+        "stateCode": "JOHOR",
+        "completed": 500,
+        "suppressed": false
+      },
+      {
+        "stateCode": "PERAK",
+        "completed": 100,
+        "suppressed": false
+      },
+      {
+        "stateCode": "KEDAH",
+        "completed": 80,
+        "suppressed": false
+      },
+      {
+        "stateCode": "KELANTAN",
+        "completed": 0,
+        "suppressed": false
+      },
+      {
+        "stateCode": "MELAKA",
+        "completed": 0,
+        "suppressed": false
+      },
+      {
+        "stateCode": "NEGERI_SEMBILAN",
+        "completed": 0,
+        "suppressed": false
+      },
+      {
+        "stateCode": "PAHANG",
+        "completed": 0,
+        "suppressed": false
+      },
+      {
+        "stateCode": "PERLIS",
+        "completed": null,
+        "suppressed": true
+      },
+      {
+        "stateCode": "PULAU_PINANG",
+        "completed": 0,
+        "suppressed": false
+      },
+      {
+        "stateCode": "SABAH",
+        "completed": 0,
+        "suppressed": false
+      },
+      {
+        "stateCode": "SARAWAK",
+        "completed": 0,
+        "suppressed": false
+      },
+      {
+        "stateCode": "TERENGGANU",
+        "completed": 0,
+        "suppressed": false
+      },
+      {
+        "stateCode": "W_P_KUALA_LUMPUR",
+        "completed": 0,
+        "suppressed": false
+      },
+      {
+        "stateCode": "W_P_LABUAN",
+        "completed": 0,
+        "suppressed": false
+      },
+      {
+        "stateCode": "W_P_PUTRAJAYA",
+        "completed": null,
+        "suppressed": true
+      }
+    ]
+  }
+}

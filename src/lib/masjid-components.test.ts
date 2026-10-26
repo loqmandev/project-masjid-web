@@ -149,8 +149,8 @@ const offPage: PublicMasjidPage = {
     { url: 'https://bucket.jejakmasjid.my/two.jpg' },
   ],
 }
-it('ajk off: no programs, news, claim or AJK links; interest card instead', () => {
-  const html = render(offPage, false)
+it.each([false, true])('ajk off (claimed: %s): no programs, news, claim or committee card', (claimed) => {
+  const html = render({ ...offPage, claimed }, false)
   for (const s of [
     'Upcoming programs',
     'No upcoming programs',
@@ -159,6 +159,9 @@ it('ajk off: no programs, news, claim or AJK links; interest card instead', () =
     'ajk.jejakmasjid.my',
     '/p/',
     'News',
+    'committee?',
+    'Register your interest',
+    '<aside',
   ])
     expect(html).not.toContain(s)
   for (const s of [
@@ -168,9 +171,6 @@ it('ajk off: no programs, news, claim or AJK links; interest card instead', () =
     'Get directions',
     'https://bucket.jejakmasjid.my/one.jpg',
     'https://bucket.jejakmasjid.my/two.jpg',
-    "Are you on this masjid&#x27;s committee?",
-    'Register your interest',
-    'href="https://jejakmasjid.my/ajk"',
   ])
     expect(html).toContain(s)
 })
