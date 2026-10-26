@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { areaPath, discoverySearch, discoveryAreaSearch, validAreas, validAreaList, validNearby, validSearch, type Areas, type AreaList, type DiscoveryItem } from './discovery'
+import { areaPath, discoverySearch, discoveryAreaSearch, searchPath, validAreas, validAreaList, validNearby, validSearch, type Areas, type AreaList, type DiscoveryItem, type SearchResults } from './discovery'
 import { areaHead, itemList, landingHead } from './discovery-seo'
 import { htmlLangForPath, twinForPath } from './i18n'
 import { areaSitemap } from './discovery-sitemap'
@@ -15,20 +15,21 @@ import { apiGet } from './jm-api'
 import { getAreas, getAreaList, getSearch, getNearby } from './discovery-api.server'
 const fixture = () => JSON.parse(readFileSync(new URL('./fixtures/discovery.json', import.meta.url), 'utf8')) as { areas: Areas; items: DiscoveryItem[] }
 const list = (): AreaList => ({ payloadVersion: 1, area: { country: 'malaysia', region: 'selangor', district: 'petaling', names: { country: 'Malaysia', region: 'Selangor', district: 'Petaling' } }, total: 51, page: 1, pageSize: 50, items: fixture().items.slice(0, 50) })
+const searchResults = (page = 1, total = 51): SearchResults => ({ payloadVersion: 1, q: 'masjid', page, pageSize: 20, total, items: fixture().items.slice((page - 1) * 20, Math.min(page * 20, total)) })
 const stats = JSON.parse(readFileSync(new URL('./fixtures/public-stats.json', import.meta.url), 'utf8'))
 afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks() })
 
 describe('strict discovery contracts', () => {
-  it('accepts the four actual parallel backend samples captured on 2026-10-26', () => {
+  it('accepts the unchanged backend samples and rejects the historical unpaginated search sample', () => {
     expect(validAreas(backendFixture.areas)).toEqual(backendFixture.areas)
     expect(validAreaList(backendFixture.masjids)).toEqual(backendFixture.masjids)
-    expect(validSearch(backendFixture.search)).toEqual(backendFixture.search)
+    expect(validSearch(backendFixture.search)).toBeNull()
     expect(validNearby(backendFixture.nearby)).toEqual(backendFixture.nearby)
   })
   it('accepts all four public response shapes', () => {
     expect(validAreas(fixture().areas)).toEqual(fixture().areas)
     expect(validAreaList(list())).toEqual(list())
-    expect(validSearch({ payloadVersion: 1, q: 'masjid', items: fixture().items.slice(0, 20) }, 'masjid')).toBeTruthy()
+    expect(validSearch(searchResults(), 'masjid')).toEqual(searchResults())
     expect(validNearby({ payloadVersion: 1, items: [{ ...fixture().items[0], distanceM: 150 }] })).toBeTruthy()
   })
   it.each([
@@ -49,10 +50,31 @@ describe('strict discovery contracts', () => {
     expect(validAreaList({ ...list(), page: 2 })).toBeNull()
     expect(validAreaList(list(), { country: 'singapore' })).toBeNull()
     const v = list(); Object.assign(v.items[0], { lat: 3.1 }); expect(validAreaList(v)).toBeNull()
-    expect(validSearch({ payloadVersion: 1, q: 'masjid', items: fixture().items.slice(0, 21) })).toBeNull()
-    expect(validSearch({ payloadVersion: 1, q: 'masjid', items: [] }, 'surau')).toBeNull()
+    expect(validSearch({ ...searchResults(), items: fixture().items.slice(0, 21) })).toBeNull()
+    expect(validSearch(searchResults(), 'surau')).toBeNull()
     expect(validNearby({ payloadVersion: 1, items: [{ ...fixture().items[0], distanceM: 151 }] })).toBeNull()
     expect(validNearby({ payloadVersion: 1, items: [{ ...fixture().items[0], distanceM: 500 }, { ...fixture().items[1], distanceM: 150 }] })).toBeNull()
+  })
+  it('accepts empty, full, last and capped search pages', () => {
+    for (const value of [searchResults(1, 0), searchResults(1, 20), searchResults(2), searchResults(3), { ...searchResults(), page: 10, total: 200 }]) expect(validSearch(value)).toEqual(value)
+  })
+  it.each([
+    { page: 0 }, { page: -1 }, { page: 1.5 }, { page: '2' }, { page: 4 }, { page: NaN },
+    { pageSize: 50 }, { pageSize: '20' }, { total: -1 }, { total: 201 }, { total: 20.5 }, { total: '51' }, { total: Infinity },
+    { items: [] }, { items: fixture().items.slice(0, 19) }, { items: fixture().items.slice(0, 21) },
+    { payloadVersion: 2 }, { q: ' masjid' }, { q: 'a' }, { q: 'a'.repeat(81) }, { extra: true },
+  ])('rejects malformed search pagination or schema drift: %j', patch => {
+    expect(validSearch({ ...searchResults(), ...patch })).toBeNull()
+  })
+  it('requires the complete last-page count and all strict search keys', () => {
+    expect(validSearch({ ...searchResults(3), items: fixture().items.slice(40, 50) })).toBeNull()
+    expect(validSearch({ ...searchResults(3), items: fixture().items.slice(40, 52) })).toBeNull()
+    expect(validSearch({ ...searchResults(1, 0), items: fixture().items.slice(0, 1) })).toBeNull()
+    for (const key of Object.keys(searchResults())) {
+      const value = { ...searchResults() } as Record<string, unknown>
+      delete value[key]
+      expect(validSearch(value)).toBeNull()
+    }
   })
 })
 
@@ -83,11 +105,22 @@ describe('discovery URLs and search metadata', () => {
       expect(areaHead('ms', { areas: fixture().areas, list: v }).meta).toContainEqual({ name: 'robots', content: total < 3 ? 'noindex, nofollow' : 'index, follow, max-image-preview:large' })
     }
     expect(itemList(fixture().items.slice(0, 1)).itemListElement[0].item.url).toContain('/masjid/')
-    expect(landingHead('en', { q: 'Masjid & Surau', results: null }).links[0].href).toContain('?q=Masjid+%26+Surau')
+    expect(landingHead('en', { q: 'Masjid & Surau', results: null }).links[0].href).toBe('https://jejakmasjid.my/en/mosques')
+  })
+  it.each(['ms', 'en'] as const)('keeps %s search pages noindex, follow with bare landing canonicals and continued JSON-LD positions', locale => {
+    for (const q of ['a', 'Masjid & Surau', 'a'.repeat(81)]) for (const results of [null, searchResults(2)]) {
+      const head = landingHead(locale, { q, results })
+      expect(head.meta).toContainEqual({ name: 'robots', content: 'noindex, follow' })
+      expect(head.links.filter(link => link.rel === 'canonical')).toEqual([{ rel: 'canonical', href: 'https://jejakmasjid.my' + (locale === 'ms' ? '/masjid' : '/en/mosques') }])
+      expect(head.links.filter(link => link.rel === 'alternate').map(link => link.href)).toEqual(['https://jejakmasjid.my/masjid', 'https://jejakmasjid.my/en/mosques', 'https://jejakmasjid.my/en/mosques'])
+      if (results) expect(JSON.parse(head.scripts[0].children).itemListElement[0].position).toBe(21)
+    }
+    expect(landingHead(locale, { q: '', results: null }).meta).toContainEqual({ name: 'robots', content: 'index, follow, max-image-preview:large' })
   })
   it('normalizes search safely and never emits unknown-area sitemap entries', () => {
-    expect(discoverySearch({ q: '  masjid  ', halaman: '2', page: 3 })).toEqual({ q: 'masjid' })
-    expect(discoverySearch({})).toEqual({})
+    expect(discoverySearch({ q: '  masjid  ', halaman: '2', page: 3 }, 'ms')).toEqual({ q: 'masjid', halaman: 2 })
+    expect(discoverySearch({ q: '  masjid  ', halaman: '2', page: 3 }, 'en')).toEqual({ q: 'masjid', page: 3 })
+    expect(discoverySearch({}, 'ms')).toEqual({})
     expect(discoveryAreaSearch({ halaman: '2', page: 3 }, 'ms')).toEqual({ halaman: 2 })
     expect(discoveryAreaSearch({ halaman: '3', page: 2 }, 'en')).toEqual({ page: 2 })
     expect(discoveryAreaSearch({ page: 2 }, 'ms')).toEqual({})
@@ -101,6 +134,14 @@ describe('discovery URLs and search metadata', () => {
     expect(xml).toContain('/petaling?page=2')
     expect(xml).not.toContain('/selangor/klang')
     expect(xml).not.toContain('/other')
+  })
+  it.each(['ms', 'en'] as const)('drops invalid %s search pages and keeps only the localized positive integer', locale => {
+    const param = locale === 'ms' ? 'halaman' : 'page'
+    const parse = (value: unknown) => locale === 'ms' ? discoverySearch({ q: 'masjid', [param]: value }, 'ms') : discoverySearch({ q: 'masjid', [param]: value }, 'en')
+    for (const value of [undefined, null, '', 0, '0', -1, '-1', 1.5, '1.5', '01', '+2', ' 2 ', '1e2', 'NaN', Infinity, true, [], [2], {}, '9007199254740992', 1, '1']) expect(parse(value)).toEqual({ q: 'masjid' })
+    for (const value of [2, '2', 10, '10', Number.MAX_SAFE_INTEGER]) expect(parse(value)).toEqual({ q: 'masjid', [param]: Number(value) })
+    expect(searchPath(locale, 'Masjid & Surau', 2)).toBe(`${locale === 'ms' ? '/masjid' : '/en/mosques'}?q=Masjid+%26+Surau&${param}=2`)
+    expect(searchPath(locale, 'masjid', 1)).not.toMatch(/(?:page|halaman)=1/)
   })
 })
 
@@ -145,17 +186,36 @@ describe('API caching and closed availability', () => {
     expect(await getAreas(env)).toBeNull(); expect(await getAreas(env)).toBeNull()
     expect(c.put).not.toHaveBeenCalled(); expect(fetcher).toHaveBeenCalledTimes(2)
   })
-  it('caches lists 1h, search per q for 60s, and never reads or writes nearby cache', async () => {
+  it('caches lists 1h, search per full q/page/upstream URL for 60s, and never caches nearby', async () => {
     const c = cache()
-    const fetcher = vi.fn(async (req: Request) => Response.json(req.url.includes('/masjids?') ? list() : req.url.includes('/search?') ? { payloadVersion: 1, q: new URL(req.url).searchParams.get('q'), items: [] } : { payloadVersion: 1, items: [] }))
+    const fetcher = vi.fn(async (req: Request) => Response.json(req.url.includes('/masjids?') ? list() : req.url.includes('/search?') ? { ...searchResults(Number(new URL(req.url).searchParams.get('page'))), q: new URL(req.url).searchParams.get('q') } : { payloadVersion: 1, items: [] }))
     const env = { JM_API: { fetch: fetcher } }
-    await getAreaList(list().area, 1, env); await getSearch('masjid', env); await getSearch('surau', env)
-    expect([...c.stored.values()].map(r => r.headers.get('Cache-Control'))).toEqual(['public, max-age=3600', 'public, max-age=60', 'public, max-age=60'])
+    await getAreaList(list().area, 1, env)
+    for (const [q, page] of [['masjid', 1], ['surau', 1], ['masjid', 2]] as const) {
+      expect(await getSearch(q, page, env)).toEqual({ ...searchResults(page), q })
+      expect(new URL(fetcher.mock.calls.at(-1)![0].url).searchParams).toEqual(new URLSearchParams({ q, page: String(page) }))
+    }
+    await getSearch('masjid', 2, env)
+    expect(fetcher).toHaveBeenCalledTimes(4)
+    await getSearch('masjid', 2, { ...env, JM_API_BASE: 'http://127.0.0.1:9998' })
+    expect(fetcher).toHaveBeenCalledTimes(5)
+    expect([...c.stored.values()].map(r => r.headers.get('Cache-Control'))).toEqual(['public, max-age=3600', ...Array(4).fill('public, max-age=60')])
     const reads = c.match.mock.calls.length
     await getNearby(3.123, 101.678, env); await getNearby(3.123, 101.678, env)
-    expect(c.match).toHaveBeenCalledTimes(reads); expect(c.put).toHaveBeenCalledTimes(3)
+    expect(c.match).toHaveBeenCalledTimes(reads); expect(c.put).toHaveBeenCalledTimes(5)
     expect(fetcher.mock.calls.at(-1)![0].url).toContain('lat=3.123&lng=101.678')
     expect(fetcher.mock.calls.at(-1)![0].headers.has('Cookie')).toBe(false)
+  })
+  it('rejects old search responses on cache hits and never caches upstream old or malformed search data', async () => {
+    const c = cache()
+    const fetcher = vi.fn(async () => Response.json(backendFixture.search))
+    const env = { JM_API: { fetch: fetcher } }
+    expect(await getSearch('Al Hidayah', 1, env)).toBeNull()
+    expect(c.put).not.toHaveBeenCalled()
+    const key = c.match.mock.calls[0][0]
+    c.stored.set(key, Response.json(backendFixture.search))
+    expect(await getSearch('Al Hidayah', 1, env)).toBeNull()
+    expect(fetcher).toHaveBeenCalledOnce()
   })
   it('keeps the old mutable/prayer cache limits and tags intact', async () => {
     const c = cache(), env = { MASJID_PAGES_ENABLED: 'true', JM_API: { fetch: vi.fn(async () => Response.json({})) } }

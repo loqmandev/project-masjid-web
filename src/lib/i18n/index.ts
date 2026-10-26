@@ -31,7 +31,7 @@ export function twinForPath(path: string): string | undefined {
   const result = new URLSearchParams()
   if (params.has('q')) result.set('q', params.get('q')!)
   const from = path.startsWith('/en/') ? 'page' : 'halaman'
-  const page = path.includes('/di/') || path.includes('/in/') ? params.get(from) : null
-  if (page && /^[1-9]\d*$/.test(page) && Number(page) > 1) result.set(from === 'page' ? 'halaman' : 'page', page)
+  const page = params.get(from)
+  if (page && /^[1-9]\d*$/.test(page) && Number.isSafeInteger(Number(page)) && Number(page) > 1) result.set(from === 'page' ? 'halaman' : 'page', page)
   return twin + (result.size ? '?' + result : '')
 }

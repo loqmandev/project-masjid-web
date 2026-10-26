@@ -9,7 +9,7 @@ export type DiscoveryItem = { slug: string; name: string; type: 'masjid' | 'sura
 export type NearbyItem = DiscoveryItem & { distanceM: number }
 export type AreaQuery = { country: string; region?: string; district?: string }
 export type AreaList = { payloadVersion: 1; area: AreaQuery & { names: { country: string; region?: string; district?: string } }; total: number; page: number; pageSize: 50; items: DiscoveryItem[] }
-export type SearchResults = { payloadVersion: 1; q: string; items: DiscoveryItem[] }
+export type SearchResults = { payloadVersion: 1; q: string; page: number; pageSize: 20; total: number; items: DiscoveryItem[] }
 export type NearbyResults = { payloadVersion: 1; items: NearbyItem[] }
 const object = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
 const keys = (v: Record<string, unknown>, required: string[], optional: string[] = []) => required.every(k => Object.hasOwn(v, k)) && Object.keys(v).every(k => [...required, ...optional].includes(k))
@@ -45,7 +45,9 @@ function items(v: unknown, maximum: number, nearby = false): v is DiscoveryItem[
   return Array.isArray(v) && v.length <= maximum && v.every(i => item(i, nearby)) && unique(v)
 }
 export function validSearch(v: unknown, q?: string): SearchResults | null {
-  return object(v) && keys(v, ['payloadVersion', 'q', 'items']) && v.payloadVersion === 1 && typeof v.q === 'string' && v.q === v.q.trim() && v.q.length >= 2 && v.q.length <= 80 && (q === undefined || v.q === q) && items(v.items, 20) ? v as SearchResults : null
+  if (!object(v) || !keys(v, ['payloadVersion', 'q', 'page', 'pageSize', 'total', 'items']) || v.payloadVersion !== 1 || typeof v.q !== 'string' || v.q !== v.q.trim() || v.q.length < 2 || v.q.length > 80 || q !== undefined && v.q !== q) return null
+  if (!count(v.total) || v.total > 200 || !count(v.page) || v.page < 1 || v.pageSize !== 20 || v.page > Math.max(1, Math.ceil(v.total / 20)) || !items(v.items, 20) || v.items.length !== Math.min(20, Math.max(0, v.total - (v.page - 1) * 20))) return null
+  return v as SearchResults
 }
 export function validNearby(v: unknown): NearbyResults | null {
   return object(v) && keys(v, ['payloadVersion', 'items']) && v.payloadVersion === 1 && items(v.items, 20, true) && v.items.every((i, n, all) => n === 0 || (i as NearbyItem).distanceM >= (all[n - 1] as NearbyItem).distanceM) ? v as NearbyResults : null
@@ -61,6 +63,11 @@ export function validAreaList(v: unknown, query?: AreaQuery): AreaList | null {
   return v as AreaList
 }
 export const discoveryHome = (locale: Locale) => locale === 'ms' ? '/masjid' : '/en/mosques'
+export function searchPath(locale: Locale, q: string, page = 1) {
+  const params = new URLSearchParams({ q })
+  if (page > 1) params.set(locale === 'ms' ? 'halaman' : 'page', String(page))
+  return `${discoveryHome(locale)}?${params}`
+}
 export const areaPath = (locale: Locale, query: AreaQuery, page = 1) => `${discoveryHome(locale)}/${locale === 'ms' ? 'di' : 'in'}/${[query.country, query.region, query.district].filter(Boolean).join('/')}${page > 1 ? `?${locale === 'ms' ? 'halaman' : 'page'}=${page}` : ''}`
 export const countryName = (code: string | null, locale: Locale) => code === null ? (locale === 'ms' ? 'Lain-lain / tidak diketahui' : 'Other or unknown') : COUNTRY_NAMES[code as keyof typeof COUNTRY_NAMES]?.[locale] ?? new Intl.DisplayNames([locale], { type: 'region' }).of(code) ?? code
 export function resolveArea(areas: Areas, query: AreaQuery) {
@@ -72,8 +79,15 @@ export function resolveArea(areas: Areas, query: AreaQuery) {
   if (query.district && !district) return null
   return { country, region, district }
 }
-export function discoverySearch(search: Record<string, unknown>): { q?: string } {
-  return typeof search.q === 'string' ? { q: search.q.trim().slice(0, 81) } : {}
+export function discoverySearch(search: Record<string, unknown>, locale: 'ms'): { q?: string; halaman?: number }
+export function discoverySearch(search: Record<string, unknown>, locale: 'en'): { q?: string; page?: number }
+export function discoverySearch(search: Record<string, unknown>, locale: Locale) {
+  const result = typeof search.q === 'string' ? { q: search.q.trim().slice(0, 81) } : {}
+  const param = locale === 'ms' ? 'halaman' : 'page'
+  const p = search[param]
+  // Invalid values and page 1 disappear when the router rebuilds the URL.
+  if ((typeof p !== 'string' && typeof p !== 'number') || !/^[1-9]\d*$/.test(String(p)) || !Number.isSafeInteger(Number(p)) || Number(p) <= 1) return result
+  return { ...result, [param]: Number(p) }
 }
 export function discoveryAreaSearch(search: Record<string, unknown>, locale: 'ms'): { halaman?: number }
 export function discoveryAreaSearch(search: Record<string, unknown>, locale: 'en'): { page?: number }

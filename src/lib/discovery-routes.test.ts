@@ -9,7 +9,7 @@ vi.mock('./discovery-server', () => ({
 import { routeTree } from '@/routeTree.gen'
 import { twinForPath } from './i18n'
 import fixture from './fixtures/discovery.json'
-import type { Areas, DiscoveryItem } from './discovery'
+import type { Areas, DiscoveryItem, SearchResults } from './discovery'
 import { loadDiscoveryAreas, loadDiscoveryLanding, loadDiscoveryArea } from './discovery-server'
 
 const areas = fixture.areas as Areas
@@ -52,29 +52,67 @@ it('preserves search and translates the page parameter across language twins', (
   const en = '/en/mosques/in/malaysia/selangor?page=2'
   expect(twinForPath(bm)).toBe(en); expect(twinForPath(en)).toBe(bm)
   expect(twinForPath('/masjid?q=Masjid+Negara')).toBe('/en/mosques?q=Masjid+Negara')
+  expect(twinForPath('/masjid?q=Masjid+Negara&halaman=2')).toBe('/en/mosques?q=Masjid+Negara&page=2')
+  expect(twinForPath('/en/mosques?q=Masjid+Negara&page=2')).toBe('/masjid?q=Masjid+Negara&halaman=2')
 })
 
-it.each(['/masjid', '/en/mosques'])('keeps native search GETs on %s free of pagination and redirects', async landing => {
-  for (const query of ['', '?q=Petaling']) {
+it.each(['/masjid', '/en/mosques'])('keeps native search GETs on %s working without redirects and a bare canonical', async landing => {
+  for (const query of ['', '?q=', '?q=Petaling']) {
+    const q = query === '?q=Petaling' ? 'Petaling' : ''
     const requestRouter = await serverGet(landing + query)
     expect(requestRouter.state.statusCode).toBe(200)
     expect(requestRouter.state.redirect).toBeUndefined()
     expect(requestRouter.state.location.href).toBe(landing + query)
-    expect(requestRouter.state.matches.at(-1)!.search).toEqual(query ? { q: 'Petaling' } : {})
-    expect(loadDiscoveryLanding).toHaveBeenLastCalledWith({ data: { q: query ? 'Petaling' : '' } })
-    expect(requestRouter.state.matches.at(-1)!.links).toContainEqual({ rel: 'canonical', href: 'https://jejakmasjid.my' + landing + query })
+    expect(requestRouter.state.matches.at(-1)!.search).toEqual(query ? { q } : {})
+    expect(loadDiscoveryLanding).toHaveBeenLastCalledWith({ data: { q, page: 1 } })
+    expect(requestRouter.state.matches.at(-1)!.links).toContainEqual({ rel: 'canonical', href: 'https://jejakmasjid.my' + landing })
+    expect(requestRouter.state.matches.at(-1)!.meta).toContainEqual({ name: 'robots', content: query ? 'noindex, follow' : 'index, follow, max-image-preview:large' })
   }
 })
 
-it.each(['/masjid', '/en/mosques'])('drops stray pagination from %s URLs, canonicals and language links', async landing => {
-  for (const query of ['?q=Petaling&page=1', '?q=Petaling&halaman=2', '?q=Petaling&page=2&halaman=3', '?page=2&halaman=3']) {
-    const clean = landing + (query.includes('q=') ? '?q=Petaling' : '')
-    const requestRouter = await serverGet(landing + query)
-    expect(requestRouter.state.redirect?.options.href).toBe(clean)
+const landingRoutes = [
+  { path: '/masjid', param: 'halaman', stray: 'page', twin: '/en/mosques' },
+  { path: '/en/mosques', param: 'page', stray: 'halaman', twin: '/masjid' },
+]
+it.each(landingRoutes)('passes localized search pagination through $path loaderDeps', async ({ path, param }) => {
+  const requestRouter = await serverGet(`${path}?q=Petaling&${param}=2`)
+  expect(requestRouter.state.statusCode).toBe(200)
+  expect(requestRouter.state.redirect).toBeUndefined()
+  expect(requestRouter.state.matches.at(-1)!.search).toEqual({ q: 'Petaling', [param]: 2 })
+  expect(requestRouter.state.matches.at(-1)!.loaderDeps).toEqual({ q: 'Petaling', page: 2 })
+  expect(loadDiscoveryLanding).toHaveBeenLastCalledWith({ data: { q: 'Petaling', page: 2 } })
+  expect(requestRouter.state.matches.at(-1)!.links).toContainEqual({ rel: 'canonical', href: 'https://jejakmasjid.my' + path })
+})
+it.each(landingRoutes)('drops invalid and stray pagination from $path search URLs and language links', async ({ path, param, stray, twin }) => {
+  for (const value of ['1', '0', '-1', '1.5', 'nope', '9007199254740992']) {
+    const requestRouter = await serverGet(`${path}?q=Petaling&${param}=${value}`)
+    expect(requestRouter.state.redirect?.options.href).toBe(path + '?q=Petaling')
+    expect(twinForPath(`${path}?q=Petaling&${param}=${value}`)).toBe(twin + '?q=Petaling')
+  }
+  for (const query of [`?q=Petaling&${stray}=2`, `?q=Petaling&${param}=2&${stray}=3`]) {
+    const clean = path + '?q=Petaling' + (query.includes(`${param}=`) ? `&${param}=2` : '')
+    expect((await serverGet(path + query)).state.redirect?.options.href).toBe(clean)
     const responseRouter = await serverGet(clean)
     expect(responseRouter.state.statusCode).toBe(200)
-    expect(responseRouter.state.matches.at(-1)!.links).toContainEqual({ rel: 'canonical', href: 'https://jejakmasjid.my' + clean })
-    expect(twinForPath(landing + query)).toBe((landing === '/masjid' ? '/en/mosques' : '/masjid') + (query.includes('q=') ? '?q=Petaling' : ''))
+    expect(responseRouter.state.matches.at(-1)!.links).toContainEqual({ rel: 'canonical', href: 'https://jejakmasjid.my' + path })
+  }
+})
+it.each(landingRoutes)('302 redirects clamped $path search pages, preserving q and omitting page 1', async ({ path, param }) => {
+  for (const total of [0, 2, 51]) {
+    const page = Math.max(1, Math.ceil(total / 20))
+    const q = 'Masjid & Surau'
+    const results: SearchResults = { payloadVersion: 1, q, page, pageSize: 20, total, items: fixture.items.slice((page - 1) * 20, Math.min(page * 20, total)) as DiscoveryItem[] }
+    vi.mocked(loadDiscoveryLanding).mockResolvedValueOnce({ areas, q, results, stats: null })
+    const requestRouter = await serverGet(`${path}?q=Masjid+%26+Surau&${param}=999`)
+    const destination = path + '?q=Masjid+%26+Surau' + (page > 1 ? `&${param}=${page}` : '')
+    expect(loadDiscoveryLanding).toHaveBeenLastCalledWith({ data: { q, page: 999 } })
+    expect(requestRouter.state.redirect?.status).toBe(302)
+    expect(requestRouter.state.redirect?.options.href).toBe(destination)
+    vi.mocked(loadDiscoveryLanding).mockResolvedValueOnce({ areas, q, results, stats: null })
+    const responseRouter = await serverGet(destination)
+    expect(responseRouter.state.statusCode).toBe(200)
+    expect(responseRouter.state.redirect).toBeUndefined()
+    expect(responseRouter.state.matches.at(-1)!.loaderData).toEqual(expect.objectContaining({ results: expect.objectContaining({ page }) }))
   }
 })
 

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import fixture from './fixtures/discovery.json'
-import type { Areas, AreaList, DiscoveryItem } from './discovery'
+import type { Areas, AreaList, DiscoveryItem, SearchResults } from './discovery'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
@@ -10,6 +10,7 @@ vi.mock('@/components/Header', () => ({ default: () => null }))
 vi.mock('@/components/Footer', () => ({ default: () => null }))
 import { loadDiscoveryNearby } from './discovery-server'
 import { DiscoveryArea, DiscoveryLanding, DiscoveryMissing, NearbySearch } from '@/components/Discovery'
+import { t } from './i18n'
 afterEach(() => { cleanup(); vi.restoreAllMocks() })
 it.each(['ms', 'en'] as const)('server-renders %s discovery headings with the on-deep foreground', locale => {
   const list: AreaList = { payloadVersion: 1, area: { country: 'malaysia', region: 'selangor', district: 'petaling', names: { country: 'Malaysia', region: 'Selangor', district: 'Petaling' } }, total: 51, page: 1, pageSize: 50, items: fixture.items.slice(0, 50) as DiscoveryItem[] }
@@ -33,7 +34,7 @@ it.each(['ms', 'en'] as const)('keeps the %s missing-page heading dark on its li
   expect(doc.querySelector('main a')?.getAttribute('href')).toBe(locale === 'ms' ? '/' : '/en')
 })
 it.each(['ms', 'en'] as const)('server-renders a native %s GET form with only q and search results without a nearby button', locale => {
-  const html = renderToStaticMarkup(createElement(DiscoveryLanding, { locale, data: { areas: fixture.areas as Areas, q: 'Petaling', results: { payloadVersion: 1, q: 'Petaling', items: fixture.items.slice(0, 2) as DiscoveryItem[] }, stats: null } }))
+  const html = renderToStaticMarkup(createElement(DiscoveryLanding, { locale, data: { areas: fixture.areas as Areas, q: 'Petaling', results: { payloadVersion: 1, q: 'Petaling', page: 1, pageSize: 20, total: 2, items: fixture.items.slice(0, 2) as DiscoveryItem[] }, stats: null } }))
   const form = new DOMParser().parseFromString(html, 'text/html').querySelector('form')!
   expect(form.getAttribute('method')).toBe('get')
   expect(form.getAttribute('action')).toBe(locale === 'ms' ? '/masjid' : '/en/mosques')
@@ -43,6 +44,37 @@ it.each(['ms', 'en'] as const)('server-renders a native %s GET form with only q 
   expect(html).toContain('Masjid Contoh Petaling 01')
   expect(html).not.toContain(locale === 'ms' ? 'Dekat saya' : 'Near me')
   expect(html).not.toContain('href="/masjid/di/other"')
+})
+it.each(['ms', 'en'] as const)('server-renders %s search pagination, continued numbering and a form that restarts at page 1', locale => {
+  const landing = locale === 'ms' ? '/masjid' : '/en/mosques'
+  const param = locale === 'ms' ? 'halaman' : 'page'
+  const copy = t(locale).discovery
+  for (const page of [1, 2, 3]) {
+    const results: SearchResults = { payloadVersion: 1, q: 'Masjid & Surau', page, pageSize: 20, total: 51, items: fixture.items.slice((page - 1) * 20, Math.min(page * 20, 51)) as DiscoveryItem[] }
+    const doc = new DOMParser().parseFromString(renderToStaticMarkup(createElement(DiscoveryLanding, { locale, data: { areas: fixture.areas as Areas, q: results.q, results, stats: null } })), 'text/html')
+    expect([...new FormData(doc.querySelector('form')!).entries()]).toEqual([['q', results.q]])
+    expect(doc.querySelector('ol.discovery-list')?.getAttribute('start')).toBe(String((page - 1) * 20 + 1))
+    expect(doc.querySelectorAll('.discovery-list li')).toHaveLength(page === 3 ? 11 : 20)
+    const pager = doc.querySelector('nav.discovery-pagination')!
+    expect(pager.textContent).toContain(`${copy.page} ${page} ${copy.of} 3`)
+    expect(pager.querySelector('a[rel="prev"]')?.getAttribute('href')).toBe(page === 1 ? undefined : `${landing}?q=Masjid+%26+Surau${page === 2 ? '' : `&${param}=${page - 1}`}`)
+    expect(pager.querySelector('a[rel="next"]')?.getAttribute('href')).toBe(page === 3 ? undefined : `${landing}?q=Masjid+%26+Surau&${param}=${page + 1}`)
+    for (const link of pager.querySelectorAll('a')) expect(link.getAttribute('href')).not.toMatch(/[?&](?:halaman|page)=1(?:&|$)/)
+  }
+})
+it.each(['ms', 'en'] as const)('shows one calm %s refinement hint only at the 200-result cap', locale => {
+  for (const total of [51, 200]) {
+    const results: SearchResults = { payloadVersion: 1, q: 'masjid', page: 1, pageSize: 20, total, items: fixture.items.slice(0, 20) as DiscoveryItem[] }
+    const html = renderToStaticMarkup(createElement(DiscoveryLanding, { locale, data: { areas: fixture.areas as Areas, q: results.q, results, stats: null } }))
+    expect(html.split(t(locale).discovery.refine).length - 1).toBe(total === 200 ? 1 : 0)
+  }
+})
+it.each(['ms', 'en'] as const)('handles empty and unavailable %s search results without dead pager links', locale => {
+  for (const results of [null, { payloadVersion: 1 as const, q: 'masjid', page: 1, pageSize: 20 as const, total: 0, items: [] }]) {
+    const doc = new DOMParser().parseFromString(renderToStaticMarkup(createElement(DiscoveryLanding, { locale, data: { areas: fixture.areas as Areas, q: 'masjid', results, stats: null } })), 'text/html')
+    expect(doc.querySelector('#search-heading')?.parentElement?.textContent).toContain(results ? t(locale).discovery.empty : t(locale).discovery.unavailable)
+    expect(doc.querySelectorAll('.discovery-pagination a')).toHaveLength(0)
+  }
 })
 it.each(['ms', 'en'] as const)('links from %s page 2 back to page 1 without a query parameter', locale => {
   const list: AreaList = { payloadVersion: 1, area: { country: 'malaysia', region: 'selangor', district: 'petaling', names: { country: 'Malaysia', region: 'Selangor', district: 'Petaling' } }, total: 51, page: 2, pageSize: 50, items: fixture.items.slice(50, 51) as DiscoveryItem[] }

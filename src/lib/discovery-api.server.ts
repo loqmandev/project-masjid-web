@@ -16,8 +16,8 @@ export async function getAreaList(query: AreaQuery, page: number, env?: WebEnv) 
   const r = await apiGet<AreaList>(`/api/public/discovery/masjids?${params}`, { ttl: 3600, validate: v => validAreaList(v, query) !== null }, env)
   return r.status === 200 ? validAreaList(r.body, query) : null
 }
-export async function getSearch(q: string, env?: WebEnv) {
-  const r = await apiGet<SearchResults>(`/api/public/discovery/search?${new URLSearchParams({ q, limit: '20' })}`, { ttl: 60, validate: v => validSearch(v, q) !== null }, env)
+export async function getSearch(q: string, page: number, env?: WebEnv) {
+  const r = await apiGet<SearchResults>(`/api/public/discovery/search?${new URLSearchParams({ q, page: String(page) })}`, { ttl: 60, validate: v => validSearch(v, q) !== null }, env)
   return r.status === 200 ? validSearch(r.body, q) : null
 }
 export async function getNearby(lat: number, lng: number, env?: WebEnv) {
