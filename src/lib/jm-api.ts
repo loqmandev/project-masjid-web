@@ -14,6 +14,8 @@ export type ApiResult<T> = { status: number; body: T | null }
 export const PUBLIC_CACHE_TAG = 'jm-ajk-public'
 export const statsCacheKey = (url: string) =>
   `https://jejakmasjid.my/__jm-internal-cache/public-stats/v1/${encodeURIComponent(url)}`
+export const discoveryCacheKey = (url: string) =>
+  `https://jejakmasjid.my/__jm-internal-cache/discovery/v1/${encodeURIComponent(url)}`
 // Cache API custom keys must belong to the web zone for zone tag purges.
 // Including the upstream URL isolates service-binding/local environments.
 export const publicCacheKey = (url: string, prayer = false) =>
@@ -27,7 +29,9 @@ export async function apiGet<T>(
 ): Promise<ApiResult<T>> {
   const env = supplied ?? (await getWorkerEnv())
   const stats = path === '/api/public/stats'
-  if (!stats && env.MASJID_PAGES_ENABLED !== 'true') return { status: 404, body: null }
+  const discovery = path.startsWith('/api/public/discovery/')
+  const nearby = path.startsWith('/api/public/discovery/nearby?')
+  if (!stats && !discovery && env.MASJID_PAGES_ENABLED !== 'true') return { status: 404, body: null }
   if (!path.startsWith('/api/') || path.includes('..'))
     return { status: 404, body: null }
   const url = new URL(
@@ -36,17 +40,17 @@ export async function apiGet<T>(
   ).toString()
   const prayer = path.startsWith('/api/prayer-times?')
   const negative = prayer && opts.cacheNegative === true
-  const key = stats ? statsCacheKey(url) : publicCacheKey(url, prayer)
+  const key = discovery ? discoveryCacheKey(url) : stats ? statsCacheKey(url) : publicCacheKey(url, prayer)
   const cache =
-    typeof caches !== 'undefined'
+    !nearby && opts.ttl > 0 && typeof caches !== 'undefined'
       ? (caches as CacheStorage & { default?: Cache }).default
       : undefined
-  const ttl = Math.min(opts.ttl, stats ? 3600 : prayer ? 300 : 60)
+  const ttl = Math.min(opts.ttl, stats || discovery ? 3600 : prayer ? 300 : 60)
   const put = async (response: Response) => {
     if (!cache) return
     const copy = response.clone()
     copy.headers.set('Cache-Control', `public, max-age=${ttl}`)
-    if (!prayer && !stats) copy.headers.set('Cache-Tag', PUBLIC_CACHE_TAG)
+    if (!prayer && !stats && !discovery) copy.headers.set('Cache-Tag', PUBLIC_CACHE_TAG)
     try {
       await cache.put(key, copy)
     } catch {
@@ -71,7 +75,7 @@ export async function apiGet<T>(
       }
     }
     const request = new Request(url, {
-      signal: AbortSignal.timeout(stats ? Math.min(opts.timeoutMs ?? 1500, 1500) : opts.timeoutMs ?? 5000),
+      signal: AbortSignal.timeout(stats || discovery ? Math.min(opts.timeoutMs ?? 1500, 1500) : opts.timeoutMs ?? 5000),
       redirect: 'manual',
     })
     const response = await (env.JM_API
@@ -84,7 +88,7 @@ export async function apiGet<T>(
       return { status: 200, body }
     }
     if (!negative && response.status === 404) {
-      if (!stats) await put(new Response(null, { status: 404 }))
+      if (!stats && !discovery) await put(new Response(null, { status: 404 }))
       return { status: 404, body: null }
     }
   } catch {
