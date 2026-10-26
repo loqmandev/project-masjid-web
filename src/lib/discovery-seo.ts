@@ -2,7 +2,7 @@ import { seo } from './seo'
 import { jsonLdScript } from './jsonld'
 import { absoluteUrl } from './site'
 import { t, type Locale } from './i18n'
-import { areaPath, countryName, discoveryHome, resolveArea, type Areas, type AreaList, type DiscoveryItem } from './discovery'
+import { areaPath, countryName, discoveryHome, resolveArea, type Areas, type AreaList, type DiscoveryItem, type SearchResults } from './discovery'
 export const itemList = (items: DiscoveryItem[], start = 0) => ({
   '@context': 'https://schema.org', '@type': 'ItemList',
   itemListElement: items.map((item, index) => ({ '@type': 'ListItem', position: start + index + 1, item: { '@type': 'Place', name: item.name, url: absoluteUrl(`/masjid/${item.slug}`) } })),
@@ -17,12 +17,13 @@ export function areaBreadcrumbs(areas: Areas, list: AreaList, locale: Locale) {
     ...(area.district ? [{ name: area.district.name, href: areaPath(locale, q) }] : []),
   ]
 }
-export function landingHead(locale: Locale, data?: { q: string; results: { items: DiscoveryItem[] } | null }) {
+export function landingHead(locale: Locale, data?: { q: string; results: SearchResults | null }, hasQuery = Boolean(data?.q)) {
   if (!data) return { meta: [{ name: 'robots', content: 'noindex, nofollow' }], links: [], scripts: [] }
   const copy = t(locale).discovery
-  const query = data?.q ? `?${new URLSearchParams({ q: data.q })}` : ''
-  return { ...seo({ title: copy.title, description: copy.intro, path: discoveryHome(locale) + query, alternates: { ms: discoveryHome('ms') + query, en: discoveryHome('en') + query } }),
-    scripts: data?.results ? [{ type: 'application/ld+json', children: jsonLdScript(itemList(data.results.items)) }] : [],
+  const head = seo({ title: copy.title, description: copy.intro, path: discoveryHome(locale), alternates: { ms: discoveryHome('ms'), en: discoveryHome('en') } })
+  if (hasQuery) head.meta = head.meta.map(meta => meta.name === 'robots' ? { name: 'robots', content: 'noindex, follow' } : meta)
+  return { ...head,
+    scripts: data.results ? [{ type: 'application/ld+json', children: jsonLdScript(itemList(data.results.items, (data.results.page - 1) * data.results.pageSize)) }] : [],
   }
 }
 export function areaHead(locale: Locale, data?: { areas: Areas; list: AreaList }) {

@@ -4,13 +4,14 @@ import Footer from './Footer'
 import { Container } from './ui/Section'
 import StoreBadges from './ui/StoreBadges'
 import { t, type Locale } from '@/lib/i18n'
-import { areaPath, countryName, discoveryHome, resolveArea, type Areas, type AreaList, type AreaQuery, type DiscoveryItem, type NearbyItem } from '@/lib/discovery'
+import { areaPath, countryName, discoveryHome, searchPath, resolveArea, type Areas, type AreaList, type AreaQuery, type DiscoveryItem, type NearbyItem } from '@/lib/discovery'
 import { areaBreadcrumbs } from '@/lib/discovery-seo'
 import { loadDiscoveryNearby } from '@/lib/discovery-server'
 import type { loadDiscoveryLanding } from '@/lib/discovery-server'
 const number = (n: number, locale: Locale) => new Intl.NumberFormat(locale).format(n)
-export function DiscoveryList({ items, locale }: { items: (DiscoveryItem | NearbyItem)[]; locale: Locale }) {
-  return <ul className="discovery-list divide-y divide-border border-y border-border">
+export function DiscoveryList({ items, locale, start }: { items: (DiscoveryItem | NearbyItem)[]; locale: Locale; start?: number }) {
+  const List = start === undefined ? 'ul' : 'ol'
+  return <List start={start} className={`discovery-list divide-y divide-border border-y border-border${start === undefined ? '' : ' list-decimal pl-8 marker:text-muted-foreground marker:tabular-nums'}`}>
     {items.map(item => <li key={item.slug} className="py-5 sm:py-6">
       <a className="group flex min-w-0 items-start justify-between gap-4" href={`/masjid/${item.slug}`}>
         <div className="min-w-0"><h3 className="break-words text-lg group-hover:underline sm:text-xl">{item.name}</h3>
@@ -19,7 +20,15 @@ export function DiscoveryList({ items, locale }: { items: (DiscoveryItem | Nearb
         {'distanceM' in item ? <span className="shrink-0 pt-1 text-sm tabular-nums">{item.distanceM < 1000 ? `${number(item.distanceM, locale)} m` : `${number(item.distanceM / 1000, locale)} km`}</span> : <span className="pt-1" aria-hidden="true">↗</span>}
       </a>
     </li>)}
-  </ul>
+  </List>
+}
+function DiscoveryPager({ locale, page, pages, href }: { locale: Locale; page: number; pages: number; href: (page: number) => string }) {
+  const copy = t(locale).discovery
+  return <nav className="discovery-pagination mt-8 flex max-w-4xl flex-wrap items-center justify-between gap-4" aria-label={copy.pagination}>
+    {page > 1 ? <a rel="prev" className="discovery-button discovery-secondary" href={href(page - 1)}>← {copy.previous}</a> : <span />}
+    <span className="text-sm">{copy.page} {number(page, locale)} {copy.of} {number(pages, locale)}</span>
+    {page < pages ? <a rel="next" className="discovery-button discovery-secondary" href={href(page + 1)}>{copy.next} →</a> : <span />}
+  </nav>
 }
 export function NearbySearch({ locale }: { locale: Locale }) {
   const copy = t(locale).discovery
@@ -69,7 +78,12 @@ export function DiscoveryLanding({ locale, data }: { locale: Locale; data: Await
         {data.q.length < 2 ? <p className="mt-3 text-sm text-muted-foreground">{copy.hint}</p> : data.q.length > 80 ? <p className="mt-3 text-sm text-muted-foreground">{copy.long}</p> : null}
         <NearbySearch locale={locale} />
       </section>
-      {data.q.length >= 2 && data.q.length <= 80 ? <section className="mt-10 max-w-3xl" aria-labelledby="search-heading"><h2 id="search-heading" className="mb-5 text-2xl">{copy.results}</h2>{data.results?.items.length ? <DiscoveryList items={data.results.items} locale={locale} /> : <p className="leading-relaxed text-muted-foreground">{data.results ? copy.empty : copy.unavailable}</p>}</section> : null}
+      {data.q.length >= 2 && data.q.length <= 80 ? <section className="mt-10 max-w-3xl" aria-labelledby="search-heading">
+        <h2 id="search-heading" className="mb-5 text-2xl">{copy.results}</h2>
+        {data.results?.items.length ? <DiscoveryList items={data.results.items} locale={locale} start={(data.results.page - 1) * data.results.pageSize + 1} /> : <p className="leading-relaxed text-muted-foreground">{data.results ? copy.empty : copy.unavailable}</p>}
+        {data.results ? <DiscoveryPager locale={locale} page={data.results.page} pages={Math.max(1, Math.ceil(data.results.total / data.results.pageSize))} href={page => searchPath(locale, data.q, page)} /> : null}
+        {data.results?.total === 200 ? <p className="mt-6 text-sm leading-relaxed text-muted-foreground">{copy.refine}</p> : null}
+      </section> : null}
       <section className="mt-14 border-t border-border-strong pt-10 sm:mt-20" aria-labelledby="browse-heading"><h2 id="browse-heading" className="text-3xl">{copy.browse}</h2>
         {malaysia ? <><a className="mt-7 inline-flex min-h-11 items-center text-lg font-semibold underline underline-offset-4" href={areaPath(locale, { country: malaysia.slug })}>Malaysia <span className="ml-3 text-sm font-normal">{number(malaysia.count, locale)}</span></a><h3 className="sr-only">{copy.states}</h3><AreaLinks locale={locale} label={copy.states} entries={malaysia.regions.map(r => ({ name: r.name, count: r.count, query: { country: malaysia.slug, region: r.slug } }))} /></> : null}
         {other.length ? <div className="mt-10"><h3 className="text-xl">{copy.countries}</h3><ul className="mt-5 flex flex-wrap gap-3">{other.map(c => <li key={c.slug}>{c.code === null ? <span className="inline-flex min-h-11 items-center gap-3 px-1 text-sm text-muted-foreground">{countryName(null, locale)} · {number(c.count, locale)}</span> : <a className="inline-flex min-h-11 items-center gap-3 rounded-full border border-border-strong px-5 py-2 text-sm hover:bg-surface-sunken" href={areaPath(locale, { country: c.slug })}>{countryName(c.code, locale)}<span className="text-muted-foreground">{number(c.count, locale)}</span></a>}</li>)}</ul></div> : null}
@@ -93,11 +107,7 @@ export function DiscoveryArea({ locale, data }: { locale: Locale; data: { areas:
     <Container className="py-10 sm:py-14">
       {children.length ? <section className="mb-12" aria-labelledby="child-heading"><h2 id="child-heading" className="text-2xl">{copy.children}</h2><AreaLinks locale={locale} label={copy.children} entries={children.map(c => ({ name: c.name, count: c.count, query: resolved.region ? { country: list.area.country, region: list.area.region, district: c.slug } : { country: list.area.country, region: c.slug } }))} /></section> : null}
       <section className="max-w-4xl" aria-label={copy.results}><DiscoveryList items={list.items} locale={locale} /></section>
-      <nav className="discovery-pagination mt-8 flex max-w-4xl flex-wrap items-center justify-between gap-4" aria-label={copy.pagination}>
-        {list.page > 1 ? <a rel="prev" className="discovery-button discovery-secondary" href={areaPath(locale, list.area, list.page - 1)}>← {copy.previous}</a> : <span />}
-        <span className="text-sm">{copy.page} {number(list.page, locale)} {copy.of} {number(pages, locale)}</span>
-        {list.page < pages ? <a rel="next" className="discovery-button discovery-secondary" href={areaPath(locale, list.area, list.page + 1)}>{copy.next} →</a> : <span />}
-      </nav>
+      <DiscoveryPager locale={locale} page={list.page} pages={pages} href={page => areaPath(locale, list.area, page)} />
       <aside className="mt-14 max-w-4xl border-t border-border pt-8"><p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{copy.add}</p><StoreBadges locale={locale} className="mt-5" size="compact" /></aside>
     </Container>
   </Frame>

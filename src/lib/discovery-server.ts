@@ -8,13 +8,16 @@ export const loadDiscoveryAreas = createServerFn({ method: 'GET' }).handler(asyn
   return getAreas()
 })
 export const loadDiscoveryLanding = createServerFn({ method: 'GET' })
-  .inputValidator((v: { q: string }) => ({ q: typeof v?.q === 'string' ? v.q.trim().slice(0, 81) : '' }))
+  .inputValidator((v: { q: string; page: number }) => ({
+    q: typeof v?.q === 'string' ? v.q.trim().slice(0, 81) : '',
+    page: Number.isSafeInteger(v?.page) && v.page > 0 ? v.page : 1,
+  }))
   .handler(async ({ data }) => {
     const { getAreas, getSearch } = await import('./discovery-api.server')
     const areas = await getAreas()
     if (!areas) return missing()
     const [results, stats] = await Promise.all([
-      data.q.length >= 2 && data.q.length <= 80 ? getSearch(data.q) : null,
+      data.q.length >= 2 && data.q.length <= 80 ? getSearch(data.q, data.page) : null,
       import('./public-stats-api.server').then(m => m.getPublicStats()),
     ])
     return { areas, q: data.q, results, stats }
