@@ -1,20 +1,27 @@
 import { apiGet } from './jm-api'
 import { validAreas, validAreaList, validSearch, validNearby, type Areas, type AreaList, type SearchResults, type NearbyResults, type AreaQuery } from './discovery'
 import type { WebEnv } from './worker-env'
-export async function getAreas(env?: WebEnv): Promise<Areas | null> {
+export type DiscoveryResult<T> = { status: 'ok'; data: T } | { status: 'missing' } | { status: 'unavailable' }
+export async function getAreas(env?: WebEnv): Promise<DiscoveryResult<Areas>> {
   try {
     const r = await apiGet<Areas>('/api/public/discovery/areas', { ttl: 3600, validate: v => validAreas(v) !== null }, env)
-    return r.status === 200 ? validAreas(r.body) : null
+    const data = r.status === 200 ? validAreas(r.body) : null
+    return data ? { status: 'ok', data } : { status: r.status === 404 ? 'missing' : 'unavailable' }
   } catch {
-    return null
+    return { status: 'unavailable' }
   }
 }
-export async function getAreaList(query: AreaQuery, page: number, env?: WebEnv) {
+export async function getAreaList(query: AreaQuery, page: number, env?: WebEnv): Promise<DiscoveryResult<AreaList>> {
   const params = new URLSearchParams({ country: query.country, page: String(page) })
   if (query.region) params.set('region', query.region)
   if (query.district) params.set('district', query.district)
-  const r = await apiGet<AreaList>(`/api/public/discovery/masjids?${params}`, { ttl: 3600, validate: v => validAreaList(v, query) !== null }, env)
-  return r.status === 200 ? validAreaList(r.body, query) : null
+  try {
+    const r = await apiGet<AreaList>(`/api/public/discovery/masjids?${params}`, { ttl: 3600, validate: v => validAreaList(v, query) !== null }, env)
+    const data = r.status === 200 ? validAreaList(r.body, query) : null
+    return data ? { status: 'ok', data } : { status: r.status === 404 && r.error === 'area_not_found' ? 'missing' : 'unavailable' }
+  } catch {
+    return { status: 'unavailable' }
+  }
 }
 export async function getSearch(q: string, page: number, env?: WebEnv) {
   const r = await apiGet<SearchResults>(`/api/public/discovery/search?${new URLSearchParams({ q, page: String(page) })}`, { ttl: 60, validate: v => validSearch(v, q) !== null }, env)

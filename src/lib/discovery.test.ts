@@ -170,20 +170,20 @@ describe('API caching and closed availability', () => {
   it('uses a separate 1h cache independent of the masjid-pages flag; revalidates hits', async () => {
     const c = cache(), fetcher = vi.fn(async () => Response.json(fixture().areas))
     const env = { MASJID_PAGES_ENABLED: 'false', JM_API_BASE: 'http://127.0.0.1:9999', JM_API: { fetch: fetcher } }
-    expect(await getAreas(env)).toEqual(fixture().areas)
+    expect(await getAreas(env)).toEqual({ status: 'ok', data: fixture().areas })
     await getAreas(env); expect(fetcher).toHaveBeenCalledOnce()
     const [key, stored] = [...c.stored][0]
     expect(key).toContain('/discovery/v1/')
     expect(stored.headers.get('Cache-Control')).toBe('public, max-age=3600')
     c.stored.set(key, Response.json({ payloadVersion: 1 }))
-    expect(await getAreas(env)).toBeNull()
-    await getAreas({ ...env, JM_API_BASE: 'http://127.0.0.1:9998' }); expect(fetcher).toHaveBeenCalledTimes(2)
+    expect(await getAreas(env)).toEqual({ status: 'ok', data: fixture().areas })
+    await getAreas({ ...env, JM_API_BASE: 'http://127.0.0.1:9998' }); expect(fetcher).toHaveBeenCalledTimes(3)
   })
   it.each(['404', 'invalid', 'timeout'])('fails closed on %s and caches no failed response', async mode => {
     const c = cache()
     const fetcher = vi.fn(async () => { if (mode === 'timeout') throw new DOMException('timeout', 'TimeoutError'); return mode === '404' ? new Response(null, { status: 404 }) : Response.json({ payloadVersion: 1 }) })
     const env = { JM_API: { fetch: fetcher } }
-    expect(await getAreas(env)).toBeNull(); expect(await getAreas(env)).toBeNull()
+    expect(await getAreas(env)).toEqual({ status: mode === '404' ? 'missing' : 'unavailable' }); expect(await getAreas(env)).toEqual({ status: mode === '404' ? 'missing' : 'unavailable' })
     expect(c.put).not.toHaveBeenCalled(); expect(fetcher).toHaveBeenCalledTimes(2)
   })
   it('caches lists 1h, search per full q/page/upstream URL for 60s, and never caches nearby', async () => {
@@ -199,10 +199,10 @@ describe('API caching and closed availability', () => {
     expect(fetcher).toHaveBeenCalledTimes(4)
     await getSearch('masjid', 2, { ...env, JM_API_BASE: 'http://127.0.0.1:9998' })
     expect(fetcher).toHaveBeenCalledTimes(5)
-    expect([...c.stored.values()].map(r => r.headers.get('Cache-Control'))).toEqual(['public, max-age=3600', ...Array(4).fill('public, max-age=60')])
+    expect([...c.stored.values()].map(r => r.headers.get('Cache-Control'))).toEqual(['public, max-age=3600', 'public, max-age=86400', ...Array(4).fill('public, max-age=60')])
     const reads = c.match.mock.calls.length
     await getNearby(3.123, 101.678, env); await getNearby(3.123, 101.678, env)
-    expect(c.match).toHaveBeenCalledTimes(reads); expect(c.put).toHaveBeenCalledTimes(5)
+    expect(c.match).toHaveBeenCalledTimes(reads); expect(c.put).toHaveBeenCalledTimes(6)
     expect(fetcher.mock.calls.at(-1)![0].url).toContain('lat=3.123&lng=101.678')
     expect(fetcher.mock.calls.at(-1)![0].headers.has('Cookie')).toBe(false)
   })

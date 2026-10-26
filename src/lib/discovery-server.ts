@@ -1,11 +1,18 @@
 import { createServerFn } from '@tanstack/react-start'
 import { notFound } from '@tanstack/react-router'
-import { setResponseHeader } from '@tanstack/react-start/server'
+import { setResponseHeader, setResponseStatus } from '@tanstack/react-start/server'
 import { areaSlug, resolveArea, type AreaQuery } from './discovery'
+import { discoveryUnavailableHeaders } from './discovery-response'
 const missing = (): never => { setResponseHeader('Cache-Control', 'no-store'); throw notFound() }
+const unavailable = () => {
+  setResponseStatus(503)
+  for (const [name, value] of Object.entries(discoveryUnavailableHeaders)) setResponseHeader(name, value)
+  return { unavailable: true as const }
+}
 export const loadDiscoveryAreas = createServerFn({ method: 'GET' }).handler(async () => {
   const { getAreas } = await import('./discovery-api.server')
-  return getAreas()
+  const result = await getAreas()
+  return result.status === 'ok' ? result.data : null
 })
 export const loadDiscoveryLanding = createServerFn({ method: 'GET' })
   .inputValidator((v: { q: string; page: number }) => ({
@@ -14,13 +21,15 @@ export const loadDiscoveryLanding = createServerFn({ method: 'GET' })
   }))
   .handler(async ({ data }) => {
     const { getAreas, getSearch } = await import('./discovery-api.server')
-    const areas = await getAreas()
-    if (!areas) return missing()
+    const result = await getAreas()
+    if (result.status === 'missing') return missing()
+    if (result.status === 'unavailable') return { ...unavailable(), areas: null, q: data.q, results: null, stats: null }
+    const areas = result.data
     const [results, stats] = await Promise.all([
       data.q.length >= 2 && data.q.length <= 80 ? getSearch(data.q, data.page) : null,
       import('./public-stats-api.server').then(m => m.getPublicStats()),
     ])
-    return { areas, q: data.q, results, stats }
+    return { areas, q: data.q, results, stats, ...(data.q.length >= 2 && data.q.length <= 80 && !results ? unavailable() : {}) }
   })
 export const loadDiscoveryArea = createServerFn({ method: 'GET' })
   .inputValidator((v: AreaQuery & { page: number }) => {
@@ -29,11 +38,15 @@ export const loadDiscoveryArea = createServerFn({ method: 'GET' })
   })
   .handler(async ({ data }) => {
     const { getAreas, getAreaList } = await import('./discovery-api.server')
-    const areas = await getAreas()
-    if (!areas || !resolveArea(areas, data)) return missing()
+    const result = await getAreas()
+    if (result.status === 'missing') return missing()
+    if (result.status === 'unavailable') return unavailable()
+    const areas = result.data
+    if (!resolveArea(areas, data)) return missing()
     const list = await getAreaList(data, data.page)
-    if (!list) return missing()
-    return { areas, list }
+    if (list.status === 'missing') return missing()
+    if (list.status === 'unavailable') return unavailable()
+    return { areas, list: list.data }
   })
 export const loadDiscoveryNearby = createServerFn({ method: 'POST' })
   .inputValidator((v: { lat: number; lng: number }) => {
@@ -43,6 +56,6 @@ export const loadDiscoveryNearby = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     setResponseHeader('Cache-Control', 'private, no-store')
     const { getAreas, getNearby } = await import('./discovery-api.server')
-    if (!await getAreas()) return null
+    if ((await getAreas()).status !== 'ok') return null
     return getNearby(data.lat, data.lng)
   })

@@ -120,6 +120,15 @@ const areaRoutes = [
   ...['malaysia', 'malaysia/selangor', 'malaysia/selangor/petaling'].map(area => ({ path: '/masjid/di/' + area, param: 'halaman', stray: 'page' })),
   ...['malaysia', 'malaysia/selangor', 'malaysia/selangor/petaling'].map(area => ({ path: '/en/mosques/in/' + area, param: 'page', stray: 'halaman' })),
 ]
+it.each([...landingRoutes, ...areaRoutes])('keeps $path outage pages noindex with their own canonical', async ({ path, param }) => {
+  vi.mocked(loadDiscoveryLanding).mockResolvedValue({ unavailable: true, areas: null, q: 'Petaling', results: null, stats: null })
+  vi.mocked(loadDiscoveryArea).mockResolvedValue({ unavailable: true })
+  const requestRouter = await serverGet(path + `?${param}=2`)
+  const match = requestRouter.state.matches.at(-1)!
+  expect(match.meta).toContainEqual({ name: 'robots', content: 'noindex, nofollow' })
+  expect(match.links).toContainEqual({ rel: 'canonical', href: 'https://jejakmasjid.my' + path })
+  expect(requestRouter.state.redirect).toBeUndefined()
+})
 it.each(areaRoutes)('renders $path with only $param, and a clean canonical for page 1', async ({ path, param, stray }) => {
   for (const query of ['', `?${param}=1`, `?${param}=2`]) {
     const requestRouter = await serverGet(path + query)

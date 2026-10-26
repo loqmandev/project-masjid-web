@@ -9,7 +9,7 @@ export const Route = createFileRoute('/en_/mosques_/in/$country')({
   loaderDeps: ({ search }) => ({ page: search.page ?? 1 }),
   loader: ({ params, deps }) => loadDiscoveryArea({ data: { ...params, ...deps } }),
   headers: () => ({ 'Cache-Control': 'no-store' }),
-  head: ({ loaderData }) => areaHead('en', loaderData),
+  head: ({ loaderData, match }) => areaHead('en', loaderData, match.pathname),
   component: () => <DiscoveryArea locale="en" data={Route.useLoaderData()} />,
   notFoundComponent: () => <DiscoveryMissing locale="en" />,
 })

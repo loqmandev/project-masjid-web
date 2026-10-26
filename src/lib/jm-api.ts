@@ -10,12 +10,13 @@ export const validSlug = (s: string) =>
   s.length >= 3 && s.length <= 100 && !/[^a-z0-9-]|^-|-$|--/.test(s)
 export const validProgramId = (s: string) => /^[A-Za-z0-9_-]{1,64}$/.test(s)
 export const validSitemapPage = (s: string) => /^[1-9][0-9]{0,2}$/.test(s)
-export type ApiResult<T> = { status: number; body: T | null }
+export type ApiResult<T> = { status: number; body: T | null; error?: string }
 export const PUBLIC_CACHE_TAG = 'jm-ajk-public'
 export const statsCacheKey = (url: string) =>
   `https://jejakmasjid.my/__jm-internal-cache/public-stats/v1/${encodeURIComponent(url)}`
 export const discoveryCacheKey = (url: string) =>
   `https://jejakmasjid.my/__jm-internal-cache/discovery/v1/${encodeURIComponent(url)}`
+export const discoveryStaleCacheKey = (url: string) => `${discoveryCacheKey(url)}/stale`
 // Cache API custom keys must belong to the web zone for zone tag purges.
 // Including the upstream URL isolates service-binding/local environments.
 export const publicCacheKey = (url: string, prayer = false) =>
@@ -31,6 +32,7 @@ export async function apiGet<T>(
   const stats = path === '/api/public/stats'
   const discovery = path.startsWith('/api/public/discovery/')
   const nearby = path.startsWith('/api/public/discovery/nearby?')
+  const staleFallback = path === '/api/public/discovery/areas' || path.startsWith('/api/public/discovery/masjids?')
   if (!stats && !discovery && env.MASJID_PAGES_ENABLED !== 'true') return { status: 404, body: null }
   if (!path.startsWith('/api/') || path.includes('..'))
     return { status: 404, body: null }
@@ -46,13 +48,13 @@ export async function apiGet<T>(
       ? (caches as CacheStorage & { default?: Cache }).default
       : undefined
   const ttl = Math.min(opts.ttl, stats || discovery ? 3600 : prayer ? 300 : 60)
-  const put = async (response: Response) => {
+  const put = async (response: Response, cacheKey = key, maxAge = ttl) => {
     if (!cache) return
     const copy = response.clone()
-    copy.headers.set('Cache-Control', `public, max-age=${ttl}`)
+    copy.headers.set('Cache-Control', `public, max-age=${maxAge}`)
     if (!prayer && !stats && !discovery) copy.headers.set('Cache-Tag', PUBLIC_CACHE_TAG)
     try {
-      await cache.put(key, copy)
+      await cache.put(cacheKey, copy)
     } catch {
       /* Never fail a public read for a cache write. */
     }
@@ -65,17 +67,23 @@ export async function apiGet<T>(
       /* Read through on cache failure. */
     }
     if (cached) {
-      const body = cached.status === 200 ? await cached.json() : null
-      if (opts.validate && !opts.validate(body)) return { status: 503, body: null }
-      return {
-        status: cached.headers.has('X-JM-Prayer-Unavailable')
-          ? 503
-          : cached.status,
-        body: body as T | null,
+      try {
+        const body = cached.status === 200 ? await cached.json() : null
+        if (opts.validate && !opts.validate(body)) {
+          if (!staleFallback) return { status: 503, body: null }
+        } else {
+          return {
+            status: cached.headers.has('X-JM-Prayer-Unavailable') ? 503 : cached.status,
+            body: body as T | null,
+          }
+        }
+      } catch {
+        // A corrupt discovery entry must not prevent a new upstream read.
+        if (!staleFallback) return { status: 503, body: null }
       }
     }
     const request = new Request(url, {
-      signal: AbortSignal.timeout(stats || discovery ? Math.min(opts.timeoutMs ?? 1500, 1500) : opts.timeoutMs ?? 5000),
+      signal: AbortSignal.timeout(stats ? Math.min(opts.timeoutMs ?? 1500, 1500) : opts.timeoutMs ?? (discovery ? 4000 : 5000)),
       redirect: 'manual',
     })
     const response = await (env.JM_API
@@ -83,16 +91,33 @@ export async function apiGet<T>(
       : fetch(request))
     if (response.status === 200) {
       const body = (await response.json()) as T
-      if (opts.validate && !opts.validate(body)) return { status: 503, body: null }
-      await put(Response.json(body))
-      return { status: 200, body }
+      if (!opts.validate || opts.validate(body)) {
+        await put(Response.json(body))
+        if (staleFallback) await put(Response.json(body), discoveryStaleCacheKey(url), 86400)
+        return { status: 200, body }
+      }
     }
     if (!negative && response.status === 404) {
       if (!stats && !discovery) await put(new Response(null, { status: 404 }))
+      if (discovery) {
+        const body = await response.json().catch(() => null) as { error?: unknown } | null
+        if (body?.error === 'area_not_found') return { status: 404, body: null, error: 'area_not_found' }
+      }
       return { status: 404, body: null }
     }
   } catch {
     /* Timeout, invalid JSON or network failure. Optional sections hide. */
+  }
+  if (staleFallback) {
+    try {
+      const stale = await cache?.match(discoveryStaleCacheKey(url))
+      if (stale?.status === 200) {
+        const body = await stale.json() as T
+        if (!opts.validate || opts.validate(body)) return { status: 200, body }
+      }
+    } catch {
+      /* Stale reads are best-effort and are validated just like fresh reads. */
+    }
   }
   if (negative) {
     // Cache API cannot cache errors: an explicit 200/null sentinel remembers failure.

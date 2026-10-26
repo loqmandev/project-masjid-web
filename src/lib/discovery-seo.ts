@@ -17,18 +17,19 @@ export function areaBreadcrumbs(areas: Areas, list: AreaList, locale: Locale) {
     ...(area.district ? [{ name: area.district.name, href: areaPath(locale, q) }] : []),
   ]
 }
-export function landingHead(locale: Locale, data?: { q: string; results: SearchResults | null }, hasQuery = Boolean(data?.q)) {
+export function landingHead(locale: Locale, data?: { q: string; results: SearchResults | null; unavailable?: boolean }, hasQuery = Boolean(data?.q)) {
   if (!data) return { meta: [{ name: 'robots', content: 'noindex, nofollow' }], links: [], scripts: [] }
   const copy = t(locale).discovery
-  const head = seo({ title: copy.title, description: copy.intro, path: discoveryHome(locale), alternates: { ms: discoveryHome('ms'), en: discoveryHome('en') } })
-  if (hasQuery) head.meta = head.meta.map(meta => meta.name === 'robots' ? { name: 'robots', content: 'noindex, follow' } : meta)
+  const head = seo({ title: copy.title, description: copy.intro, path: discoveryHome(locale), alternates: { ms: discoveryHome('ms'), en: discoveryHome('en') }, noindex: data.unavailable })
+  if (hasQuery && !data.unavailable) head.meta = head.meta.map(meta => meta.name === 'robots' ? { name: 'robots', content: 'noindex, follow' } : meta)
   return { ...head,
     scripts: data.results ? [{ type: 'application/ld+json', children: jsonLdScript(itemList(data.results.items, (data.results.page - 1) * data.results.pageSize)) }] : [],
   }
 }
-export function areaHead(locale: Locale, data?: { areas: Areas; list: AreaList }) {
+export function areaHead(locale: Locale, data?: { areas: Areas; list: AreaList } | { unavailable: true }, requestedPath = discoveryHome(locale)) {
   if (!data) return { meta: [{ name: 'robots', content: 'noindex, nofollow' }], links: [], scripts: [] }
   const copy = t(locale).discovery
+  if ('unavailable' in data) return { ...seo({ title: copy.title, description: copy.listUnavailable, path: requestedPath, noindex: true }), scripts: [] }
   const { areas, list } = data
   const crumbs = areaBreadcrumbs(areas, list, locale)
   const name = crumbs.at(-1)!.name

@@ -4,10 +4,10 @@ import Footer from './Footer'
 import { Container } from './ui/Section'
 import StoreBadges from './ui/StoreBadges'
 import { t, type Locale } from '@/lib/i18n'
-import { areaPath, countryName, discoveryHome, searchPath, resolveArea, type Areas, type AreaList, type AreaQuery, type DiscoveryItem, type NearbyItem } from '@/lib/discovery'
+import { areaPath, countryName, discoveryHome, searchPath, resolveArea, type AreaQuery, type DiscoveryItem, type NearbyItem } from '@/lib/discovery'
 import { areaBreadcrumbs } from '@/lib/discovery-seo'
 import { loadDiscoveryNearby } from '@/lib/discovery-server'
-import type { loadDiscoveryLanding } from '@/lib/discovery-server'
+import type { loadDiscoveryLanding, loadDiscoveryArea } from '@/lib/discovery-server'
 const number = (n: number, locale: Locale) => new Intl.NumberFormat(locale).format(n)
 export function DiscoveryList({ items, locale, start }: { items: (DiscoveryItem | NearbyItem)[]; locale: Locale; start?: number }) {
   const List = start === undefined ? 'ul' : 'ol'
@@ -65,16 +65,14 @@ function Frame({ children }: { locale: Locale; children: ReactNode }) {
 }
 export function DiscoveryLanding({ locale, data }: { locale: Locale; data: Awaited<ReturnType<typeof loadDiscoveryLanding>> }) {
   const copy = t(locale).discovery
+  if (data.unavailable || !data.areas) return <DiscoveryUnavailable locale={locale} landing q={data.q} />
   const malaysia = data.areas.countries.find(c => c.code === 'MY')
   const other = data.areas.countries.filter(c => c.code !== 'MY')
   return <Frame locale={locale}>
     <div className="on-deep bg-deep py-12 sm:py-20"><Container><h1 className="max-w-3xl text-4xl leading-tight text-deep-foreground sm:text-5xl">{copy.title}</h1><p className="mt-5 max-w-2xl leading-relaxed text-deep-muted">{copy.intro}</p></Container></div>
     <Container className="py-10 sm:py-14">
       <section className="max-w-3xl" aria-label={copy.submit}>
-        <form method="get" action={discoveryHome(locale)} role="search" className="discovery-search">
-          <label className="mb-3 block font-semibold" htmlFor="masjid-search">{copy.label}</label>
-          <div className="flex flex-col gap-3 sm:flex-row"><input id="masjid-search" name="q" type="search" maxLength={80} defaultValue={data.q} placeholder={copy.placeholder} className="min-w-0 flex-1 rounded-xl border border-border-strong bg-card px-4 py-3.5" /><button className="discovery-button" type="submit">{copy.submit}</button></div>
-        </form>
+        <DiscoverySearchForm locale={locale} q={data.q} />
         {data.q.length < 2 ? <p className="mt-3 text-sm text-muted-foreground">{copy.hint}</p> : data.q.length > 80 ? <p className="mt-3 text-sm text-muted-foreground">{copy.long}</p> : null}
         <NearbySearch locale={locale} />
       </section>
@@ -92,8 +90,9 @@ export function DiscoveryLanding({ locale, data }: { locale: Locale; data: Await
     </Container>
   </Frame>
 }
-export function DiscoveryArea({ locale, data }: { locale: Locale; data: { areas: Areas; list: AreaList } }) {
+export function DiscoveryArea({ locale, data }: { locale: Locale; data: Awaited<ReturnType<typeof loadDiscoveryArea>> }) {
   const copy = t(locale).discovery
+  if ('unavailable' in data) return <DiscoveryUnavailable locale={locale} />
   const { list, areas } = data
   const crumbs = areaBreadcrumbs(areas, list, locale)
   const resolved = resolveArea(areas, list.area)!
@@ -115,4 +114,20 @@ export function DiscoveryArea({ locale, data }: { locale: Locale; data: { areas:
 export function DiscoveryMissing({ locale }: { locale: Locale }) {
   const copy = t(locale).discovery
   return <Frame locale={locale}><Container className="py-24"><h1 className="text-3xl text-foreground">{copy.missing}</h1><a href={locale === 'ms' ? '/' : '/en'} className="mt-6 inline-block min-h-11 underline">{copy.back}</a></Container></Frame>
+}
+function DiscoverySearchForm({ locale, q }: { locale: Locale; q: string }) {
+  const copy = t(locale).discovery
+  return <form method="get" action={discoveryHome(locale)} role="search" className="discovery-search">
+    <label className="mb-3 block font-semibold" htmlFor="masjid-search">{copy.label}</label>
+    <div className="flex flex-col gap-3 sm:flex-row"><input id="masjid-search" name="q" type="search" maxLength={80} defaultValue={q} placeholder={copy.placeholder} className="min-w-0 flex-1 rounded-xl border border-border-strong bg-card px-4 py-3.5" /><button className="discovery-button" type="submit">{copy.submit}</button></div>
+  </form>
+}
+export function DiscoveryUnavailable({ locale, landing = false, q = '' }: { locale: Locale; landing?: boolean; q?: string }) {
+  const copy = t(locale).discovery
+  return <Frame locale={locale}>
+    <div className="on-deep bg-deep py-12 sm:py-20"><Container><h1 className="max-w-3xl text-4xl leading-tight text-deep-foreground sm:text-5xl">{copy.title}</h1></Container></div>
+    <Container className="py-10 sm:py-14"><p className="max-w-2xl leading-relaxed text-muted-foreground">{copy.listUnavailable}</p>
+      {landing ? <div className="mt-8 max-w-3xl"><DiscoverySearchForm locale={locale} q={q} /></div> : <a href={locale === 'ms' ? '/' : '/en'} className="mt-6 inline-block min-h-11 underline">{copy.back}</a>}
+    </Container>
+  </Frame>
 }

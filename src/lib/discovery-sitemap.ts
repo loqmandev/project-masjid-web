@@ -1,6 +1,7 @@
 import { areaPath, discoveryHome, type Areas, type AreaQuery } from './discovery'
 import { SITE } from './site'
 import { xmlEscape } from './sitemap'
+import { discoveryUnavailableHeaders } from './discovery-response'
 export function areaSitemap(areas: Areas) {
   const pages: { query: AreaQuery | null; page: number }[] = [{ query: null, page: 1 }]
   const add = (query: AreaQuery, count: number) => {
@@ -22,6 +23,9 @@ export function areaSitemap(areas: Areas) {
 }
 export async function areaSitemapResponse() {
   const { getAreas } = await import('./discovery-api.server')
-  const areas = await getAreas()
-  return new Response(areas ? areaSitemap(areas) : null, { status: areas ? 200 : 404, headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'no-store' } })
+  const result = await getAreas()
+  return new Response(result.status === 'ok' ? areaSitemap(result.data) : null, {
+    status: result.status === 'ok' ? 200 : result.status === 'missing' ? 404 : 503,
+    headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'no-store', ...(result.status === 'unavailable' ? discoveryUnavailableHeaders : {}) },
+  })
 }

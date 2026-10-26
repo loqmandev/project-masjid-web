@@ -39,10 +39,11 @@ export async function sitemapIndexResponse() {
   const env = await getWorkerEnv()
   const { getAreas } = await import('./discovery-api.server')
   const [areas, r] = await Promise.all([getAreas(), env.MASJID_PAGES_ENABLED === 'true' ? getSitemapCount() : null])
-  if (!r) return response(sitemapIndex(0, 5000, !!areas))
+  const discovery = areas.status === 'ok'
+  if (!r) return response(sitemapIndex(0, 5000, discovery))
   return r.status === 200 && r.body && validPagination(r.body)
-    ? response(sitemapIndex(r.body.total, r.body.pageSize, !!areas))
-    : response(sitemapIndex(0, 5000, !!areas), 200, areas ? 'no-store' : 'public, max-age=300')
+    ? response(sitemapIndex(r.body.total, r.body.pageSize, discovery))
+    : response(sitemapIndex(0, 5000, discovery), 200, discovery ? 'no-store' : 'public, max-age=300')
 }
 export async function sitemapPageResponse(n: string) {
   if (!validSitemapPage(n)) return response('', 404)
