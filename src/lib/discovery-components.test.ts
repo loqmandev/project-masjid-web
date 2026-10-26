@@ -12,6 +12,18 @@ import { loadDiscoveryNearby } from './discovery-server'
 import { DiscoveryArea, DiscoveryLanding, DiscoveryMissing, NearbySearch } from '@/components/Discovery'
 import { t } from './i18n'
 afterEach(() => { cleanup(); vi.restoreAllMocks() })
+it.each(['ms', 'en'] as const)('renders the calm %s outage page and keeps the landing search usable', locale => {
+  const data = { unavailable: true as const, areas: null, q: 'Petaling', results: null, stats: null }
+  const landing = new DOMParser().parseFromString(renderToStaticMarkup(createElement(DiscoveryLanding, { locale, data })), 'text/html')
+  expect(landing.querySelector('main')?.textContent).toContain(t(locale).discovery.listUnavailable)
+  const form = landing.querySelector('form')!
+  expect(form.method).toBe('get')
+  expect(form.getAttribute('action')).toBe(locale === 'ms' ? '/masjid' : '/en/mosques')
+  expect([...new FormData(form).entries()]).toEqual([['q', 'Petaling']])
+  expect(landing.querySelector('.discovery-pagination')).toBeNull()
+  const area = renderToStaticMarkup(createElement(DiscoveryArea, { locale, data: { unavailable: true } }))
+  expect(new DOMParser().parseFromString(area, 'text/html').querySelector('main')?.textContent).toContain(t(locale).discovery.listUnavailable)
+})
 it.each(['ms', 'en'] as const)('server-renders %s discovery headings with the on-deep foreground', locale => {
   const list: AreaList = { payloadVersion: 1, area: { country: 'malaysia', region: 'selangor', district: 'petaling', names: { country: 'Malaysia', region: 'Selangor', district: 'Petaling' } }, total: 51, page: 1, pageSize: 50, items: fixture.items.slice(0, 50) as DiscoveryItem[] }
   const pages = [
