@@ -1,45 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
-
-import Cta from '@/components/Cta'
-import Assurances from '@/components/Assurances'
-import Faq from '@/components/Faq'
-import Features from '@/components/Features'
-import ForCommittees from '@/components/ForCommittees'
-import Footer from '@/components/Footer'
-import Header from '@/components/Header'
-import Hero from '@/components/Hero'
-import HowItWorks from '@/components/HowItWorks'
-import Journey from '@/components/Journey'
-import { FAQ } from '@/lib/faq'
-import { faqStructuredData, seo } from '@/lib/seo'
+import Homepage, { homepageHead } from '@/components/Homepage'
+import { loadPublicStats } from '@/lib/public-stats-server'
 
 export const Route = createFileRoute('/')({
-  head: () =>
-    seo({
-      path: '/',
-    }),
-  component: App,
+  loader: () => loadPublicStats(),
+  head: () => homepageHead('ms'),
+  component: HomePage,
 })
 
-function App() {
-  return (
-    <>
-      <Header />
-      <main>
-        <Hero />
-        <Assurances />
-        <Journey />
-        <Features />
-        <HowItWorks />
-        <ForCommittees />
-        <Faq />
-        <Cta />
-      </main>
-      <Footer />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData(FAQ)) }}
-      />
-    </>
-  )
+function HomePage() {
+  return <Homepage locale="ms" stats={Route.useLoaderData()} />
 }

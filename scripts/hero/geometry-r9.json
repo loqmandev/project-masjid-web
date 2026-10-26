@@ -1,0 +1,606 @@
+{
+  "sourceSize": 1254,
+  "cornerOrder": "TL, TR, BR, BL (screen); clockwise from left/back edge (plots)",
+  "screens": {
+    "close": {
+      "painting": "l1-close.png",
+      "quad": [
+        [
+          641.0,
+          382.0
+        ],
+        [
+          753.1999999999999,
+          410.5
+        ],
+        [
+          684.0,
+          641.6
+        ],
+        [
+          573.8,
+          610.2
+        ]
+      ],
+      "alphaBounds": [
+        16,
+        12,
+        724,
+        1042
+      ],
+      "occludedPixels": 7054,
+      "overlayRect": [
+        571,
+        380,
+        185,
+        264
+      ],
+      "overlayScale": 4,
+      "overlayPixelSize": [
+        740,
+        1056
+      ],
+      "alphaBoundsSpace": "overlay pixels, relative to overlayRect",
+      "occlusionAsset": "screen-close-occlusion.webp",
+      "rightEdgeRefinement": "Round 9c: include the last ivory glass pixels up to the painted dark bezel."
+    },
+    "street": {
+      "painting": "l2-street.png",
+      "quad": [
+        [
+          631.8,
+          550.8
+        ],
+        [
+          677.2,
+          560.5
+        ],
+        [
+          648.0,
+          652.8
+        ],
+        [
+          603.8,
+          640.2
+        ]
+      ],
+      "alphaBounds": [
+        13,
+        12,
+        303,
+        418
+      ],
+      "occludedPixels": 1242,
+      "overlayRect": [
+        601,
+        548,
+        79,
+        107
+      ],
+      "overlayScale": 4,
+      "overlayPixelSize": [
+        316,
+        428
+      ],
+      "alphaBoundsSpace": "overlay pixels, relative to overlayRect",
+      "occlusionAsset": "screen-street-occlusion.webp",
+      "rightEdgeRefinement": "Round 9c: include the last ivory glass pixels up to the painted dark bezel."
+    },
+    "block": {
+      "painting": "l3-block.png",
+      "quad": [
+        [
+          628.4,
+          692.4
+        ],
+        [
+          644.5,
+          696.3
+        ],
+        [
+          632.8,
+          728.2
+        ],
+        [
+          617.7,
+          724.3
+        ]
+      ],
+      "alphaBounds": [
+        11,
+        10,
+        118,
+        152
+      ],
+      "occludedPixels": 123,
+      "overlayRect": [
+        615,
+        690,
+        32,
+        41
+      ],
+      "overlayScale": 4,
+      "overlayPixelSize": [
+        128,
+        164
+      ],
+      "alphaBoundsSpace": "overlay pixels, relative to overlayRect",
+      "occlusionAsset": "screen-block-occlusion.webp",
+      "rightEdgeRefinement": "Round 9c: include the last ivory glass pixels up to the painted dark bezel."
+    }
+  },
+  "plots": [
+    {
+      "id": "city",
+      "asset": "city-masjid",
+      "crop": [
+        40,
+        95,
+        340,
+        340
+      ],
+      "corners": [
+        [
+          67,
+          216
+        ],
+        [
+          230,
+          177
+        ],
+        [
+          312,
+          257
+        ],
+        [
+          148,
+          308
+        ]
+      ],
+      "ground": [
+        205,
+        276
+      ],
+      "label": "1.4 km",
+      "metres": 1400,
+      "margin": [
+        5,
+        40,
+        5,
+        6
+      ],
+      "envelope": [
+        [
+          43,
+          132
+        ],
+        [
+          89,
+          115
+        ],
+        [
+          89,
+          65
+        ],
+        [
+          102,
+          54
+        ],
+        [
+          112,
+          74
+        ],
+        [
+          112,
+          112
+        ],
+        [
+          141,
+          96
+        ],
+        [
+          151,
+          82
+        ],
+        [
+          166,
+          79
+        ],
+        [
+          181,
+          89
+        ],
+        [
+          211,
+          107
+        ],
+        [
+          217,
+          94
+        ],
+        [
+          217,
+          57
+        ],
+        [
+          226,
+          51
+        ],
+        [
+          236,
+          67
+        ],
+        [
+          238,
+          125
+        ],
+        [
+          263,
+          143
+        ],
+        [
+          269,
+          172
+        ],
+        [
+          112,
+          213
+        ],
+        [
+          85,
+          188
+        ]
+      ],
+      "spriteRect": [
+        82,
+        145,
+        229,
+        165
+      ],
+      "alphaBounds": [
+        0,
+        0,
+        229,
+        165
+      ]
+    },
+    {
+      "id": "modern",
+      "asset": "modern-masjid",
+      "crop": [
+        880,
+        120,
+        340,
+        340
+      ],
+      "corners": [
+        [
+          936,
+          259
+        ],
+        [
+          1070,
+          211
+        ],
+        [
+          1162,
+          278
+        ],
+        [
+          1064,
+          343
+        ]
+      ],
+      "ground": [
+        1052,
+        292
+      ],
+      "label": "900 m",
+      "metres": 900,
+      "margin": [
+        5,
+        36,
+        12,
+        10
+      ],
+      "envelope": [
+        [
+          69,
+          145
+        ],
+        [
+          109,
+          122
+        ],
+        [
+          145,
+          104
+        ],
+        [
+          160,
+          91
+        ],
+        [
+          173,
+          85
+        ],
+        [
+          180,
+          90
+        ],
+        [
+          194,
+          104
+        ],
+        [
+          224,
+          118
+        ],
+        [
+          237,
+          125
+        ],
+        [
+          237,
+          74
+        ],
+        [
+          247,
+          65
+        ],
+        [
+          254,
+          77
+        ],
+        [
+          254,
+          127
+        ],
+        [
+          290,
+          149
+        ],
+        [
+          290,
+          163
+        ],
+        [
+          189,
+          230
+        ],
+        [
+          69,
+          158
+        ]
+      ],
+      "spriteRect": [
+        948,
+        184,
+        224,
+        168
+      ],
+      "alphaBounds": [
+        0,
+        0,
+        224,
+        168
+      ]
+    },
+    {
+      "id": "south",
+      "asset": "shophouse-surau",
+      "crop": [
+        0,
+        730,
+        340,
+        340
+      ],
+      "corners": [
+        [
+          26,
+          926
+        ],
+        [
+          179,
+          866
+        ],
+        [
+          273,
+          953
+        ],
+        [
+          112,
+          1026
+        ]
+      ],
+      "ground": [
+        155,
+        953
+      ],
+      "label": "600 m",
+      "metres": 600,
+      "margin": [
+        5,
+        10,
+        5,
+        5
+      ],
+      "envelope": [
+        [
+          61,
+          199
+        ],
+        [
+          74,
+          177
+        ],
+        [
+          74,
+          172
+        ],
+        [
+          132,
+          147
+        ],
+        [
+          148,
+          145
+        ],
+        [
+          150,
+          138
+        ],
+        [
+          152,
+          148
+        ],
+        [
+          187,
+          131
+        ],
+        [
+          223,
+          148
+        ],
+        [
+          235,
+          169
+        ],
+        [
+          243,
+          188
+        ],
+        [
+          269,
+          223
+        ],
+        [
+          118,
+          294
+        ]
+      ],
+      "spriteRect": [
+        60,
+        860,
+        211,
+        166
+      ],
+      "alphaBounds": [
+        0,
+        0,
+        211,
+        166
+      ]
+    },
+    {
+      "id": "condos",
+      "asset": "condo-surau",
+      "crop": [
+        880,
+        730,
+        340,
+        340
+      ],
+      "corners": [
+        [
+          927,
+          926
+        ],
+        [
+          1080,
+          860
+        ],
+        [
+          1164,
+          926
+        ],
+        [
+          1025,
+          997
+        ]
+      ],
+      "ground": [
+        1051,
+        938
+      ],
+      "label": "350 m",
+      "metres": 350,
+      "margin": [
+        5,
+        24,
+        5,
+        10
+      ],
+      "envelope": [
+        [
+          46,
+          195
+        ],
+        [
+          88,
+          176
+        ],
+        [
+          115,
+          163
+        ],
+        [
+          115,
+          159
+        ],
+        [
+          160,
+          138
+        ],
+        [
+          169,
+          131
+        ],
+        [
+          177,
+          110
+        ],
+        [
+          183,
+          109
+        ],
+        [
+          189,
+          131
+        ],
+        [
+          201,
+          138
+        ],
+        [
+          245,
+          159
+        ],
+        [
+          245,
+          180
+        ],
+        [
+          281,
+          197
+        ],
+        [
+          146,
+          264
+        ]
+      ],
+      "spriteRect": [
+        925,
+        838,
+        238,
+        158
+      ],
+      "alphaBounds": [
+        0,
+        0,
+        238,
+        158
+      ]
+    }
+  ]
+}

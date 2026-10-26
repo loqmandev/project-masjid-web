@@ -12,6 +12,7 @@ type SeoInput = {
   type?: 'website' | 'article'
   /** Overrides the OG/Twitter title when the share card should read differently. */
   socialTitle?: string
+  alternates?: { ms: string; en: string }
 }
 
 /**
@@ -26,6 +27,7 @@ export function seo({
   noindex = false,
   type = 'website',
   socialTitle,
+  alternates,
 }: SeoInput = {}) {
   const fullTitle = title
     ? `${title} | ${SITE.name}`
@@ -46,7 +48,7 @@ export function seo({
 
     { property: 'og:type', content: type },
     { property: 'og:site_name', content: SITE.name },
-    { property: 'og:locale', content: SITE.locale },
+    { property: 'og:locale', content: alternates ? (canonical === absoluteUrl(alternates.ms) ? 'ms_MY' : 'en_US') : SITE.locale },
     { property: 'og:title', content: cardTitle },
     { property: 'og:description', content: description },
     { property: 'og:url', content: canonical },
@@ -67,7 +69,14 @@ export function seo({
 
   return {
     meta,
-    links: [{ rel: 'canonical', href: canonical }],
+    links: [
+      { rel: 'canonical', href: canonical },
+      ...(alternates ? [
+        { rel: 'alternate', hrefLang: 'ms', href: absoluteUrl(alternates.ms) },
+        { rel: 'alternate', hrefLang: 'en', href: absoluteUrl(alternates.en) },
+        { rel: 'alternate', hrefLang: 'x-default', href: absoluteUrl(alternates.en) },
+      ] : []),
+    ],
   }
 }
 
@@ -84,7 +93,6 @@ export function structuredData() {
         url: SITE.url,
         logo: absoluteUrl('/icon-512.png'),
         email: SITE.email,
-        areaServed: 'MY',
       },
       {
         '@type': 'WebSite',
@@ -92,7 +100,7 @@ export function structuredData() {
         name: SITE.name,
         url: SITE.url,
         description: SITE.description,
-        inLanguage: 'en-MY',
+        inLanguage: ['ms', 'en'],
         publisher: { '@id': `${SITE.url}/#organization` },
       },
       {
@@ -110,7 +118,7 @@ export function structuredData() {
           absoluteUrl('/screens/02-explore.webp'),
           absoluteUrl('/screens/04-prayer-circle.webp'),
         ],
-        inLanguage: ['ms-MY', 'en-MY'],
+        inLanguage: ['ms', 'en'],
         author: { '@id': `${SITE.url}/#organization` },
         offers: {
           '@type': 'Offer',

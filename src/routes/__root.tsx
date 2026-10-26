@@ -1,17 +1,18 @@
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+import { HeadContent, Scripts, createRootRoute, useLocation } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import appCss from '../styles.css?url'
 import { SITE } from '@/lib/site'
 import { seo, structuredData } from '@/lib/seo'
+import { htmlLangForPath } from '@/lib/i18n'
 
 /**
  * Opts the page into motion. Everything animated is gated behind
  * `html[data-motion="on"]`, so a visitor without JS, or one who has asked for
  * reduced motion, gets the full page rendered static and visible.
  */
-const MOTION_INIT = `(function(){try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.dataset.motion='on'}}catch(e){}})()`
+const MOTION_INIT = `(function(){try{var q=matchMedia('(prefers-reduced-motion: reduce)');function sync(){if(q.matches){delete document.documentElement.dataset.motion}else{document.documentElement.dataset.motion='on'}}sync();q.addEventListener('change',sync)}catch(e){}})()`
 
 export const Route = createRootRoute({
   head: () => ({
@@ -59,8 +60,9 @@ export const Route = createRootRoute({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const path = useLocation({ select: location => location.pathname })
   return (
-    <html lang="en-MY">
+    <html lang={htmlLangForPath(path)}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: MOTION_INIT }} />
         <HeadContent />

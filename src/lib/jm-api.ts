@@ -12,6 +12,8 @@ export const validProgramId = (s: string) => /^[A-Za-z0-9_-]{1,64}$/.test(s)
 export const validSitemapPage = (s: string) => /^[1-9][0-9]{0,2}$/.test(s)
 export type ApiResult<T> = { status: number; body: T | null }
 export const PUBLIC_CACHE_TAG = 'jm-ajk-public'
+export const statsCacheKey = (url: string) =>
+  `https://jejakmasjid.my/__jm-internal-cache/public-stats/v1/${encodeURIComponent(url)}`
 // Cache API custom keys must belong to the web zone for zone tag purges.
 // Including the upstream URL isolates service-binding/local environments.
 export const publicCacheKey = (url: string, prayer = false) =>
@@ -20,11 +22,12 @@ export const publicCacheKey = (url: string, prayer = false) =>
 // Server-only. Never forward visitor credentials. Cache failures are best-effort.
 export async function apiGet<T>(
   path: string,
-  opts: { ttl: number; timeoutMs?: number; cacheNegative?: boolean },
+  opts: { ttl: number; timeoutMs?: number; cacheNegative?: boolean; validate?: (body: unknown) => boolean },
   supplied?: WebEnv,
 ): Promise<ApiResult<T>> {
   const env = supplied ?? (await getWorkerEnv())
-  if (env.MASJID_PAGES_ENABLED !== 'true') return { status: 404, body: null }
+  const stats = path === '/api/public/stats'
+  if (!stats && env.MASJID_PAGES_ENABLED !== 'true') return { status: 404, body: null }
   if (!path.startsWith('/api/') || path.includes('..'))
     return { status: 404, body: null }
   const url = new URL(
@@ -33,17 +36,17 @@ export async function apiGet<T>(
   ).toString()
   const prayer = path.startsWith('/api/prayer-times?')
   const negative = prayer && opts.cacheNegative === true
-  const key = publicCacheKey(url, prayer)
+  const key = stats ? statsCacheKey(url) : publicCacheKey(url, prayer)
   const cache =
     typeof caches !== 'undefined'
       ? (caches as CacheStorage & { default?: Cache }).default
       : undefined
-  const ttl = Math.min(opts.ttl, prayer ? 300 : 60)
+  const ttl = Math.min(opts.ttl, stats ? 3600 : prayer ? 300 : 60)
   const put = async (response: Response) => {
     if (!cache) return
     const copy = response.clone()
     copy.headers.set('Cache-Control', `public, max-age=${ttl}`)
-    if (!prayer) copy.headers.set('Cache-Tag', PUBLIC_CACHE_TAG)
+    if (!prayer && !stats) copy.headers.set('Cache-Tag', PUBLIC_CACHE_TAG)
     try {
       await cache.put(key, copy)
     } catch {
@@ -58,15 +61,17 @@ export async function apiGet<T>(
       /* Read through on cache failure. */
     }
     if (cached) {
+      const body = cached.status === 200 ? await cached.json() : null
+      if (opts.validate && !opts.validate(body)) return { status: 503, body: null }
       return {
         status: cached.headers.has('X-JM-Prayer-Unavailable')
           ? 503
           : cached.status,
-        body: cached.status === 200 ? ((await cached.json()) as T) : null,
+        body: body as T | null,
       }
     }
     const request = new Request(url, {
-      signal: AbortSignal.timeout(opts.timeoutMs ?? 5000),
+      signal: AbortSignal.timeout(stats ? Math.min(opts.timeoutMs ?? 1500, 1500) : opts.timeoutMs ?? 5000),
       redirect: 'manual',
     })
     const response = await (env.JM_API
@@ -74,15 +79,16 @@ export async function apiGet<T>(
       : fetch(request))
     if (response.status === 200) {
       const body = (await response.json()) as T
+      if (opts.validate && !opts.validate(body)) return { status: 503, body: null }
       await put(Response.json(body))
       return { status: 200, body }
     }
     if (!negative && response.status === 404) {
-      await put(new Response(null, { status: 404 }))
+      if (!stats) await put(new Response(null, { status: 404 }))
       return { status: 404, body: null }
     }
   } catch {
-    /* Timeout, invalid JSON or network failure. Optional prayers hide. */
+    /* Timeout, invalid JSON or network failure. Optional sections hide. */
   }
   if (negative) {
     // Cache API cannot cache errors: an explicit 200/null sentinel remembers failure.

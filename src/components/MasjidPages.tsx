@@ -344,16 +344,12 @@ function PrayerTimesSection({
   )
 }
 function ClaimCta({ page, ajk }: { page: PublicMasjidPage; ajk: boolean }) {
+  if (!ajk) return null
   const m = page.masjid
   return (
     <>
       <aside className="on-deep my-10 rounded-[20px] bg-deep p-8 text-deep-foreground [&_h2]:text-deep-foreground [&_a]:text-deep-foreground">
-        {!ajk ? (
-          <>
-            <h2>Are you on this masjid's committee?</h2>
-            <a href="https://jejakmasjid.my/ajk">Register your interest</a>
-          </>
-        ) : page.claimed ? (
+        {page.claimed ? (
           <p>
             Managed by the AJK of {m.name} · Are you AJK here?{' '}
             <a href="https://ajk.jejakmasjid.my/login">Sign in</a>

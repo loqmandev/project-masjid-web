@@ -21,16 +21,20 @@ export const APP_STORE_URL =
 export const PLAY_STORE_URL =
   'https://play.google.com/store/apps/details?id=my.lonasoft.jejakmasjidmobile'
 export const GOOGLE_GROUP_URL = 'https://groups.google.com/g/jejakmasjid'
-export const COMMITTEE_WHATSAPP_URL = 'https://wa.me/message/IIUIRAT4AKQVJ1'
+// Owner to confirm the Business destination and preset message before publishing.
+export const WHATSAPP_URL = 'https://wa.me/message/IIUIRAT4AKQVJ1'
 
-/** Nav destinations shared by the header and footer. */
-export const SECTIONS = [
-  { href: '/#journey', label: 'The journey' },
-  { href: '/#features', label: 'What it does' },
-  { href: '/#how', label: 'How it works' },
-  { href: '/#committees', label: 'For committees' },
-  { href: '/#faq', label: 'Questions' },
+/** Shared destinations; localized names and availability live in i18n. */
+export const PRODUCTS = [
+  { id: 'app', href: '/download', external: false },
+  { id: 'shop', href: 'https://shop.jejakmasjid.my', external: true },
+  { id: 'merchant', href: 'https://merchant.jejakmasjid.my', external: true },
+  { id: 'collaboration', href: '/kolaborasi', external: false },
 ] as const
+
+export function productHref(product: typeof PRODUCTS[number], locale: 'ms' | 'en') {
+  return product.id === 'collaboration' && locale === 'en' ? '/en/collaboration' : product.href
+}
 
 export function absoluteUrl(path: string) {
   return path.startsWith('http') ? path : `${SITE.url}${path}`

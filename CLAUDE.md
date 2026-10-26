@@ -5,12 +5,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 Jejak Masjid (jejakmasjid.my) is the marketing site for the Jejak Masjid mobile app — a masjid
-finder and visit journal for Muslims in Malaysia. Built with TanStack Start (SSR React) and
+finder and visit journal for Muslims at home and on their travels. Built with TanStack Start (SSR React) and
 deployed to Cloudflare Workers.
 
 **Brand voice is normative.** Read `BRAND.md` before writing or editing any copy: calm,
-bersahaja, gentle motivation, never competitive. The site is written in English with Malay
-anchor words (`singgah`, `jejak`, `langkah`, `ikhlas`, `hadir`). Never use urgency or
+bersahaja, gentle motivation, never competitive. The homepage is Bahasa Melayu first at `/`, with English at `/en`.
+Keep both dictionaries in `src/lib/i18n/` aligned. Other existing routes keep their original language. Never use urgency or
 streak-panic language.
 
 Product facts come from `../FEATURES.md` and `../store-assets-v2/ASO_COPY.md`. Where the two
@@ -39,7 +39,8 @@ src/
   routes/
     __root.tsx        # HTML shell, default meta, icons, fonts, org/site/app JSON-LD,
                       # no-flash theme script. Devtools render in dev only.
-    index.tsx         # Homepage + FAQPage JSON-LD
+    index.tsx | en.tsx # Localized homepage + FAQPage JSON-LD
+    kolaborasi.tsx | en_.collaboration.tsx # Paired collaboration pages
     privacy.tsx | tos.tsx | support.tsx   # Long-form pages via PageLayout
     download.tsx      # UA-sniffing redirect to the right store
     beta-ios.tsx | beta-android.tsx | google-groups.tsx  # Redirects. Kept even
@@ -49,24 +50,34 @@ src/
     [.]well-known.apple-app-site-association.ts   # iOS Universal Links (fail-closed)
     [.]well-known.assetlinks[.]json.ts            # Android App Links (fail-closed)
   components/
-    Header · Hero · Assurances · Journey · Features · HowItWorks · Faq · Cta · Footer
+    Header · Hero · TrustStrip · PublicStats · Features · Reviews · Media
+    CollaborationBand · Ecosystem · Faq · Cta · Footer
+    Homepage · Collaboration · CollaborationContact # Localized pages and shared email/WhatsApp block
     PageLayout.tsx    # Header + title band + .prose-jm article + Footer
     PrivacyPolicy · TermsOfService · Support   # Body copy only; no page chrome
     ui/               # Logo, StoreBadges, PhoneFrame, Section, Reveal
   lib/
-    site.ts           # Site constants, store URLs, nav sections
+    site.ts           # Site constants, store URLs, PRODUCTS destinations
+    i18n/{ms,en,index}.ts # Typed copy, route locale, twins and SSR document language
+    social-proof.ts   # Verbatim store ratings/reviews/media; owner refreshes before deploy
+    public-stats.ts   # Strict v1 validator, local country/state maps and MYT formatting
+    public-stats-server.ts # createServerFn boundary for the homepage loaders
+    public-stats-api.server.ts # Optional SSR read via jm-api, 1.5 s timeout, 1 h cache
+    fixtures/public-stats.json # Synthetic snapshot shared by tests and the host mock
+    hero-motion.js    # Dependency-free H8 canvas renderer; mounted/cleaned up by Hero effect
     seo.ts            # seo() head builder + structuredData() + faqStructuredData()
-    faq.ts            # Homepage FAQ — feeds both the accordion and FAQPage JSON-LD
+    faq.ts            # FAQ_MS / FAQ_EN aliases of the dictionary answers
     app.ts            # Mobile app bundle ID + custom scheme (public identifiers)
     invite.ts         # Invite code normaliser + app/intent URL builders
     app-association.ts # AASA + assetlinks builders, var parsing, 404 response
     worker-env.ts     # Reads Worker vars via a dynamic `cloudflare:workers` import
   styles.css          # Light-only brand tokens, .on-deep / .eyebrow / .path-rule / .prose-jm
 public/
-  screens/*.webp      # App screenshots, optimised from ../store-assets-v2/public/screenshots/source
+  screens/*.webp      # Real screenshots; the bento excludes unreleased 05-facilities
+  hero/*.webp         # Approved H8 paintings, sprites and pre-warped phone overlays
   logo.png · og-image.png · icon-*.png · apple-touch-icon.png · favicon.ico
                       # all derived from project-masjid-mobile/assets/images/icon.png
-  sitemap.xml · robots.txt · manifest.json · _headers
+  sitemap-pages.xml · robots.txt · manifest.json · _headers
 ```
 
 ### Key Patterns
@@ -91,8 +102,7 @@ visitor has not asked for reduced motion, so the page always renders complete an
 otherwise. Animate only `transform` and `opacity`.
 
 **Layout rhythm.** Max 1 section eyebrow per 3 sections, max 4 text elements in the hero, and
-no more than 2 consecutive image-and-text split rows. Features deliberately runs three
-different layout families for this reason.
+no more than 2 consecutive image-and-text split rows. The feature bento is asymmetric; its map tile spans two rows on desktop.
 
 **Server Functions**: `createServerFn` from `@tanstack/react-start`. See `src/routes/download.tsx`.
 
@@ -142,7 +152,7 @@ dark teal `#154C46` (hover), brand teal `#00A9A5` (thin rules, icons, focus ring
 blocks only), gold `#FFCC00` (small bars, CTA buttons on deep teal). Gold and `#00A9A5` are never
 text on light surfaces. Deep-teal blocks carry `.on-deep` (ivory text, gold eyebrows, teal ring).
 Fonts self-hosted in `public/fonts/` from `@fontsource-variable` 5.3.0: **Nunito 800** for
-headings/CTAs, **Plus Jakarta Sans** for body. No italics, no gradients. `.path-rule` (dotted
+headings/CTAs, **Plus Jakarta Sans** for body. No italics. The approved H8 hero overlays are the only gradient exception. `.path-rule` (dotted
 footpath) remains the motif. Focus ring is deep teal on light surfaces (3:1 rule).
 
 ### Environment Variables
@@ -166,28 +176,61 @@ my.lonasoft.jejakmasjidmobile` (the `jejakmasjid.my` domain should read `verifie
 fetches the AASA through Apple's CDN, so a fresh install may be needed to pick up changes.
 
 Locally, `.dev.vars` feeds `pnpm dev`. To exercise the built Worker with fake values:
-`pnpm build && npx wrangler dev -c dist/server/wrangler.json --var APPLE_TEAM_ID:ABCDE12345`.
+`pnpm build && npx wrangler dev -c dist/server/wrangler.json --local --var APPLE_TEAM_ID:ABCDE12345`.
 
 The old waitlist (Google Sheets + Resend) was removed in full, along with
 `SHEET_ID`, `GOOGLE_SERVICE_ACCOUNT_JSON`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL` and
 `APP_DOMAIN`. Any of those still set as Worker secrets can be deleted.
 
-### AJK interest form (`/ajk`) — 2026-10-11
-Spec `SPEC_ajk-interest-form.md`. Page `src/routes/ajk.tsx` + `components/AjkInterestForm.tsx` (works without JS),
-POST `/api/ajk-interest` → `lib/ajk-interest-server.tsx` (same-origin, 8 KB cap, honeypot, validate, then 5 valid
-submissions/hour per salted IP hash, duplicate = same phone + masjid within 24 h). Leads in D1 **`jm-web-db`**
-(binding `WEB_DB`, id `18abc900-…`, migrations in `migrations/`, applied remotely 2026-10-11). E-mail alert via the Cloudflare Email Service structured `send()` on the
-`send_email` binding `EMAIL` (from `ajk@notify.jejakmasjid.my`, same as the shop; not Email Routing) to secret `AJK_INTEREST_NOTIFY_TO` (best-effort; never fails a submission). Turnstile is
-supported but deliberately not configured (owner). Read leads:
-`./node_modules/.bin/wrangler d1 execute jm-web-db --remote --command "SELECT created_at,name,role,masjid_name,area,state,phone,needs,status FROM ajk_interest ORDER BY created_at DESC"`.
-Local: `pnpm db:migrate:local`. Audience copy is KL-first (owner 2026-10-11).
+### Homepage numbers and collaboration — owner amendments 2026-10-26
+
+`SPEC_website-revamp.md` §8 supersedes all earlier AJK marketing requirements. `/ajk` and
+`/api/ajk-interest` are removed and return 404. The form, proposal, snapshot, server handlers
+and their tests are gone. Products now contain App, Shop, Merchant and Collaboration. The
+masjid-page AJK flag/code is unchanged. Keep `wrangler.jsonc`, existing D1 bindings, migrations,
+and the `AJK_INTEREST_NOTIFY_TO` secret intact; their retirement is an owner operation.
+The privacy policy still describes the former AJK form in BM/EN and its retention terms;
+leave it unchanged because it covers previously collected leads.
+
+The homepage order is hero → trust → optional numbers → features → reviews → media →
+collaboration → ecosystem → FAQ → download. Collaboration is a deep-teal band with three
+modest invitation cards (organisations/NGOs, brands/sponsors, media/researchers). It has a
+top-level desktop/mobile nav link and stays in Products. `CollaborationContact` shows
+`SITE.email` as selectable text, provides clipboard copy with text-selection fallback,
+a localized subject in the mailto link, and a WhatsApp link. All three placements (band and
+two collaboration pages) share this block. `WHATSAPP_URL` is the single Business-link constant;
+the owner must confirm its destination and preset message before publishing.
+
+Both homepages load numbers during SSR through `loadPublicStats`. The server-only API module
+uses `jm-api` at `/api/public/stats`, independently of `MASJID_PAGES_ENABLED`, with the existing
+`JM_API_BASE`/service-binding pattern. Only a 200 with a complete, strictly validated v1
+snapshot renders. Non-200, network failures, timeout (1500 ms) or invalid data omit the entire
+section. Cloudflare Cache API caches valid snapshots for 3600 s with keys isolated by upstream
+URL; failures are not cached. Cached data is revalidated. Existing masjid/prayer caches retain
+their own caps and keys. No new runtime variable or dependency is required.
+
+Numbers render statically with tabular numerals and localized `Intl.NumberFormat`, local
+country/state labels and an MYT snapshot date. Country visits and the semantic state table
+preserve suppressed values as `< 10`; unknown geography is never assigned to Malaysia.
+State codes mirror the backend's canonical list (e.g. `SELANGOR`, not the schematic `SGR`).
+Never animate these numbers out of view or render a partial snapshot.
+
+Host evidence lives in `../.hermes/reviews/website-revamp/` relative to the project root.
+`mock-stats.mjs [port] [200|404|503|invalid|timeout]` serves the synthetic fixture on loopback
+and proxies nothing. Start only the built local Worker using
+`npx wrangler dev -c dist/server/wrangler.json --local --var JM_API_BASE:http://127.0.0.1:8799`.
+Run `STATS_EXPECT=present ONLY=stats node check-hero.mjs <local-worker-url>` with the 200 mock;
+use `STATS_EXPECT=absent` and another mock port/base for 404/failure checks to avoid a cached
+success. Optional `STATS_ABSENT_BASE` checks a second local Worker in the same run.
+The host script checks SSR and no-JS layouts at 360/768/1440 for both languages and verifies
+retired AJK routes return 404. Preserve the planner's no-JS ready fix, 250–510 ms raster wipe
+tolerance and realistic denied-storage getter simulation.
 
 ### Known Follow-ups
 - App Store badge is the Malay (`_MY`) artwork while the Play badge is English. Swap one for
   consistency using Apple/Google marketing resources — badges must not be redrawn by hand.
 - `pnpm test` runs from `vitest.config.ts`, which deliberately omits the Cloudflare/Start
-  plugins (under `vite.config.ts` the workerd runner fails to load CJS deps). Component tests
-  would need `environment: 'jsdom'` added there.
+  plugins (under `vite.config.ts` the workerd runner fails to load CJS deps). DOM component tests opt into jsdom with a per-file environment directive; static SSR component tests use `react-dom/server`.
 - `npx tsc --noEmit` reports one pre-existing error in `src/routes/download.tsx`
   (`request` is not on the server-fn context type); the build is unaffected.
 
@@ -213,3 +256,42 @@ codes. Tests cover the backend gate, older-backend parity, states, disclosures, 
 loader and structured data. No deployment has been performed. Production currently has
 `MASJID_AJK_ENABLED=true` at runtime (pilot version `f57a1189`) while tracked config says false;
 the future deploy operator must preserve the pilot setting. This change does not edit config.
+
+
+### Homepage revamp (phase 1, local implementation 2026-10-26)
+
+Normative contract: `SPEC_website-revamp.md`. H8 camera geometry, 600–2300 ms zoom,
+3600 ms sequence, and sprite plot coordinates are ported from sketch 107, rounds 9–9d.
+`Hero.tsx` server-renders the full rest composition. The text never starts transparent.
+CSS image backgrounds provide no-JS/canvas-failure rest. Because URL backgrounds can
+be LCP candidates, the synchronous head motion gate suppresses them on normal-motion
+startup, before hydration. Source images load only after text paint, then canvases paint
+the rest city, sprites and phone. Reduced motion allocates
+no canvas backing. The React effect cancels/releases work on unmount; visibility,
+pagehide, replay and motion changes return to rest. One session-scoped play, explicit replay.
+The zoom uses a stage-sized canvas capped at DPR 3; no art DOM layer may exceed 1.25 ×
+the stage, and temporary buffers are capped at 1254 px and freed after each run.
+
+`hero-motion.js` is intentionally the dependency-free JavaScript port; its public mount
+signature is declared in `hero-motion.d.ts`. Keep the camera math/timings stable. Offline
+screen regeneration: `python3 scripts/hero/warp-screen.py /path/to/light-mode-explore.png`
+(Pillow + numpy; details in `scripts/hero/README.md`). Current Explore art is the dark
+placeholder from the approved sketch, pending the owner's light-mode screenshot.
+
+`seo({ alternates: { ms, en } })` emits one own-page canonical, language-only `ms` / `en`
+and English `x-default`; OG locale is `ms_MY` / `en_US`. `__root.tsx` derives `html lang`
+from the SSR location; existing routes remain `en-MY`. There are no browser-language/IP
+redirects. Header/footer labels use BM on `/` and `/kolaborasi`, and English elsewhere. Only paired pages have a language
+switch. Native Products disclosure works without JS; the mobile menu has Escape/outside
+click cleanup. Product status copy is in the dictionaries, destinations in `PRODUCTS`.
+
+`FAQ_MS` / `FAQ_EN` and `Faq` read the same dictionaries as homepage FAQPage JSON-LD.
+The committee proposal, form and snapshot are removed per §8. Collaboration has the shared
+email-copy/mailto/WhatsApp contact block described above. Homepage numbers read the new
+backend public-stats contract; no directory/search page, Worker vars, migrations or deployment
+changes are included.
+
+Implementation evidence and the host-only Chromium script are under
+`.hermes/reviews/website-revamp/` in the parent project. The script checks the built local
+Worker, captures screens and records actual outcomes. Deployment still needs the owner's
+ratings/review refresh, Opus review and browser approval.

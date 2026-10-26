@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://jejakmasjid.my/</loc>
-    <lastmod>2026-08-18</lastmod>
+    <xhtml:link rel="alternate" hreflang="ms" href="https://jejakmasjid.my/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://jejakmasjid.my/en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://jejakmasjid.my/en" />
+    <lastmod>2026-10-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -25,8 +28,27 @@
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://jejakmasjid.my/ajk</loc>
+    <loc>https://jejakmasjid.my/en</loc>
+    <xhtml:link rel="alternate" hreflang="ms" href="https://jejakmasjid.my/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://jejakmasjid.my/en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://jejakmasjid.my/en" />
+    <lastmod>2026-10-26</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://jejakmasjid.my/kolaborasi</loc>
+    <xhtml:link rel="alternate" hreflang="ms" href="https://jejakmasjid.my/kolaborasi" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://jejakmasjid.my/en/collaboration" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://jejakmasjid.my/en/collaboration" />
+    <lastmod>2026-10-26</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://jejakmasjid.my/en/collaboration</loc>
+    <xhtml:link rel="alternate" hreflang="ms" href="https://jejakmasjid.my/kolaborasi" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://jejakmasjid.my/en/collaboration" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://jejakmasjid.my/en/collaboration" />
+    <lastmod>2026-10-26</lastmod>
+    <changefreq>monthly</changefreq>
   </url>
 </urlset>
