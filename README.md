@@ -3,6 +3,9 @@
 Marketing site for the Jejak Masjid app. TanStack Start (SSR React) on Cloudflare Workers.
 See `CLAUDE.md` for architecture and `BRAND.md` for voice.
 
+The former AJK interest form's database and outbound email bindings have been removed
+from the Worker configuration. Collaboration contacts use email and WhatsApp links.
+
 ## Prayer Circle invite links
 
 Circle owners in the app share `https://jejakmasjid.my/prayer-circles/invite/<CODE>`.

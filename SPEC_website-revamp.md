@@ -270,10 +270,10 @@ Jejak Masjid is discussing with the qiyam.com.my team about them running the AJK
 - **Delete `/ajk`; it returns 404.** Remove the route, `AjkInterestForm`, the AJK interest server function and its endpoint, `ForCommittees`, `CommitteeSnapshot`, `putrajaya-snapshot.ts` and their tests.
 - Remove AJK from `PRODUCTS`, the header Products menu, the "More than an app" section, the footer, the collaboration cards, the dictionaries and `public/sitemap-pages.xml`.
 - Rename `COMMITTEE_WHATSAPP_URL` to a neutral `WHATSAPP_URL` (same value; the owner will confirm the link, §8.2).
+- **Infrastructure retirement (owner amendment 2026-10-27):** remove the former form's D1 and unused outbound email bindings, migration files and migration scripts from the website. Leave secrets untouched; the planner deletes the database after this change ships. This supersedes the earlier instruction to preserve that infrastructure.
 - **Do not touch:**
-  - `wrangler.jsonc`, including the `WEB_DB` binding, `migrations/` and the `AJK_INTEREST_NOTIFY_TO` secret (removal is an owner step);
   - the masjid-page AJK code behind `MASJID_AJK_ENABLED="false"`;
-  - the privacy policy. If it describes the AJK form, list that in the report: data already collected in `jm-web-db` is still covered by it, and the owner decides.
+  - the privacy policy. If it describes the AJK form, list that in the report: previously collected leads remain covered by it, and the owner decides.
 - No search box or link that leads nowhere (§1 still applies).
 
 ### 8.2 Collaboration is the highlight

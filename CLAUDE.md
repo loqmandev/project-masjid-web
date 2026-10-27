@@ -187,8 +187,11 @@ The old waitlist (Google Sheets + Resend) was removed in full, along with
 `SPEC_website-revamp.md` §8 supersedes all earlier AJK marketing requirements. `/ajk` and
 `/api/ajk-interest` are removed and return 404. The form, proposal, snapshot, server handlers
 and their tests are gone. Products now contain App, Shop, Merchant and Collaboration. The
-masjid-page AJK flag/code is unchanged. Keep `wrangler.jsonc`, existing D1 bindings, migrations,
-and the `AJK_INTEREST_NOTIFY_TO` secret intact; their retirement is an owner operation.
+masjid-page AJK flag/code is unchanged. Under the owner's 2026-10-27 removal decision, the
+former form's D1 and unused outbound email bindings, migration files and migration script
+have been removed from the website. Runtime code, env types and tests no longer depend on
+that infrastructure. Secrets remain untouched; the planner deletes the database after
+this change ships.
 The privacy policy still describes the former AJK form in BM/EN and its retention terms;
 leave it unchanged because it covers previously collected leads.
 

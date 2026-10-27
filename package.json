@@ -7,7 +7,6 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "db:migrate:local": "wrangler d1 migrations apply jm-web-db --local",
     "deploy": "pnpm run build && wrangler deploy"
   },
   "dependencies": {

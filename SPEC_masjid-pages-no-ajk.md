@@ -170,8 +170,12 @@ Report:
 (the pages stay inert while the backend flag is off) → backend `MASJID_SLUGS_ENABLED=true`.
 
 **Before the first deploy of this branch.** The new `vars` block replaces any dashboard-only plain vars. The owner must confirm that
-`APPLE_TEAM_ID`, `ANDROID_SHA256_CERT_FINGERPRINTS`, `TURNSTILE_SECRET_KEY`, `TURNSTILE_SITE_KEY` and `AJK_INTEREST_NOTIFY_TO`
+`APPLE_TEAM_ID`, `ANDROID_SHA256_CERT_FINGERPRINTS`, `TURNSTILE_SECRET_KEY` and `TURNSTILE_SITE_KEY`
 are secrets (`npx wrangler secret list`).
+
+The former website AJK interest form infrastructure was removed under the owner's
+2026-10-27 decision. Its notification configuration is no longer required by the website;
+existing secrets remain untouched.
 
 **Flipping on AJK later.** It needs `MASJID_AJK_ENABLED="true"` here, together with the backend `AJK_*` flags and shop
 `NUXT_AJK_ENABLED`, which brings `ajk.jejakmasjid.my` up.
