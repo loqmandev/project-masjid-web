@@ -11,7 +11,7 @@ export const ms = {
     description: 'Aplikasi percuma untuk cari masjid dan surau berdekatan, di tanah air atau ketika bermusafir. Semak waktu solat dan simpan rekod kunjungan anda.',
     lines: ['Cari masjid', 'berdekatan,', 'simpan jejak.'],
     supporting: 'Jejak Masjid ialah aplikasi percuma untuk mencari masjid dan surau di sekitar anda, di tanah air atau ketika bermusafir. Semak waktu solat dan rekod setiap kunjungan anda.',
-    caption: 'Ilustrasi dijana AI', replay: 'Main semula animasi',
+    caption: 'Ilustrasi dijana AI',
     city: 'Peta cat air sebuah kejiranan rekaan, dengan empat masjid dan surau berdekatan.',
     phone: 'Tangkapan skrin sebenar peta Jelajah dalam aplikasi Jejak Masjid.',
     destinations: ['Surau kejiranan berdekatan, 350 meter', 'Surau rumah kedai berdekatan, 600 meter', 'Masjid moden berdekatan, 900 meter', 'Masjid bandar berdekatan, 1400 meter'],

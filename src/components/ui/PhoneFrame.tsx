@@ -2,21 +2,26 @@
  * A restrained device frame for app screenshots: a thin bezel and a soft
  * shadow, no glossy chrome.
  *
- * Screenshots render between 158 and 240px wide, so the 480px file covers 1x
- * and 2x displays and only 3x screens pull the 720px one.
+ * Each screenshot ships at 320, 480 and 720 px wide. Callers pass the real
+ * rendered width of the screen as `sizes`, so a phone downloads the 320 px file
+ * for the small bento slots and only 3x screens pull the 720 px one.
  */
 export default function PhoneFrame({
   src,
   alt,
+  sizes = '126px',
   className = '',
   priority = false,
 }: {
-  /** Path to the 480px-wide file. The 2x variant is derived from it. */
+  /** Path to the 480px-wide file. The 320px (`-320`) and 720px (`@2x`) variants are derived from it. */
   src: string
   alt: string
+  /** Rendered width of the screen image (frame minus bezel), for `srcset` selection. */
+  sizes?: string
   className?: string
   priority?: boolean
 }) {
+  const src320 = src.replace(/\.webp$/, '-320.webp')
   const src2x = src.replace(/\.webp$/, '@2x.webp')
 
   return (
@@ -26,8 +31,8 @@ export default function PhoneFrame({
       <div className="overflow-hidden rounded-[1.6rem] bg-surface-sunken">
         <img
           src={src}
-          srcSet={`${src} 480w, ${src2x} 720w`}
-          sizes="(min-width: 640px) 240px, 224px"
+          srcSet={`${src320} 320w, ${src} 480w, ${src2x} 720w`}
+          sizes={sizes}
           alt={alt}
           width={480}
           height={1067}
