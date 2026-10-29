@@ -64,7 +64,6 @@ src/
     public-stats-server.ts # createServerFn boundary for the homepage loaders
     public-stats-api.server.ts # Optional SSR read via jm-api, 1.5 s timeout, 1 h cache
     fixtures/public-stats.json # Synthetic snapshot shared by tests and the host mock
-    hero-art.ts       # Static hero image candidate sets (city, phone) + the head preload link
     html-cache.ts     # 300 s Cache API wrapper for `/` and `/en` (used by src/start.ts)
     seo.ts            # seo() head builder + structuredData() + faqStructuredData()
     faq.ts            # FAQ_MS / FAQ_EN aliases of the dictionary answers
@@ -73,11 +72,10 @@ src/
     app-association.ts # AASA + assetlinks builders, var parsing, 404 response
     worker-env.ts     # Reads Worker vars via a dynamic `cloudflare:workers` import
   start.ts            # Request middleware: homepage HTML edge cache (`/`, `/en`)
-  hero.css            # Static hero styles (imported by Hero.tsx)
+  hero.css            # Widget hero styles + float (imported by Hero.tsx)
   styles.css          # Light-only brand tokens, .on-deep / .eyebrow / .path-rule / .prose-jm
 public/
   screens/*.webp      # Real screenshots (480 / `@2x` 720 / `-320` px); the bento excludes unreleased 05-facilities
-  hero/*.webp|avif    # Approved H8 city painting (WebP + AVIF at 640/800/960/1254 px) and four masjid sprites
   logo.png · og-image.png · icon-*.png · apple-touch-icon.png · favicon.ico
                       # all derived from project-masjid-mobile/assets/images/icon.png
   sitemap-pages.xml · robots.txt · manifest.json · _headers
@@ -102,8 +100,7 @@ utilities without being asked.
 IntersectionObserver, never a scroll listener. Everything animated is gated behind
 `html[data-motion="on"]`, set by `MOTION_INIT` in `__root.tsx` only when JS runs and the
 visitor has not asked for reduced motion, so the page always renders complete and static
-otherwise. Animate only `transform` and `opacity`. The homepage hero is the exception: it is
-fully static (see "Static hero" below).
+otherwise. Animate only `transform` and `opacity`. The homepage hero follows the same rule (widget float, see "Widget hero" below).
 
 **Layout rhythm.** Max 1 section eyebrow per 3 sections, max 4 text elements in the hero, and
 no more than 2 consecutive image-and-text split rows. The feature bento is asymmetric; its map tile spans two rows on desktop.
@@ -156,7 +153,7 @@ dark teal `#154C46` (hover), brand teal `#00A9A5` (thin rules, icons, focus ring
 blocks only), gold `#FFCC00` (small bars, CTA buttons on deep teal). Gold and `#00A9A5` are never
 text on light surfaces. Deep-teal blocks carry `.on-deep` (ivory text, gold eyebrows, teal ring).
 Fonts self-hosted in `public/fonts/` from `@fontsource-variable` 5.3.0: **Nunito 800** for
-headings/CTAs, **Plus Jakarta Sans** for body. No italics. The approved H8 hero overlays are the only gradient exception. `.path-rule` (dotted
+headings/CTAs, **Plus Jakarta Sans** for body. No italics. `.path-rule` (dotted
 footpath) remains the motif. Focus ring is deep teal on light surfaces (3:1 rule).
 
 ### Environment Variables
@@ -228,7 +225,7 @@ Host evidence lives in `../.hermes/reviews/website-revamp/` relative to the proj
 `mock-stats.mjs [port] [200|404|503|invalid|timeout]` serves the synthetic fixture on loopback
 and proxies nothing. Start only the built local Worker using
 `npx wrangler dev -c dist/server/wrangler.json --local --var JM_API_BASE:http://127.0.0.1:8799`.
-The hero is checked by `check-static-hero.mjs` in the same directory (the motion groups of
+The hero is checked by `check-widget-hero.mjs` in the same directory (the motion groups of
 `check-hero.mjs` describe the removed animation and are obsolete; its stats groups still apply).
 Run `STATS_EXPECT=present ONLY=stats node check-hero.mjs <local-worker-url>` with the 200 mock;
 use `STATS_EXPECT=absent` and another mock port/base for 404/failure checks to avoid a cached
@@ -271,39 +268,35 @@ the future deploy operator must preserve the pilot setting. This change does not
 
 ### Homepage revamp (phase 1, local implementation 2026-10-26)
 
-Normative contract: `SPEC_website-revamp.md` (its H8 animation requirements are superseded by the
-static hero below).
+Normative contract: `SPEC_website-revamp.md` (its H8 hero requirements are superseded by the
+widget hero below).
 
-**Static hero (owner 2026-10-29, performance): rest composition only, LCP `<img>` with preload; no hero
-canvas.** The H8 canvas zoom (`hero-motion.js`) was ~95 % of first-party blocking time and shipped 433 KiB
-of extra paintings, so it is gone for every visitor. `Hero.tsx` is a plain server component with no effect and
-no script. It renders what reduced-motion visitors always saw: the city painting, the four masjid/surau
-sprites at their plotted positions, the four route lines fully drawn, the floating phone with the Explore
-screen (from 761 px), the static locator ring and the text column (h1, supporting line, two store badges).
-Nothing in the hero moves; other sections keep the gentle `Reveal`.
-- **LCP image.** The city painting is a `<picture>`: an AVIF `<source type="image/avif">` (`srcset` 640 / 800 / 960 /
-  1254 w, q50, 70-193 KB) in front of the WebP `<img class="city-art">` fallback (same widths, q70, original 1254 px
-  file). The img carries `fetchPriority="high"`, `decoding="async"`, never lazy, explicit 1254 x 1254; both use the same
-  `sizes`, which mirror the `.map-stage` width in `hero.css` (110vw on phones, `min(720px, 66vw)` to 1200 px, then
-  60vw). The `filter: saturate(.85)` is on the img. `homepageHead()` adds the one matching `<link rel="preload"
-  as="image" type="image/avif" imagesrcset imagesizes fetchpriority="high">` (`lib/hero-art.ts` feeds both); a browser
-  without AVIF ignores it and loads the WebP. React does not hoist a preload of its own for an `<img>` inside
-  `<picture>`, so the head has exactly one city preload (a test and the host check assert it). Only `/` and `/en`
-  carry it.
-- **Other hero images** are real `<img>` elements too (no CSS backgrounds): sprites `fetchPriority="low"` with
-  intrinsic sizes, the phone screen `loading="lazy"` with `srcset` 320 / 480 / 720 w (it is `display:none` on
-  phones, so lazy keeps it from downloading there). Never put the art back in a CSS `url()`: backgrounds are
-  discovered late and cost the LCP 2.9 s of render delay.
-- **Variants** are plain Lanczos resizes of the approved art (city AVIF q50 and WebP q70, screens WebP q80);
-  never recolour, crop or redraw (regenerate with ImageMagick `magick l4-city.webp -filter Lanczos -resize Nx
-  -quality 50 l4-city-N.avif`). Bento screenshots also have `-320` variants and tile-specific `sizes` (`Features.tsx`).
-- **Removed:** `lib/hero-motion.js` / `.d.ts`, the `mountHero` effect, canvases, replay button, `data-state` /
-  `data-zoom` / `data-art*`, the `html[data-motion='on']` background suppression, the path-reveal mask, radar
-  ring, beams, shockwaves, the locator pulse animation, and `public/hero/l1-*`, `l2`, `l3`, `screen-*`
-  (animation-only paintings and phone overlays). `scripts/hero/` (warp tooling) stays but is unused.
-  `MOTION_INIT` and `ui/Reveal.tsx` remain for the rest of the page.
-- **Do not reintroduce** a hero animation or canvas without the owner; `src/lib/hero-static.test.ts` fails if
-  `hero-motion`, `@keyframes`, a canvas or the removed images come back.
+**Widget hero (owner 2026-10-29, performance; replaces the static city-painting hero): deep-teal band, no hero image, no hero script.**
+The city painting (the LCP image, 70–190 KB, LCP 3.1–3.6 s) is gone, with its preload, sprites, route lines, floating
+phone, "Ilustrasi dijana AI" tag, `lib/hero-art.ts`, all of `public/hero/` and the footer AI-illustration disclosure
+(`footer.disclosure`, `hero.caption/city/phone/destinations` in both dictionaries). `Hero.tsx` is a plain server component:
+the `.on-deep` section (`#003130`) with a faint khatam pattern (inline SVG `<pattern>`, ivory stroke, 7 % opacity), the H1
+(spans, one block with `text-wrap: balance`), the supporting line, the two store badges, and three **decorative
+(`aria-hidden`) HTML/CSS widgets** that reproduce the app's home-screen widgets (sketch 104/109 B): Today (medium: "Next ·
+Maghrib 7:07", flame chip 12, countdown, five-stop day timeline), Prayer Times (small: "☾ Kuala Lumpur", Maghrib pill) and
+Streak (small: gold flame, 12, "✓ Done today"). Widget text stays **English** in both languages and the values are fixed
+samples. Desktop (>= 860 px): copy left, widgets right (Today top, Prayer Times lower-left, Streak lower-right); below that:
+Today on top, the two small widgets side by side, stage <= 480 px wide.
+- **LCP is the H1.** Keep the H1 one block (display:block spans make each line a separate LCP candidate and the supporting
+  paragraph wins) and keep the supporting paragraph's text area smaller than the H1's (phones: `.9rem`, `max-width: 36ch`).
+  Verify with Lighthouse after any hero edit (`largest-contentful-paint-element`).
+- **Motion.** The widgets float (`translateY` +-8 px, 5.5 s, staggered, fixed rotation from `--r`) only under
+  `html[data-motion="on"]`; `prefers-reduced-motion` and no-JS show the complete resting frame. Only `transform`; no
+  `opacity: 0` start, no JS. `src/lib/hero-widgets.test.ts` fails if another `@keyframes`, a gradient, `hero-motion`, a
+  `<picture>`, a hero image or `public/hero` comes back.
+- **Palette.** Gold only inside the white widgets (flame, checked-in dots); text accents inside widgets use `#007a77`
+  (brand teal `#00A9A5` is not text on light surfaces; rings and the timeline line keep brand teal).
+- **Logo bytes.** `Wordmark` (header and footer lockups) is `loading="lazy" decoding="async"`: the header lockup is
+  `display:none` on phones (never fetched) and the footer one is below the fold, so React emits no preload for them and the
+  homepage head carries no image preload at all. `LogoMark` (symbol) stays eager.
+- **Evidence.** `.hermes/reviews/widget-hero/BUILD-web.md` and `check-widget-hero.mjs` (host check, replaces
+  `check-static-hero.mjs`) in `.hermes/reviews/website-revamp/`. The bento keeps its own screenshots (`public/screens/`).
+- **Do not reintroduce** a hero image, canvas or script animation without the owner.
 
 **Homepage HTML edge cache.** `src/start.ts` registers a request middleware (`createStart`
 `requestMiddleware`) that serves `GET /` and `GET /en` (exact path, no query string, no `Range`) from
@@ -322,8 +315,8 @@ Measure performance the same way before and after a change: build, run the built
 the stats section is simply absent), then `CHROME_PATH=/usr/bin/chromium npx -y lighthouse@12 http://127.0.0.1:8792/
 --only-categories=performance --chrome-flags="--headless=new --no-sandbox --disable-extensions"` three times and
 take the median. Local `wrangler dev` is HTTP/1.1, so concurrent downloads share bandwidth and `fetchpriority` has
-less effect than on the live HTTP/2 site; compare builds, not absolute numbers. Evidence for the static hero:
-`.hermes/reviews/homepage-performance/BUILD-web.md` in the parent project.
+less effect than on the live HTTP/2 site; compare builds, not absolute numbers. Evidence: `.hermes/reviews/homepage-performance/BUILD-web.md` (static hero) and
+`.hermes/reviews/widget-hero/BUILD-web.md` (widget hero) in the parent project.
 
 `seo({ alternates: { ms, en } })` emits one own-page canonical, language-only `ms` / `en`
 and English `x-default`; OG locale is `ms_MY` / `en_US`. `__root.tsx` derives `html lang`

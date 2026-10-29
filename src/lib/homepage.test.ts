@@ -7,16 +7,14 @@ import Homepage from '@/components/Homepage'
 import { t } from './i18n'
 
 describe('SSR homepage content', () => {
-  for (const locale of ['ms', 'en'] as const) it(`renders complete ${locale} copy and the static hero art without running client effects`, () => {
+  for (const locale of ['ms', 'en'] as const) it(`renders complete ${locale} copy and the widget hero without running client effects`, () => {
     const html = renderToStaticMarkup(createElement(Homepage, { locale }))
     const copy = t(locale)
     expect(html.match(/<h1\b/g)).toHaveLength(1)
     for (const line of copy.hero.lines) expect(html).toContain(line)
-    // Static hero: real <img>s, no canvas or motion hooks (see hero-static.test.ts for the detail).
-    expect(html).toMatch(/<img[^>]*class="city-art"[^>]*fetchPriority="high"/i)
-    expect(html).not.toMatch(/<canvas|data-art|data-state=|data-zoom/)
-    expect(html.match(/class="destination /g)).toHaveLength(4)
-    expect(html).toContain(copy.hero.caption)
+    // Widget hero: HTML/CSS widgets, no image or canvas (see hero-widgets.test.ts for the detail).
+    expect(html).not.toMatch(/<canvas|<picture|city-art|data-art|data-state=|data-zoom/)
+    expect(html.match(/class="wg wg-(today|pt|st)"/g)).toHaveLength(3)
     expect(html).toContain('"@type":"FAQPage"')
     expect(html).toContain(copy.faq.items[0].q)
     for (const id of ['ciri', 'ulasan', 'faq']) expect(html).toContain(`id="${id}"`)
