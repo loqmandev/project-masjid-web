@@ -1,65 +1,63 @@
-.home-hero { --ink:var(--foreground); --ivory:var(--background); --teal:var(--brand-teal); --gold:var(--accent); --muted:var(--muted-foreground); }
-/* Static hero (owner 2026-10-29, performance): the rest composition of the
-   approved H8 art, with nothing animated and no script. The city painting is a
-   real <img> (the LCP element), preloaded from the route head. */
-.home-hero{position:relative;isolation:isolate;overflow:hidden;min-height:clamp(720px,54vw,1200px)}
-.hero-inner{max-width:1920px;min-height:clamp(720px,54vw,1200px);margin-inline:auto;padding:0 5.55%;display:flex;align-items:center;pointer-events:none}
-.hero-copy{position:relative;z-index:3;width:calc(34.45vw - 48px);max-width:550px;padding:92px 0 104px;pointer-events:auto}
-.hero-copy h1{font-size:clamp(40px,5vw,78px);line-height:1.035;letter-spacing:-.052em}
-.hero-en .hero-copy h1{font-size:clamp(38px,5vw,78px)}
-.hero-copy h1 span{display:block;white-space:nowrap}
-.hero-copy .supporting{max-width:365px;margin-top:28px;font-size:16px;line-height:1.9}
-.hero-copy .store-badges{margin-top:30px;flex-wrap:nowrap;gap:12px}
-.hero-copy .store-badges img{height:46px;width:auto}
-.art-pane{position:absolute;inset:0 0 0 40%;z-index:1;overflow:hidden;container-type:size;background:var(--ivory)}
-.art-pane::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:6;background:linear-gradient(90deg,var(--ivory),transparent 6%),linear-gradient(0deg,var(--ivory),transparent 5%)}
-/* Narrow panes crop at most 5% per side; wide panes keep a square map. The
-   stage width is mirrored by CITY_SIZES in lib/hero-art.ts. */
-.map-stage{position:absolute;left:50%;top:50%;width:max(100cqw,min(100cqh,110cqw));aspect-ratio:1;transform:translate(-50%,-50%);container-type:inline-size}
-.map-layers{position:absolute;inset:0}
-.city-art,.map-paths{position:absolute;inset:0;width:100%;height:100%;max-width:none}
-.city-art{object-fit:fill;filter:saturate(.85)}
-.map-paths{z-index:3;overflow:visible}
-.route-ink{fill:none;stroke:var(--gold);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1 11;filter:drop-shadow(0 0 1px white)}
-.origin{position:absolute;left:var(--x);top:var(--y);width:0;height:0;z-index:7;pointer-events:none}
-.locator-dot{position:absolute;left:-4px;top:-4px;width:8px;height:8px;border:2px solid white;background:var(--teal);border-radius:50%;box-shadow:0 1px 5px #00313050}
-.locator-pulse{position:absolute;left:-13px;top:-13px;width:26px;height:26px;border:1.5px solid var(--teal);border-radius:50%;opacity:.55}
-.destination{position:absolute;z-index:5;left:var(--x);top:var(--y);width:var(--size);height:0;--marker-height:min(calc(var(--lift)*1cqw),120px)}
-/* Crop registration is in source pixels, so footprints follow the same plot
-   at every viewport size. */
-.masjid-sprite{position:absolute;left:var(--sprite-left);top:calc(var(--sprite-y)*1cqw);width:100%;height:auto;max-width:none;filter:drop-shadow(0 0 2px #ffcc0090) drop-shadow(0 3px 4px #00313024)}
-.masjid-sprite>img{display:block;width:100%;height:auto}
-.pin{position:absolute;left:-15px;bottom:var(--marker-height);width:30px;height:40px;overflow:visible;filter:drop-shadow(0 3px 3px #00313030)}
-.pin-body{fill:var(--gold);stroke:white;stroke-width:2.2;stroke-linejoin:round}
-.dome-icon{fill:var(--ink);stroke:var(--ink);stroke-width:1.3;stroke-linejoin:round}
-.distance{position:absolute;left:22px;bottom:calc(var(--marker-height) + 8px);display:block;padding:7px 11px;white-space:nowrap;border:1px solid #00313012;border-radius:8px;background:white;color:var(--ink);font:800 13px/1 Nunito,sans-serif;box-shadow:0 3px 12px #00313015}
-.dest-modern .distance,.dest-condos .distance{left:auto;right:calc(100% + 22px)}
-/* The phone belongs to the pane, outside the cropped map stage. */
-.floating-phone{position:absolute;z-index:8;width:clamp(90px,8vw,118px);right:clamp(28px,3.6vw,68px);top:44%;padding:5px;border-radius:23px;background:#153A37;box-shadow:0 20px 30px #00313026,0 5px 9px #00313026;transform:translateY(-50%) rotate(9deg);overflow:hidden}
-.floating-phone img{width:100%;height:auto;border-radius:18px}
-.phone-camera{position:absolute;top:8px;left:36%;width:28%;height:6px;border-radius:10px;background:#153A37}
-.art-footer{position:absolute;z-index:9;left:24px;right:28px;bottom:14px;display:flex;align-items:center;justify-content:flex-end;gap:15px;min-height:44px}
-.art-caption{color:var(--muted);background:var(--ivory);border-radius:4px;padding:3px 5px}
-@media(min-width:761px) and (max-width:1150px){
- .hero-copy .supporting{font-size:14px;max-width:300px}.hero-copy .store-badges{gap:8px}.hero-copy .store-badges img{height:35px}
- .floating-phone{width:90px;right:25px;padding:4px;border-radius:18px}.floating-phone img{border-radius:14px}
- .pin{width:25px;height:34px;left:-12.5px}.distance{font-size:11px;padding:6px 8px;left:18px}.dest-modern .distance,.dest-condos .distance{right:calc(100% + 18px)}
+/* Widget hero (owner 2026-10-29): deep-teal band, khatam pattern, three HTML/CSS home-screen widgets.
+   Static by default; the float below runs only under html[data-motion="on"] (set by MOTION_INIT in
+   __root.tsx when JS runs and the visitor has not asked for reduced motion). Only transform animates. */
+.home-hero{position:relative;isolation:isolate;overflow:hidden;background:var(--deep);color:var(--deep-foreground)}
+.hero-pattern{position:absolute;inset:0;z-index:-1;width:100%;height:100%;opacity:.07;pointer-events:none}
+.hero-inner{position:relative;max-width:1152px;margin-inline:auto;padding:36px 20px 40px;display:grid;gap:28px;align-items:center}
+.hero-copy{min-width:0}
+.hero-copy h1{color:var(--deep-foreground);font-size:clamp(2.4rem,13vw,3.4rem);line-height:1.08;letter-spacing:-.02em;margin:0;text-wrap:balance}
+.hero-en .hero-copy h1{font-size:clamp(2.3rem,11.8vw,3.4rem)}
+.hero-copy .supporting{max-width:36ch;margin-top:18px;font-size:.9rem;line-height:1.6;color:var(--deep-muted)}
+.hero-copy .store-badges{margin-top:24px;flex-wrap:wrap;gap:10px}
+.hero-copy .store-badges img{height:44px;width:auto}
+
+/* Widgets: decorative, positioned on a fixed-height stage so nothing shifts. */
+.hero-widgets{position:relative;min-width:0;width:100%;max-width:480px;margin-inline:auto;height:400px;font-family:var(--font-sans)}
+.wg{position:absolute;background:#fff;color:var(--foreground);border-radius:24px;padding:14px 15px;box-shadow:0 22px 40px -20px rgb(0 0 0/.6);transform:rotate(var(--r,0deg))}
+.wg-today{left:0;right:0;margin-inline:auto;top:0;width:min(330px,94%);--r:-1.5deg}
+.wg-pt{left:0;top:200px;width:150px;--r:2deg}
+.wg-st{right:0;top:222px;width:150px;height:150px;--r:-2.5deg;display:flex;flex-direction:column;justify-content:space-between}
+.wg .hd{display:flex;justify-content:space-between;align-items:center;font-size:.7rem;font-weight:700;color:var(--muted-foreground)}
+.wg .chipf{display:inline-flex;align-items:center;gap:3px;background:#e6f7f7;color:var(--deep);border-radius:999px;padding:2px 8px;font:800 .72rem var(--font-display)}
+.wg .chipf svg,.wg-st .fl{fill:var(--accent)}
+.wg .cd{font:800 2.3rem/1 var(--font-display);margin:6px 0 12px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.tl{position:relative;display:grid;grid-template-columns:repeat(5,1fr)}
+.tl::before,.tl::after{content:"";position:absolute;left:10%;top:6px;height:3px;border-radius:2px}
+.tl::before{right:10%;background:#d5e6e4}
+.tl::after{width:60%;background:var(--brand-teal)}
+.tl>span{position:relative;z-index:1;display:grid;justify-items:center;gap:4px;font-size:.62rem;color:var(--muted-foreground);line-height:1.15;text-align:center}
+.tl i{width:15px;height:15px;border-radius:50%;background:#fff;border:3px solid #b4cfcc}
+.tl i.done{background:var(--accent);border-color:var(--accent)}
+.tl i.miss{border-color:var(--brand-teal)}
+.tl i.upnext{border-color:var(--brand-teal);box-shadow:0 0 0 4px #e6f7f7}
+.tl b{font:800 .7rem var(--font-display);color:var(--foreground)}
+.tl .nx,.tl .nx b{color:#007a77}
+.wg-pt{padding-inline:12px}
+.wg-pt .hd{font-size:.66rem;gap:4px;white-space:nowrap}
+.wg-pt .hd b{color:#007a77;font-variant-numeric:tabular-nums}
+.wg-pt ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:2px}
+.wg-pt li{display:flex;justify-content:space-between;font-size:.76rem;padding:2px 7px;border-radius:7px;color:var(--muted-foreground);font-variant-numeric:tabular-nums}
+.wg-pt li b{font-family:var(--font-display)}
+.wg-pt li.on{background:#007a77;color:#fff;font-weight:700}
+.wg-pt li.after{color:var(--foreground);font-weight:600}
+.wg-st .fl{width:22px;height:22px}
+.wg-st .n{font:800 3.2rem/1 var(--font-display)}
+.wg-st .ok{font:700 .74rem var(--font-sans);color:#007a77}
+
+/* Gentle float: transform only, never without JS or with reduced motion. */
+@keyframes hero-float{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-8px) rotate(var(--r,0deg))}}
+html[data-motion="on"] .wg{animation:hero-float 5.5s ease-in-out infinite}
+html[data-motion="on"] .wg-pt{animation-delay:-1.8s}
+html[data-motion="on"] .wg-st{animation-delay:-3.6s}
+@media (prefers-reduced-motion:reduce){html[data-motion="on"] .wg{animation:none}}
+
+@media(min-width:640px){.hero-inner{padding-inline:32px}}
+@media(min-width:860px){
+ .hero-inner{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;padding-block:64px 72px}
+ .hero-copy h1,.hero-en .hero-copy h1{font-size:3.9rem}
+ .hero-copy .supporting{font-size:.95rem}
+ .hero-widgets{height:420px;max-width:none;margin-inline:0}
+ .wg-today{left:auto;right:6%;margin:0;top:10px;width:340px}
+ .wg-pt{width:168px}
+ .wg-st{right:2%;top:236px;width:160px;height:160px}
 }
-@media(max-width:760px){
- .home-hero,.hero-inner{min-height:0}.hero-inner{display:block;padding:0}
- .hero-copy{width:auto;max-width:none;padding:40px 24px 24px}
- .hero-copy h1,.hero-en .hero-copy h1{font-size:clamp(38px,12.2vw,80px);line-height:1.04;letter-spacing:-.045em}
- .hero-copy .supporting{font-size:14px;line-height:1.85;margin-top:22px;max-width:490px}
- .hero-copy .store-badges{margin-top:25px;gap:10px}
- .hero-copy .store-badges img{height:43px}
- .art-pane{position:relative;inset:auto;width:100%;height:auto;aspect-ratio:10/11}
- .art-pane::after{background:linear-gradient(180deg,var(--ivory),transparent 4%,transparent 96%,var(--ivory))}
- .map-stage{width:110%;top:50%}.floating-phone{display:none}
- .pin{width:23px;height:31px;left:-11.5px}
- .distance{font-size:11px;padding:6px 8px;bottom:calc(var(--marker-height) + 5px);left:16px;border-radius:6px}
- .dest-modern .distance{left:auto;right:calc(100% + 16px)}
- .dest-south .distance{left:5px;bottom:-26px}.dest-condos .distance{left:auto;right:calc(100% + 5px);bottom:-26px}
- .art-footer{left:18px;right:18px;bottom:4px;gap:12px}.art-caption{font-size:9px}
- .route-ink{stroke-width:4}
-}
-@media(max-width:360px){.hero-copy{padding-inline:20px}.hero-copy .store-badges{gap:8px}.hero-copy .store-badges img{height:39px}.distance{font-size:10px;padding:5px 7px}}

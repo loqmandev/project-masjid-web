@@ -44,7 +44,6 @@ export default function Footer() {
           <p>© {new Date().getFullYear()} {SITE.name}. {copy.footer.built} {SITE.legalName}.</p>
           <p>SSM: {SITE.registrationNumber}</p>
           <p>Developer: Loqman Al Hakim Aripin</p>
-          <p className="pt-4 text-xs">{copy.footer.disclosure}</p>
         </div>
       </Container>
     </footer>
