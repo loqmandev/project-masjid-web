@@ -341,7 +341,9 @@ source, which no longer exists). `components/masjid/MapEmbed.tsx` renders
 `<iframe src="https://www.google.com/maps/embed/v1/place?key=…&q={lat},{lng}&zoom=16&language=en" title="Map of {name}"
 loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen>` inside the fixed-aspect `.m-map` box (16:10 in
 the place card, 4:3 in the phone no-photo hero, 300 px tall in the desktop no-photo hero), so nothing shifts while Google
-loads. `lib/embed-map.ts` builds the URL with `URLSearchParams` from **coordinates only** (never the name: Google could
+loads. On touch layouts (`max-width: 1023px` or `pointer: coarse`) a transparent `a.m-map-cover` link covers the iframe
+(to the Google Maps directions URL) so a swipe scrolls the page instead of panning the map; with a fine pointer from `lg` it
+is `display: none` and the iframe is interactive. `lib/embed-map.ts` builds the URL with `URLSearchParams` from **coordinates only** (never the name: Google could
 match another place) and validates the key. The key is the Worker var **`GOOGLE_MAPS_EMBED_KEY`** (typed in
 `lib/worker-env.ts`), validated as `^[A-Za-z0-9_-]{20,60}$`; `loadMasjid` returns it as `mapKey`. **No value is committed to
 `wrangler.jsonc`:** the owner provides it (set it as a `vars` entry there, never dashboard-only, which the next deploy

@@ -502,6 +502,17 @@
   .m-map-hero {
     aspect-ratio: 4 / 3;
   }
+  /* Touch layouts: a full-size link over the iframe so swipes scroll the page. */
+  .m-map-cover {
+    position: absolute;
+    inset: 0;
+    display: none;
+  }
+  @media (max-width: 1023px), (pointer: coarse) {
+    .m-map-cover {
+      display: block;
+    }
+  }
 
   /* One set of images: a swipeable strip on phones, a mosaic from lg. */
   .m-gallery {

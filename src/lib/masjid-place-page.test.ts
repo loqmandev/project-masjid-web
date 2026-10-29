@@ -164,7 +164,7 @@ describe('title block and actions', () => {
   })
   it('links Directions and Waze (new tab, noopener) in the title row, the place card and the sticky bar', () => {
     const doc = dom()
-    const maps = [...doc.querySelectorAll('a[href^="https://www.google.com/maps"]')]
+    const maps = [...doc.querySelectorAll('a[href^="https://www.google.com/maps"]')].filter((a) => !a.classList.contains('m-map-cover'))
     const waze = [...doc.querySelectorAll('a')].filter((a) => a.getAttribute('href') === 'https://waze.com/ul?ll=2.9,101.7&navigate=yes')
     expect(maps).toHaveLength(3) // title row, place card, sticky bar
     expect(waze).toHaveLength(2) // title row, place card
@@ -435,17 +435,39 @@ describe('Google Maps embed', () => {
       expect(frame.hasAttribute('allowfullscreen')).toBe(true)
       // Fixed-aspect box: the iframe fills it, so nothing shifts while Google loads.
       expect(frame.parentElement!.className).toContain('m-map')
-      expect(frame.parentElement!.children).toHaveLength(1)
+      expect(frame.parentElement!.children).toHaveLength(2) // iframe + the touch cover link
+      expect(frame.hasAttribute('tabindex')).toBe(false) // the iframe stays focusable
     }
     expect(styles).toMatch(/\.m-map\s*\{[^}]*aspect-ratio:\s*16\s*\/\s*10/s)
     expect(styles).toMatch(/\.m-map-hero\s*\{[^}]*aspect-ratio:\s*4\s*\/\s*3/s)
     expect(styles).toMatch(/\.m-map iframe\s*\{[^}]*width:\s*100%;[^}]*height:\s*100%;[^}]*border:\s*0/s)
+  })
+  it('covers each iframe with a link to Google Maps directions so touch swipes scroll the page', () => {
+    for (const n of [0, 3]) {
+      const doc = dom({ page: withPhotos(n) })
+      const frame = doc.querySelector('iframe')!
+      const covers = doc.querySelectorAll('a.m-map-cover')
+      expect(covers).toHaveLength(1)
+      const cover = covers[0]
+      expect(cover.parentElement).toBe(frame.parentElement) // sibling, same fixed-aspect box
+      expect(cover.previousElementSibling).toBe(frame)
+      expect(cover.getAttribute('href')).toBe('https://www.google.com/maps/search/?api=1&query=2.9,101.7')
+      expect(cover.getAttribute('aria-label')).toBe('Open Surau Fixture in Google Maps')
+      expect(cover.getAttribute('target')).toBe('_blank')
+      expect(cover.getAttribute('rel')).toBe('noopener')
+      expect(cover.textContent).toBe('')
+    }
+    // Shown on touch layouts only: from lg with a fine pointer the iframe stays interactive.
+    expect(styles).toMatch(/\.m-map-cover\s*\{[^}]*position:\s*absolute;[^}]*inset:\s*0;[^}]*display:\s*none;/s)
+    expect(styles).toMatch(/@media \(max-width: 1023px\), \(pointer: coarse\)\s*\{\s*\.m-map-cover\s*\{\s*display:\s*block;/s)
+    expect(styles).not.toMatch(/\.m-map-cover[^{]*\{[^}]*pointer-events/s)
   })
   it('the masjid name is never the query, even when it is odd', () => {
     const doc = dom({ page: { ...withPhotos(3), masjid: { ...page.masjid, name: 'A & B <Masjid> "x"' } } })
     const src = doc.querySelector('iframe')!.getAttribute('src')!
     expect(new URL(src).searchParams.get('q')).toBe('2.9,101.7')
     expect(doc.querySelector('iframe')!.getAttribute('title')).toBe('Map of A & B <Masjid> "x"')
+    expect(doc.querySelector('a.m-map-cover')!.getAttribute('aria-label')).toBe('Open A & B <Masjid> "x" in Google Maps')
   })
   it.each([null, undefined, '', 'short', 'has spaces in it but is long enough 123', 'a'.repeat(61), 'bad/char!bad/char!bad/char!'])(
     'no key (%s): no iframe, no empty container, no map markup anywhere',
