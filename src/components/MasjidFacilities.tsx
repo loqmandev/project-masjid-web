@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Check, CircleDashed, ShieldCheck, UsersRound } from 'lucide-react'
 import {
   facilityTrustLine,
@@ -18,20 +19,22 @@ const groupLabels: Record<string, string> = {
   services: 'Services',
 }
 
+function VisitorsIcon({ label }: { label?: string }) {
+  return (
+    <span
+      className="facility-visitors-icon"
+      {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
+    >
+      <UsersRound size={18} aria-hidden="true" />
+      <Check size={11} className="facility-visitors-check" aria-hidden="true" />
+    </span>
+  )
+}
+
 function FacilityIcon({ state }: { state: PublicFacility['state'] }) {
   if (state === 'masjid_verified')
     return <ShieldCheck size={18} role="img" aria-label="Masjid verified" />
-  if (state === 'confirmed')
-    return (
-      <span
-        className="facility-visitors-icon"
-        role="img"
-        aria-label="Confirmed by visitors"
-      >
-        <UsersRound size={18} aria-hidden="true" />
-        <Check size={11} className="facility-visitors-check" aria-hidden="true" />
-      </span>
-    )
+  if (state === 'confirmed') return <VisitorsIcon label="Confirmed by visitors" />
   return <CircleDashed size={18} role="img" aria-label="Reported, not confirmed" />
 }
 
@@ -78,15 +81,18 @@ function FacilityChip({
 function FacilityChips({
   items,
   masjidName,
+  children,
 }: {
   items: FacilityDetails[]
   masjidName: string
+  children?: ReactNode
 }) {
   return (
     <div className="facility-chips">
       {items.map((item) => (
         <FacilityChip key={item.facility.code} {...item} masjidName={masjidName} />
       ))}
+      {children}
     </div>
   )
 }
@@ -113,32 +119,54 @@ export default function MasjidFacilities({
     const group = item.details.group ?? ''
     groups.set(group, [...(groups.get(group) ?? []), item])
   }
+  // Reported items collapse into one dashed chip that opens the disclosure.
+  const reportedChip = !!reported.length && (
+    <details className="facility-reported">
+      <summary className="facility-reported-chip">
+        + {reported.length} reported by visitors
+      </summary>
+      <p>
+        Visitors haven't confirmed these yet. Visiting? Confirm them in the
+        Jejak Masjid app.
+      </p>
+      <FacilityChips items={reported} masjidName={masjidName} />
+    </details>
+  )
   return (
     <section className="facility-section" aria-labelledby="facilities-title">
       <h2 id="facilities-title">Facilities</h2>
-      {proven.length > 8 ? (
-        [...groups].map(([group, grouped]) => (
-          <div key={group}>
-            <h3>{groupLabels[group] ?? (group ? group.replace(/_/g, ' ') : 'Other')}</h3>
-            <FacilityChips items={grouped} masjidName={masjidName} />
-          </div>
-        ))
-      ) : (
-        <FacilityChips items={proven} masjidName={masjidName} />
-      )}
       {!facilities.some(isProvenFacility) && <p>No confirmed facilities yet.</p>}
       {missingDetails && (
         <p>Some facility details are resting for a moment. Please try again.</p>
       )}
-      {!!reported.length && (
-        <details className="facility-reported">
-          <summary>{reported.length} reported, not confirmed</summary>
-          <p>
-            Visitors haven't confirmed these yet. Visiting? Confirm them in the
-            Jejak Masjid app.
-          </p>
-          <FacilityChips items={reported} masjidName={masjidName} />
-        </details>
+      {proven.length > 8 ? (
+        <>
+          {[...groups].map(([group, grouped]) => (
+            <div key={group}>
+              <h3>{groupLabels[group] ?? (group ? group.replace(/_/g, ' ') : 'Other')}</h3>
+              <FacilityChips items={grouped} masjidName={masjidName} />
+            </div>
+          ))}
+          {reportedChip && <div className="facility-chips mt-3">{reportedChip}</div>}
+        </>
+      ) : (
+        (proven.length > 0 || reportedChip) && (
+          <FacilityChips items={proven} masjidName={masjidName}>
+            {reportedChip}
+          </FacilityChips>
+        )
+      )}
+      {proven.length > 0 && (
+        <p className="facility-legend">
+          <span>
+            <ShieldCheck aria-hidden="true" />
+            Verified by the masjid
+          </span>
+          <span>
+            <VisitorsIcon />
+            Confirmed by visitors
+          </span>
+        </p>
       )}
       <details className="facility-help">
         <summary>How we check facilities</summary>

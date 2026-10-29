@@ -74,3 +74,58 @@ it('placeParts cleans unknown, empty and ALL CAPS districts', () => {
   )
   expect(placeParts('PRESINT 16', 'Putrajaya').district).toBe('Presint 16')
 })
+
+import {
+  countdownLabel,
+  mytDateLabel,
+  nextPrayer,
+  prayerTimeParts,
+  titleCaseAddress,
+  venueLabel,
+  wazeUrl,
+} from './masjid-format'
+it.each([
+  ['JALAN PERDANA', 'Jalan Perdana'],
+  ['LOT 1234, KG BARU', 'Lot 1234, Kg Baru'],
+  ['JALAN SS 2/66, 47300 PETALING JAYA', 'Jalan Ss 2/66, 47300 Petaling Jaya'],
+  ['JALAN-PERDANA (TAMAN TASIK)', 'Jalan-Perdana (Taman Tasik)'],
+  ['Jalan Perdana, Kuala Lumpur', 'Jalan Perdana, Kuala Lumpur'],
+  ['JALAN perdana', 'JALAN perdana'], // already has lower case: stored as is
+  ['1234', '1234'],
+  ['', ''],
+])('titleCaseAddress(%s) -> %s', (input, expected) => {
+  expect(titleCaseAddress(input)).toBe(expected)
+})
+it('builds the Waze link and classifies masjid versus surau like the backend', () => {
+  expect(wazeUrl(3.1424, 101.6918)).toBe('https://waze.com/ul?ll=3.1424,101.6918&navigate=yes')
+  expect(venueLabel(null, 'Masjid Negara')).toBe('Masjid')
+  expect(venueLabel('masjid', 'Masjid Negara')).toBe('Masjid')
+  expect(venueLabel('masjid', 'Surau Al-Hidayah')).toBe('Surau')
+  expect(venueLabel('surau', 'Al-Hidayah')).toBe('Surau')
+})
+it('splits prayer times and formats the Malaysia date without locale punctuation', () => {
+  expect(prayerTimeParts('2026-10-12T12:30:00Z')).toEqual({ time: '8:30', meridiem: 'pm' })
+  expect(mytDateLabel('2026-10-28T22:00:00Z')).toBe('Thursday 29 October') // 06:00 MYT
+  expect(mytDateLabel('2026-10-29T17:00:00Z')).toBe('Friday 30 October') // 01:00 MYT next day
+})
+const day = (hhmm: string) => `2026-10-29T${hhmm}:00+08:00`
+const today = {
+  subuh: day('05:48'),
+  zohor: day('13:00'),
+  asar: day('16:19'),
+  maghrib: day('18:59'),
+  isyak: day('20:09'),
+}
+it('finds the next prayer after a Malaysia-time clock, none after Isyak or on another day', () => {
+  expect(nextPrayer(today, Date.parse(day('03:00')))).toEqual({ key: 'subuh', minutes: 168 })
+  expect(nextPrayer(today, Date.parse(day('15:06')))).toEqual({ key: 'asar', minutes: 73 })
+  expect(nextPrayer(today, Date.parse('2026-10-29T16:18:30+08:00'))).toEqual({ key: 'asar', minutes: 1 })
+  expect(nextPrayer(today, Date.parse(day('20:30')))).toBeNull()
+  expect(nextPrayer(today, Date.parse('2026-10-30T09:00:00+08:00'))).toBeNull() // page left open past midnight
+})
+it('formats countdowns', () => {
+  expect(countdownLabel(72)).toBe('1 h 12 min')
+  expect(countdownLabel(120)).toBe('2 h')
+  expect(countdownLabel(12)).toBe('12 min')
+  expect(countdownLabel(1)).toBe('1 min')
+})

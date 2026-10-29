@@ -4,7 +4,7 @@ import { page, program } from './masjid-fixture'
 it('does not repeat equal district/state in the title or description', () => {
   const s = masjidSeo({ ...page, masjid: { ...page.masjid, districtName: 'PULAU PINANG', stateName: 'Pulau Pinang' } }, false)
   expect(s.meta[0].title).toContain('Surau Fixture · Pulau Pinang')
-  expect(s.meta.find(m => m.name === 'description')!.content).toContain('in Pulau Pinang.')
+  expect(s.meta.find(m => m.name === 'description')!.content).toContain('in Pulau Pinang:')
 })
 it('thin pages noindex with canonical and descriptive title', () => {
   const s = masjidSeo(page)
@@ -94,7 +94,7 @@ it('ajk off description has prayer times, no Programs; unknown district title is
   const d = s.meta.find((m) => m.name === 'description')!.content as string
   expect(d).toContain('prayer times')
   expect(d).not.toContain('Programs')
-  expect(d).toContain('in Putrajaya.')
+  expect(d).toContain('in Putrajaya:')
   const on = masjidSeo(page, true).meta.find((m) => m.name === 'description')!
   expect(on.content).toContain('Programs, photos and directions')
 })
@@ -106,7 +106,7 @@ it('title and description use clean place text for Sabah and ZON masjids', () =>
   )
   expect(sabah.meta[0].title).toContain('Surau Fixture \u00b7 Kota Kinabalu')
   expect(sabah.meta.find((m) => m.name === 'description')!.content).toContain(
-    'in Kota Kinabalu, Sabah.',
+    'in Kota Kinabalu, Sabah:',
   )
   const zon = masjidSeo(
     { ...page, masjid: { ...page.masjid, districtName: 'ZON 6', stateName: 'KUALA LUMPUR' } },
@@ -114,6 +114,19 @@ it('title and description use clean place text for Sabah and ZON masjids', () =>
   )
   expect(zon.meta[0].title).toContain('Surau Fixture \u00b7 Kuala Lumpur')
   expect(zon.meta.find((m) => m.name === 'description')!.content).toContain(
-    'in Kuala Lumpur.',
+    'in Kuala Lumpur:',
+  )
+})
+
+it('uses the place-card description for pages without a profile text, keeping title and noindex rules', () => {
+  const s = masjidSeo({ ...page, indexable: true, masjid: { ...page.masjid, name: 'Masjid Negara', districtName: 'Kuala Lumpur', stateName: 'Wilayah Persekutuan Kuala Lumpur' } }, false)
+  expect(s.meta.find((m) => m.name === 'description')!.content).toBe(
+    "Masjid Negara in Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur: today's prayer times, facilities, photos and reviews from visitors on Jejak Masjid.",
+  )
+  expect(s.meta[0].title).toBe('Masjid Negara · Kuala Lumpur | Jejak Masjid')
+  expect(s.meta.some((m) => m.name === 'robots' && String(m.content).includes('noindex'))).toBe(false)
+  const noPlace = masjidSeo({ ...page, masjid: { ...page.masjid, districtName: null, stateName: '' } }, false)
+  expect(noPlace.meta.find((m) => m.name === 'description')!.content).toBe(
+    "Surau Fixture: today's prayer times, facilities, photos and reviews from visitors on Jejak Masjid.",
   )
 })

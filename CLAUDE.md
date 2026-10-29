@@ -300,3 +300,63 @@ Implementation evidence and the host-only Chromium script are under
 `.hermes/reviews/website-revamp/` in the parent project. The script checks the built local
 Worker, captures screens and records actual outcomes. Deployment still needs the owner's
 ratings/review refresh, Opus review and browser approval.
+
+### Masjid page redesign — "Place card" (local implementation, 2026-10-29)
+
+Spec `SPEC_masjid-page-redesign.md` (project-masjid-web, unmoved), design sketch 108 variant A. Only
+`/masjid/$slug` changed; the program page, missing/resting pages, sitemaps, redirects, noindex rules and the AJK
+flag behaviour are as before. English only, light only.
+
+**Structure.** `MasjidPage` (`components/MasjidPages.tsx`) renders `components/masjid/MasjidPlacePage.tsx`:
+Header, place line (`Masjid · District · State`), gallery, then two columns from `lg` (main + sticky 340 px
+`<aside>`) or one column below it with a `sticky bottom-0` action bar (inside `<main>`, never `fixed`, so it rests
+above the footer). Main order: title block (tags, h1, title-cased address, Directions + Waze below `lg`), AJK "About"
+profile text (claimed pages only), prayer times, facilities, reviews, `#photos` grid (lg only, only when more than five
+photos), then the AJK sections (programs, news, claim callout) behind `MASJID_AJK_ENABLED`. The aside is the place
+card (Google map when there are photos and a valid key, address, Directions + Waze; below `lg` it is shown only when it carries
+the map, otherwise it would repeat the title block) and the deep-teal app card. Parts live in
+`components/masjid/`: `Gallery` (one set of `<img>`s: scroll-snap strip below `lg`, mosaic from `lg` via CSS
+`data-mosaic`; counter "N photos" in SSR, "i / N" after hydration through IntersectionObserver; no photos = `MapHero`),
+`PrayerTimes` (SSR has no highlight or countdown; after hydration the next prayer is marked and a once-a-minute
+countdown shows; a page left open past midnight never highlights), `Reviews`, `PlaceCards` (Address, MapLinks, PlaceCard,
+AppCard, StickyBar), `MapEmbed`, `OpenMasjid` (keeps the Android `intent://` swap; re-exported from `MasjidPages`).
+`MasjidFacilities` keeps its behaviour and tests; proven items are white pills (shield / people-check icon), reported
+items collapse into one dashed "+ N reported by visitors" chip that opens the existing disclosure, plus an icon legend.
+Pure helpers: `lib/masjid-format.ts` (`titleCaseAddress`, `wazeUrl`, `venueLabel`, `nextPrayer`, countdown, MYT date),
+`lib/masjid-gallery.ts` (`galleryPhotos`: AJK cover, then photos, trusted hosts, de-duplicated, at most eight),
+`lib/masjid-reviews.ts`. Page styles are the `m-*` / `facility-*` rules in `styles.css`.
+
+**Reviews contract** (backend `SPEC_masjid-page-reviews.md` §3, flag `PUBLIC_MASJID_REVIEWS_ENABLED`). The by-slug payload
+may carry `reviews: { count, average, items[{ id, rating, tip, createdAt }] }`. `loadMasjid` validates it strictly with
+`validateReviews` (count integer >= 0; average null or 1–5, required from three reviews; <= 3 items and <= count;
+rating integer 1–5; tip 1–150 chars; id `^[A-Za-z0-9_-]{1,64}$`; ISO date with zone) and returns it as `loaderData.reviews`,
+removed from `page`; anything invalid or absent means no Reviews section, never a partial one. Only those four item
+keys survive, so an oversharing backend cannot reach the HTML or hydration data. Tips render as escaped text, the
+reviewer is "Visitor · Month YYYY" (MYT), "Report" is a `mailto:` to `SITE.email` with the review id and slug, and the
+tile with average + gold stars (half stars) appears from three reviews. No `AggregateRating`/`Review` JSON-LD.
+JSON-LD keeps `Mosque` as before and adds `image` (up to three trusted visitor photos) when there is no AJK cover.
+
+**Map = Google Maps Embed API** (owner decision 2026-10-29, replacing the server-rendered SVG map and its tile
+source, which no longer exists). `components/masjid/MapEmbed.tsx` renders
+`<iframe src="https://www.google.com/maps/embed/v1/place?key=…&q={lat},{lng}&zoom=16&language=en" title="Map of {name}"
+loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen>` inside the fixed-aspect `.m-map` box (16:10 in
+the place card, 4:3 in the phone no-photo hero, 300 px tall in the desktop no-photo hero), so nothing shifts while Google
+loads. On touch layouts (`max-width: 1023px` or `pointer: coarse`) a transparent `a.m-map-cover` link covers the iframe
+(to the Google Maps directions URL) so a swipe scrolls the page instead of panning the map; with a fine pointer from `lg` it
+is `display: none` and the iframe is interactive. `lib/embed-map.ts` builds the URL with `URLSearchParams` from **coordinates only** (never the name: Google could
+match another place) and validates the key. The key is the Worker var **`GOOGLE_MAPS_EMBED_KEY`** (typed in
+`lib/worker-env.ts`), validated as `^[A-Za-z0-9_-]{20,60}$`; `loadMasjid` returns it as `mapKey`. **No value is committed to
+`wrangler.jsonc`:** the owner provides it (set it as a `vars` entry there, never dashboard-only, which the next deploy
+overwrites). Absent or malformed key: no map anywhere, no empty container; the no-photo gallery slot is only the "No photos
+yet" card and the place card (lg only) is address + Directions + Waze. Below `lg` the place card is shown only when it
+carries the map. The key is public by nature, so the owner restricts it in Google Cloud to **HTTP referrers
+`jejakmasjid.my/*` and `www.jejakmasjid.my/*`** and to the **Maps Embed API only**. The site sets no Content-Security-Policy
+(`public/_headers` has none); if one is ever added it needs `frame-src https://www.google.com`. The privacy policy
+discloses that Google receives the visitor's IP address and may set cookies when the map loads. The earlier SVG map route,
+`TILES` service binding, `TILES_BASE`, `@mapbox/vector-tile`/`pbf` and the map fixtures are deleted; `lib/embed-map.test.ts`
+fails if any of them comes back.
+
+Host check (local built Worker only; `KEY=dummy|none` must match whether the Worker has `GOOGLE_MAPS_EMBED_KEY`):
+`.hermes/reviews/masjid-page-redesign/{mock-api.mjs,check-masjid.mjs}` (loopback API and https image mocks; Chromium via
+global `playwright-core`, Google requests stubbed so nothing leaves the machine). Start the Worker with
+`--persist-to <dir outside dist>` or wrangler restarts on every Cache API write and truncates responses.

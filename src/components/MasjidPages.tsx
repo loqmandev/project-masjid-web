@@ -1,56 +1,24 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import PageLayout from './PageLayout'
-import MasjidFacilities from './MasjidFacilities'
+import MasjidPlacePage from './masjid/MasjidPlacePage'
+import { OpenMasjid } from './masjid/OpenMasjid'
 import { trustedImage } from '@/lib/masjid-seo'
 import StoreBadges from './ui/StoreBadges'
 import { API_PUBLIC_URL } from '@/lib/site'
-import { masjidAppUrl, masjidIntentUrl } from '@/lib/deep-links'
 import {
   audienceLabels,
   categoryLabels,
   programDate,
-  directionsUrl,
-  prayerTime,
   recurringTime,
-  PRAYER_KEYS,
-  placeParts,
 } from '@/lib/masjid-format'
+import type { MasjidReviews } from '@/lib/masjid-reviews'
 import type {
   FacilityCatalogueDetails,
   PublicMasjidPage,
   PublicProgramCard,
   PublicProgramDetail,
 } from '@/lib/masjid-types'
-const button =
-  'inline-flex min-h-12 items-center rounded-full px-6 py-3 font-display font-extrabold no-underline'
-export function OpenMasjid({
-  id,
-  label = 'Open in Jejak Masjid',
-  onDeep = false,
-}: {
-  id: string
-  label?: string
-  onDeep?: boolean
-}) {
-  const [href, setHref] = useState(masjidAppUrl(id))
-  useEffect(
-    () =>
-      setHref(
-        /Android/i.test(navigator.userAgent)
-          ? masjidIntentUrl(id)
-          : masjidAppUrl(id),
-      ),
-    [id],
-  )
-  return (
-    <a
-      className={`${button} ${onDeep ? 'bg-accent text-accent-foreground' : 'bg-primary text-primary-foreground'}`}
-      href={href}
-    >
-      {label}
-    </a>
-  )
-}
+export { OpenMasjid }
 function ViewBeacon({ kind, id }: { kind: 'masjid' | 'program'; id: string }) {
   const sent = useRef('')
   useEffect(() => {
@@ -131,115 +99,99 @@ export function MasjidPage({
   page,
   prayers,
   ajk,
+  mapKey = null,
+  reviews = null,
   facilityCatalogue = [],
 }: {
   page: PublicMasjidPage
   prayers: Record<string, string> | null
   ajk: boolean
+  /** GOOGLE_MAPS_EMBED_KEY when valid; null renders no map anywhere. */
+  mapKey?: string | null
+  reviews?: MasjidReviews | null
   facilityCatalogue?: FacilityCatalogueDetails[]
 }) {
-  const m = page.masjid,
-    p = page.profile,
-    cover =
-      trustedImage(p?.coverUrl) ||
-      page.photos.map((photo) => trustedImage(photo.url)).find(Boolean)
+  const m = page.masjid
   return (
-    <PageLayout
-      title={m.name}
-      intro={placeParts(m.districtName, m.stateName).line}
-      actions={
-        <div className="mt-8">
-          <div className="flex flex-wrap items-center justify-center gap-5">
-            <OpenMasjid id={m.id} onDeep />
-            <a
-              className="text-deep-foreground underline"
-              href={directionsUrl(m.lat, m.lng)}
-            >
-              Get directions
-            </a>
-          </div>
-          <p className="mt-4 text-sm text-deep-muted">
-            Don't have the app? Get it below.
-          </p>
-        </div>
-      }
-    >
+    <>
       {ajk && <ViewBeacon kind="masjid" id={m.id} />}
-      {cover && <Photo url={cover} alt={m.name} eager />}
-      <AboutSection page={page} />
-      {Array.isArray(page.facilities) && (
-        <MasjidFacilities
-          facilities={page.facilities}
-          catalogue={facilityCatalogue}
-          masjidName={m.name}
-        />
-      )}
-      <div className="path-rule my-10" aria-hidden />
-      {ajk && <ProgramsSection page={page} />}
-      {ajk && <NewsSection page={page} />}
-      <PhotosSection page={page} />
-      <PrayerTimesSection prayers={prayers} />
-      <ClaimCta page={page} ajk={ajk} />
-      <StoreBadges />
-    </PageLayout>
+      <MasjidPlacePage
+        page={page}
+        prayers={prayers}
+        mapKey={mapKey}
+        reviews={reviews}
+        facilityCatalogue={facilityCatalogue}
+        about={<AboutSection page={page} />}
+        ajk={
+          ajk ? (
+            <div className="m-ajk grid gap-7">
+              <ProgramsSection page={page} />
+              <NewsSection page={page} />
+              <ClaimCta page={page} ajk={ajk} />
+            </div>
+          ) : null
+        }
+      />
+    </>
   )
 }
 
+// Profile content only exists on pages an AJK has claimed.
 function AboutSection({ page }: { page: PublicMasjidPage }) {
-  const m = page.masjid,
-    p = page.profile
+  const p = page.profile
+  const paragraphs = p?.description?.split(/\n+/).filter(Boolean) ?? []
+  if (
+    !p ||
+    !(
+      paragraphs.length ||
+      p.whatsappUrl ||
+      p.contactPhone ||
+      p.recurringClasses.length
+    )
+  )
+    return null
   return (
-    <>
-      <section>
-        <h2>About this masjid</h2>
-        {p?.description?.split(/\n+/).map((text, i) => (
-          <p key={i}>{text}</p>
-        ))}
-        <p>{m.address}</p>
-        {p?.whatsappUrl && (
-          <p>
-            <a href={p.whatsappUrl}>WhatsApp the AJK</a>
-          </p>
-        )}
-        {p?.contactPhone && (
-          <p>
-            <a href={`tel:${p.contactPhone}`}>{p.contactPhone}</a>
-          </p>
-        )}
-        {!Array.isArray(page.facilities) && !!p?.facilities.length && (
+    <section className="m-ajk">
+      <h2>About this masjid</h2>
+      {paragraphs.map((text, i) => (
+        <p key={i}>{text}</p>
+      ))}
+      {p.whatsappUrl && (
+        <p>
+          <a href={p.whatsappUrl}>WhatsApp the AJK</a>
+        </p>
+      )}
+      {p.contactPhone && (
+        <p>
+          <a href={`tel:${p.contactPhone}`}>{p.contactPhone}</a>
+        </p>
+      )}
+      {!!p.recurringClasses.length && (
+        <>
+          <h3>Recurring classes</h3>
           <ul>
-            {p.facilities.map((f) => (
-              <li key={f.code}>{f.label}</li>
+            {p.recurringClasses.map((c, i) => (
+              <li key={i}>
+                Every{' '}
+                {
+                  [
+                    'Sunday',
+                    'Monday',
+                    'Tuesday',
+                    'Wednesday',
+                    'Thursday',
+                    'Friday',
+                    'Saturday',
+                  ][c.dayOfWeek]
+                }{' '}
+                · {recurringTime(c.startTime)} · {c.title}
+                {c.note ? ` · ${c.note}` : ''}
+              </li>
             ))}
           </ul>
-        )}
-        {!!p?.recurringClasses.length && (
-          <>
-            <h3>Recurring classes</h3>
-            <ul>
-              {p.recurringClasses.map((c, i) => (
-                <li key={i}>
-                  Every{' '}
-                  {
-                    [
-                      'Sunday',
-                      'Monday',
-                      'Tuesday',
-                      'Wednesday',
-                      'Thursday',
-                      'Friday',
-                      'Saturday',
-                    ][c.dayOfWeek]
-                  }{' '}
-                  · {recurringTime(c.startTime)} · {c.title}
-                  {c.note ? ` · ${c.note}` : ''}
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-      </section>
-    </>
+        </>
+      )}
+    </section>
   )
 }
 function ProgramsSection({ page }: { page: PublicMasjidPage }) {
@@ -297,58 +249,12 @@ function NewsSection({ page }: { page: PublicMasjidPage }) {
     </>
   )
 }
-function PhotosSection({ page }: { page: PublicMasjidPage }) {
-  const m = page.masjid
-  const photos = page.photos
-    .filter((photo) => trustedImage(photo.url))
-    .slice(0, 8)
-  return (
-    <>
-      {!!photos.length && (
-        <section>
-          <h2>Photos</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {photos.map((p, i) => (
-              <Photo key={i} url={p.url} alt={`${m.name}, photo ${i + 1}`} />
-            ))}
-          </div>
-        </section>
-      )}
-    </>
-  )
-}
-function PrayerTimesSection({
-  prayers,
-}: {
-  prayers: Record<string, string> | null
-}) {
-  return (
-    <>
-      {prayers && (
-        <section>
-          <h2>Today's prayer times</h2>
-          <dl>
-            {PRAYER_KEYS.map((k) => (
-              <div
-                key={k}
-                className="flex justify-between border-b border-border py-2"
-              >
-                <dt className="capitalize">{k}</dt>
-                <dd>{prayerTime(prayers[k])}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-      )}
-    </>
-  )
-}
 function ClaimCta({ page, ajk }: { page: PublicMasjidPage; ajk: boolean }) {
   if (!ajk) return null
   const m = page.masjid
   return (
     <>
-      <aside className="on-deep my-10 rounded-[20px] bg-deep p-8 text-deep-foreground [&_h2]:text-deep-foreground [&_a]:text-deep-foreground">
+      <aside className="on-deep rounded-[20px] bg-deep p-8 text-deep-foreground [&_h2]:text-deep-foreground [&_a]:text-deep-foreground">
         {page.claimed ? (
           <p>
             Managed by the AJK of {m.name} · Are you AJK here?{' '}

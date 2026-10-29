@@ -48,6 +48,9 @@ const PrivacyPolicy = () => {
           When you access the Service, we may automatically collect certain information, including your IP address, browser type, operating system, access times, and the pages you have viewed directly before and after accessing the Service.
         </p>
         <p>
+          Masjid pages can show a map from Google Maps. When the map loads, Google receives your IP address and may set cookies, under <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>.
+        </p>
+        <p>
           We do not collect sensitive personal information such as race, ethnicity, religious beliefs, health data, or financial information.
         </p>
 
@@ -75,6 +78,7 @@ const PrivacyPolicy = () => {
           <li><strong>Displayed Information:</strong> The leaderboard shows your username (created within the app, not your third-party profile name) and your profile picture.</li>
           <li><strong>Profile Picture:</strong> Your profile picture can be sourced from your third-party provider (Google, Apple) or uploaded by you.</li>
           <li><strong>Privacy Option:</strong> You can choose to anonymize your name on the leaderboard. When enabled, your name will be displayed as "Anonymous" or a placeholder instead of your username.</li>
+          <li><strong>Reviews:</strong> Reviews you write in the app (your star rating and short tip) are public. They appear in the app and on the masjid's page at jejakmasjid.my, without your name.</li>
           <li><strong>What's NOT Shared:</strong> Your masjid visit history, email address, and unique identifier are NEVER displayed on the leaderboard or shared with other users.</li>
         </ul>
 

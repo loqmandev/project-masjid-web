@@ -112,3 +112,21 @@ it('omits facility structured data when disabled, empty, unconfirmed-only or cat
     expect(mosqueJsonLd({ ...page, facilities }, false, facilityCatalogue)).not.toHaveProperty('amenityFeature')
   expect(mosqueJsonLd({ ...page, facilities: publicFacilities })).not.toHaveProperty('amenityFeature')
 })
+
+it('uses up to three trusted visitor photos as image when there is no AJK cover, and never ratings', () => {
+  const photos = [
+    { url: 'https://tracker.test/x' },
+    ...[1, 2, 3, 4].map((i) => ({ url: `https://bucket.jejakmasjid.my/${i}.jpg` })),
+  ]
+  const m = mosqueJsonLd({ ...page, photos })
+  expect(m.image).toEqual([1, 2, 3].map((i) => `https://bucket.jejakmasjid.my/${i}.jpg`))
+  const withCover = mosqueJsonLd({
+    ...page,
+    photos,
+    profile: { description: null, contactPhone: null, whatsappUrl: null, facilities: [], recurringClasses: [], coverUrl: 'https://bucket.jejakmasjid.my/cover.jpg', updatedAt: '' },
+  })
+  expect(withCover.image).toBe('https://bucket.jejakmasjid.my/cover.jpg')
+  expect(mosqueJsonLd(page)).not.toHaveProperty('image')
+  const json = jsonLdScript(mosqueJsonLd({ ...page, photos, reviews: { count: 23, average: 4.7, items: [] } } as never))
+  expect(json).not.toMatch(/AggregateRating|"Review"|aggregateRating|ratingValue/)
+})

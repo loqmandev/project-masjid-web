@@ -20,8 +20,9 @@ vi.mock('@tanstack/react-start', () => ({
 }))
 vi.mock('@tanstack/react-start/server', () => ({ setResponseHeader: vi.fn() }))
 let ajkVar: string | undefined
+let embedKey: string | undefined
 vi.mock('./worker-env', () => ({
-  getWorkerEnv: async () => ({ MASJID_AJK_ENABLED: ajkVar }),
+  getWorkerEnv: async () => ({ MASJID_AJK_ENABLED: ajkVar, GOOGLE_MAPS_EMBED_KEY: embedKey }),
 }))
 vi.mock('./jm-api', async (importOriginal) => ({
   ...(await importOriginal<typeof import('./jm-api')>()),
@@ -37,6 +38,7 @@ import { setResponseHeader } from '@tanstack/react-start/server'
 beforeEach(() => {
   vi.clearAllMocks()
   ajkVar = 'true'
+  embedKey = undefined
   vi.mocked(getMasjidPage).mockResolvedValue({ status: 200, body: page })
   vi.mocked(getFacilityCatalogue).mockResolvedValue({ status: 200, body: facilityCatalogue })
   vi.mocked(getProgram).mockResolvedValue({ status: 200, body: program })
@@ -259,4 +261,45 @@ it.each([404, 503])('keeps the masjid page available when the catalogue fails wi
   const result = await loadMasjid({ data: { slug: page.masjid.slug } })
   expect(result.page.masjid).toEqual(page.masjid)
   expect(result.facilityCatalogue).toEqual([])
+})
+
+const reviews = {
+  count: 23,
+  average: 4.7,
+  items: [{ id: 'rv_1', rating: 5, tip: 'Big compound.', createdAt: '2026-10-12T04:31:00Z' }],
+}
+it('validates reviews in the loader and returns them beside, not inside, the page', async () => {
+  vi.mocked(getMasjidPage).mockResolvedValue({
+    status: 200,
+    body: { ...page, reviews: { ...reviews, items: [{ ...reviews.items[0], userId: 'u-1' }] } },
+  })
+  const result = await loadMasjid({ data: { slug: page.masjid.slug } })
+  expect(result.reviews).toEqual(reviews)
+  expect(result.page).not.toHaveProperty('reviews')
+  expect(JSON.stringify(result)).not.toContain('u-1')
+})
+it.each([
+  ['absent', undefined],
+  ['null', null],
+  ['invalid', { ...reviews, count: -1 }],
+  ['partly invalid', { ...reviews, items: [{ ...reviews.items[0], rating: 9 }] }],
+])('omits reviews entirely when they are %s', async (_name, value) => {
+  vi.mocked(getMasjidPage).mockResolvedValue({ status: 200, body: { ...page, reviews: value } })
+  const result = await loadMasjid({ data: { slug: page.masjid.slug } })
+  expect(result.reviews).toBeNull()
+  expect(result.page).not.toHaveProperty('reviews')
+})
+
+it('loadMasjid returns the Google Maps embed key only when it is well-formed (independent of the AJK flag)', async () => {
+  const good = 'AIzaSyDummyDummyDummyDummy12345_-'
+  for (const [value, expected] of [
+    [undefined, null], ['', null], ['short', null], ['has a space inside it, long enough', null],
+    ['x'.repeat(61), null], ['bad/char!bad/char!bad/char!', null], [good, good],
+  ] as const) {
+    embedKey = value
+    ajkVar = 'false'
+    const result = await loadMasjid({ data: { slug: page.masjid.slug } })
+    expect(result.mapKey).toBe(expected)
+    expect(result.ajk).toBe(false)
+  }
 })
