@@ -184,6 +184,8 @@ The old waitlist (Google Sheets + Resend) was removed in full, along with
 
 ### Homepage numbers and collaboration — owner amendments 2026-10-26
 
+**Masjid search/browse removed 2026-10-29 (owner anti-scraping decision): no `/masjid` landing, `/masjid/di/…`, `/en/mosques…` or `/sitemaps/areas`, no "Find a mosque" links, no discovery API reads. Do not reintroduce without the owner.** Individual `/masjid/<slug>` pages stay.
+
 `SPEC_website-revamp.md` §8 supersedes all earlier AJK marketing requirements. `/ajk` and
 `/api/ajk-interest` are removed and return 404. The form, proposal, snapshot, server handlers
 and their tests are gone. Products now contain App, Shop, Merchant and Collaboration. The

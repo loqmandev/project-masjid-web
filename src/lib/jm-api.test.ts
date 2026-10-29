@@ -45,6 +45,22 @@ describe('public API boundary', () => {
     expect((await apiGet('/api/x', { ttl: 300 }, {})).status).toBe(404)
     expect(f).not.toHaveBeenCalled()
   })
+  it('gives stats reads a 1500 ms cap and every other read 5000 ms unless it overrides, and does not special-case old discovery paths', async () => {
+    const timeout = vi.spyOn(AbortSignal, 'timeout').mockReturnValue(new AbortController().signal)
+    const env = { MASJID_PAGES_ENABLED: 'true', JM_API: { fetch: vi.fn(async () => Response.json({})) } }
+    await apiGet('/api/public/stats', { ttl: 0, timeoutMs: 6000 }, env)
+    expect(timeout).toHaveBeenLastCalledWith(1500)
+    await apiGet('/api/x', { ttl: 0 }, env)
+    expect(timeout).toHaveBeenLastCalledWith(5000)
+    await apiGet('/api/x', { ttl: 0, timeoutMs: 700 }, env)
+    expect(timeout).toHaveBeenLastCalledWith(700)
+    // The old discovery paths are ordinary reads now: gated by the masjid-pages flag like any other.
+    const f = vi.fn()
+    vi.stubGlobal('fetch', f)
+    expect((await apiGet('/api/public/discovery/areas', { ttl: 60 }, {})).status).toBe(404)
+    expect(f).not.toHaveBeenCalled()
+    timeout.mockRestore()
+  })
   it('uses binding and caches full URL with TTL', async () => {
     const f = vi.fn().mockResolvedValue(new Response('{"ok":true}'))
     const put = vi.fn()

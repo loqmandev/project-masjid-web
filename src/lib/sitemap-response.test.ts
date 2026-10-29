@@ -4,16 +4,12 @@ vi.mock('./jm-api', async (importOriginal) => ({
   getSitemapCount: vi.fn(),
   getSitemapPage: vi.fn(),
 }))
-vi.mock('./discovery-api.server', () => ({ getAreas: vi.fn() }))
 vi.mock('./worker-env', () => ({ getWorkerEnv: vi.fn() }))
 import { getSitemapCount, getSitemapPage } from './jm-api'
 import { getWorkerEnv } from './worker-env'
 import { sitemapIndexResponse, sitemapPageResponse } from './sitemap'
-import { getAreas } from './discovery-api.server'
-import { areaSitemapResponse } from './discovery-sitemap'
 beforeEach(() => {
   vi.clearAllMocks()
-  vi.mocked(getAreas).mockResolvedValue({ status: 'missing' })
   vi.mocked(getWorkerEnv).mockResolvedValue({ MASJID_PAGES_ENABLED: 'true' })
   vi.mocked(getSitemapCount).mockResolvedValue({
     status: 200,
@@ -80,23 +76,11 @@ it('flag off does not request the backend', async () => {
   )
   expect(getSitemapCount).not.toHaveBeenCalled()
 })
-
-it('includes the area sitemap only for a valid cached discovery tree, independently of masjid pages', async () => {
-  const { getAreas } = await import('./discovery-api.server')
-  const { default: fixture } = await import('./fixtures/discovery.json')
-  vi.mocked(getWorkerEnv).mockResolvedValue({ MASJID_PAGES_ENABLED: 'false' })
-  vi.mocked(getAreas).mockResolvedValue({ status: 'ok', data: fixture.areas as import('./discovery').Areas })
-  expect(await (await sitemapIndexResponse()).text()).toContain('/sitemaps/areas')
-  vi.mocked(getAreas).mockResolvedValue({ status: 'missing' })
-  expect(await (await sitemapIndexResponse()).text()).not.toContain('/sitemaps/areas')
-})
-it('returns 503 with Retry-After for an unavailable discovery sitemap, and 404 when disabled', async () => {
-  vi.mocked(getAreas).mockResolvedValue({ status: 'unavailable' })
-  const r = await areaSitemapResponse()
-  expect(r.status).toBe(503)
-  expect(r.headers.get('Retry-After')).toBe('120')
-  expect(r.headers.get('Cache-Control')).toBe('no-store')
-  expect(r.headers.get('X-Robots-Tag')).toContain('noindex')
-  vi.mocked(getAreas).mockResolvedValue({ status: 'missing' })
-  expect((await areaSitemapResponse()).status).toBe(404)
+it('never lists an areas sitemap, whichever way masjid pages are switched', async () => {
+  for (const flag of ['true', 'false']) {
+    vi.mocked(getWorkerEnv).mockResolvedValue({ MASJID_PAGES_ENABLED: flag })
+    const body = await (await sitemapIndexResponse()).text()
+    expect(body).toContain('/sitemap-pages.xml')
+    expect(body).not.toContain('/sitemaps/areas')
+  }
 })
