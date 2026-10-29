@@ -39,6 +39,7 @@ function Page() {
       page={d.page}
       prayers={d.prayers}
       ajk={d.ajk}
+      mapEnabled={d.mapEnabled}
       reviews={d.reviews}
       facilityCatalogue={d.facilityCatalogue}
     />

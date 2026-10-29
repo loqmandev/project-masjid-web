@@ -5,7 +5,10 @@ import { fallbackMapSvg, mapCacheKey } from './masjid-map'
 import { page } from './masjid-fixture'
 
 let env: Record<string, unknown> = {}
-vi.mock('./worker-env', () => ({ getWorkerEnv: async () => env }))
+let mapFlag: string | undefined = 'true'
+vi.mock('./worker-env', () => ({
+  getWorkerEnv: async () => ({ MASJID_MAP_ENABLED: mapFlag, ...env }),
+}))
 vi.mock('./jm-api', async (importOriginal) => ({
   ...(await importOriginal<typeof import('./jm-api')>()),
   getMasjidPage: vi.fn(),
@@ -36,12 +39,32 @@ function fakeCache() {
 
 beforeEach(() => {
   env = {}
+  mapFlag = 'true'
   vi.mocked(getMasjidPage).mockReset()
   vi.mocked(getMasjidPage).mockResolvedValue({ status: 200, body: negara })
 })
 afterEach(() => vi.unstubAllGlobals())
 
 describe('/masjid/<slug>/map.svg', () => {
+  it.each([undefined, 'false', 'TRUE', '1', ''])(
+    'is a 404 (no-store) before any backend or tile call unless MASJID_MAP_ENABLED is exactly "true" (%s)',
+    async (flag) => {
+      mapFlag = flag
+      const tiles = vi.fn()
+      const publicFetch = vi.fn()
+      env = { TILES: { fetch: tiles } }
+      vi.stubGlobal('fetch', publicFetch)
+      for (const method of ['GET', 'HEAD']) {
+        const res = await masjidMapResponse('masjid-negara', method)
+        expect(res.status).toBe(404)
+        expect(res.headers.get('Cache-Control')).toBe('no-store')
+        expect(res.headers.get('Content-Type')).not.toContain('svg')
+      }
+      expect(getMasjidPage).not.toHaveBeenCalled()
+      expect(tiles).not.toHaveBeenCalled()
+      expect(publicFetch).not.toHaveBeenCalled()
+    },
+  )
   it('404s invalid slugs before any upstream call, and unknown masjids', async () => {
     for (const slug of ['../bad', 'Bad', 'ab', 'a--b'])
       expect((await masjidMapResponse(slug, 'GET')).status).toBe(404)
@@ -91,7 +114,7 @@ describe('/masjid/<slug>/map.svg', () => {
     expect(publicFetch).not.toHaveBeenCalled()
     const svg = await res.text()
     expect(svg).toContain('stroke="#ffffff"')
-    expect(svg).toContain('OpenStreetMap')
+    expect(svg).not.toContain('OpenStreetMap')
   })
 
   it('answers HEAD with the same headers and no body', async () => {

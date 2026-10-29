@@ -20,8 +20,9 @@ vi.mock('@tanstack/react-start', () => ({
 }))
 vi.mock('@tanstack/react-start/server', () => ({ setResponseHeader: vi.fn() }))
 let ajkVar: string | undefined
+let mapVar: string | undefined
 vi.mock('./worker-env', () => ({
-  getWorkerEnv: async () => ({ MASJID_AJK_ENABLED: ajkVar }),
+  getWorkerEnv: async () => ({ MASJID_AJK_ENABLED: ajkVar, MASJID_MAP_ENABLED: mapVar }),
 }))
 vi.mock('./jm-api', async (importOriginal) => ({
   ...(await importOriginal<typeof import('./jm-api')>()),
@@ -37,6 +38,7 @@ import { setResponseHeader } from '@tanstack/react-start/server'
 beforeEach(() => {
   vi.clearAllMocks()
   ajkVar = 'true'
+  mapVar = undefined
   vi.mocked(getMasjidPage).mockResolvedValue({ status: 200, body: page })
   vi.mocked(getFacilityCatalogue).mockResolvedValue({ status: 200, body: facilityCatalogue })
   vi.mocked(getProgram).mockResolvedValue({ status: 200, body: program })
@@ -286,4 +288,14 @@ it.each([
   const result = await loadMasjid({ data: { slug: page.masjid.slug } })
   expect(result.reviews).toBeNull()
   expect(result.page).not.toHaveProperty('reviews')
+})
+
+it('loadMasjid returns mapEnabled:true only for exactly "true" (independent of the AJK flag)', async () => {
+  for (const [value, expected] of [[undefined, false], ['false', false], ['TRUE', false], ['1', false], ['', false], ['true', true]] as const) {
+    mapVar = value
+    ajkVar = 'false'
+    const result = await loadMasjid({ data: { slug: page.masjid.slug } })
+    expect(result.mapEnabled).toBe(expected)
+    expect(result.ajk).toBe(false)
+  }
 })

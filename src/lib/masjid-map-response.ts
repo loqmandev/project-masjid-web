@@ -69,6 +69,9 @@ export async function masjidMapResponse(
   supplied?: WebEnv,
 ): Promise<Response> {
   if (!validSlug(slug)) return notFound()
+  const env = supplied ?? (await getWorkerEnv())
+  // The tile source can be unavailable: with the switch off there is no map at all.
+  if (env.MASJID_MAP_ENABLED !== 'true') return notFound()
   const page = await getMasjidPage(slug)
   if (page.status === 404) return notFound()
   if (!page.body || page.status !== 200)
@@ -96,7 +99,7 @@ export async function masjidMapResponse(
   }
   let svg: string
   try {
-    svg = await renderMasjidMap(supplied ?? (await getWorkerEnv()), lat, lng)
+    svg = await renderMasjidMap(env, lat, lng)
   } catch {
     return svgResponse(fallbackMapSvg(), CACHE_FALLBACK, method)
   }

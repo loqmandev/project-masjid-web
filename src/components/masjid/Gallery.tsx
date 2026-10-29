@@ -78,18 +78,31 @@ export function Gallery({ photos, name }: { photos: string[]; name: string }) {
   )
 }
 
-/** No photos: the map takes the gallery slot, with a short explanation. */
+/** "No photos yet" card. Over the map from lg when `overlay`; standalone otherwise. */
+export function NoPhotosCard({ overlay = false }: { overlay?: boolean }) {
+  return (
+    <div
+      className={`flex items-start gap-3 rounded-2xl border-[1.5px] border-dashed border-border-strong bg-white/50 p-4 text-[0.86rem] text-muted-foreground ${
+        overlay
+          ? 'mt-2.5 lg:absolute lg:bottom-4 lg:left-4 lg:mt-0 lg:max-w-[360px] lg:border-solid lg:border-border lg:bg-white/95'
+          : 'mt-2.5'
+      }`}
+    >
+      <Camera aria-hidden="true" className="mt-0.5 h-[18px] w-[18px] flex-none text-primary" />
+      <span>
+        <b className="block text-primary">No photos yet</b>
+        Visitors add photos in the Jejak Masjid app when they singgah.
+      </span>
+    </div>
+  )
+}
+
+/** No photos and the map is on: the map takes the gallery slot, with the card. */
 export function MapHero({ slug, name }: { slug: string; name: string }) {
   return (
     <div className="relative mt-2.5">
       <MapImage slug={slug} name={name} eager className="m-map-hero" />
-      <div className="mt-2.5 flex items-start gap-3 rounded-2xl border-[1.5px] border-dashed border-border-strong bg-white/50 p-4 text-[0.86rem] text-muted-foreground lg:absolute lg:bottom-4 lg:left-4 lg:mt-0 lg:max-w-[360px] lg:border-solid lg:border-border lg:bg-white/95">
-        <Camera aria-hidden="true" className="mt-0.5 h-[18px] w-[18px] flex-none text-primary" />
-        <span>
-          <b className="block text-primary">No photos yet</b>
-          Visitors add photos in the Jejak Masjid app when they singgah.
-        </span>
-      </div>
+      <NoPhotosCard overlay />
     </div>
   )
 }

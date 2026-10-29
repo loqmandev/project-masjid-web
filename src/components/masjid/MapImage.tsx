@@ -1,6 +1,11 @@
 import { MAP_HEIGHT, MAP_WIDTH } from '@/lib/masjid-map'
 
-/** The server-rendered SVG map (route /masjid/<slug>/map.svg). */
+/**
+ * The server-rendered SVG map (route /masjid/<slug>/map.svg) with the
+ * OpenStreetMap credit (ODbL). The credit is HTML, not part of the SVG: the
+ * container crops the image (object-fit: cover), which would cut an in-image
+ * credit off, while this overlay always sits inside the visible box.
+ */
 export default function MapImage({
   slug,
   name,
@@ -22,6 +27,14 @@ export default function MapImage({
         loading={eager ? 'eager' : 'lazy'}
         decoding="async"
       />
+      <a
+        className="m-map-credit"
+        href="https://www.openstreetmap.org/copyright"
+        target="_blank"
+        rel="noopener"
+      >
+        &copy; OpenStreetMap
+      </a>
     </div>
   )
 }

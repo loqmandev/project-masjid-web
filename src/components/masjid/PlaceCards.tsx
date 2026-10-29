@@ -46,7 +46,10 @@ export function MapLinks({
   )
 }
 
-/** White card: map (when the gallery has photos), address, Directions + Waze. */
+/**
+ * White card: map (when the gallery has photos and the map is on), address,
+ * Directions + Waze.
+ */
 export function PlaceCard({
   slug,
   name,
@@ -62,8 +65,12 @@ export function PlaceCard({
   lng: number
   withMap: boolean
 }) {
+  // Without a map the card only repeats the title block's address and buttons, so
+  // phones skip it; from lg the aside always has it.
   return (
-    <div className="grid gap-3 rounded-[20px] border border-border bg-card p-3">
+    <div
+      className={`gap-3 rounded-[20px] border border-border bg-card p-3 ${withMap ? 'grid' : 'hidden lg:grid'}`}
+    >
       {withMap && <MapImage slug={slug} name={name} />}
       <Address address={address} className="px-1 text-[0.92rem]" />
       <MapLinks lat={lat} lng={lng} className="[&>a]:flex-1" />

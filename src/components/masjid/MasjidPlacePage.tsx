@@ -7,7 +7,7 @@ import { galleryPhotos, MOSAIC_MAX } from '@/lib/masjid-gallery'
 import { placeParts, titleCaseAddress, venueLabel } from '@/lib/masjid-format'
 import type { MasjidReviews } from '@/lib/masjid-reviews'
 import type { FacilityCatalogueDetails, PublicMasjidPage } from '@/lib/masjid-types'
-import { Gallery, MapHero } from './Gallery'
+import { Gallery, MapHero, NoPhotosCard } from './Gallery'
 import { Address, AppCard, MapLinks, PlaceCard, StickyBar } from './PlaceCards'
 import PrayerTimes from './PrayerTimes'
 import Reviews from './Reviews'
@@ -20,6 +20,7 @@ import Reviews from './Reviews'
 export default function MasjidPlacePage({
   page,
   prayers,
+  mapEnabled,
   reviews,
   facilityCatalogue,
   about,
@@ -27,6 +28,7 @@ export default function MasjidPlacePage({
 }: {
   page: PublicMasjidPage
   prayers: Record<string, string> | null
+  mapEnabled: boolean
   reviews: MasjidReviews | null
   facilityCatalogue: FacilityCatalogueDetails[]
   about?: ReactNode
@@ -48,7 +50,13 @@ export default function MasjidPlacePage({
             {place.line ? ` · ${place.line}` : ''}
           </p>
 
-          {hasPhotos ? <Gallery photos={photos} name={m.name} /> : <MapHero slug={m.slug} name={m.name} />}
+          {hasPhotos ? (
+            <Gallery photos={photos} name={m.name} />
+          ) : mapEnabled ? (
+            <MapHero slug={m.slug} name={m.name} />
+          ) : (
+            <NoPhotosCard />
+          )}
 
           <div className="grid gap-7 pt-[18px] pb-9 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-12 lg:pt-[26px] lg:pb-14">
             <div className="grid min-w-0 gap-7">
@@ -119,7 +127,7 @@ export default function MasjidPlacePage({
                 address={address}
                 lat={m.lat}
                 lng={m.lng}
-                withMap={hasPhotos}
+                withMap={hasPhotos && mapEnabled}
               />
               <AppCard masjidId={m.id} />
             </aside>

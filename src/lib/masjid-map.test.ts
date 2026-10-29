@@ -50,7 +50,7 @@ describe('mapWindow', () => {
 describe('renderMapSvg with real tiles', () => {
   const win = mapWindow(MASJID_NEGARA.lat, MASJID_NEGARA.lng)
   const svg = renderMapSvg(win, fixtureTiles(MASJID_NEGARA.set, win), { buildings: true })
-  it('draws land, green, water, buildings, roads, rail, the pin and the attribution', () => {
+  it('draws land, green, water, buildings, roads, rail and the pin', () => {
     expect(svg.startsWith('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"')).toBe(true)
     expect(svg).toContain(`fill="${MAP_COLORS.land}"`)
     for (const color of [MAP_COLORS.green, MAP_COLORS.water, MAP_COLORS.building, MAP_COLORS.casing, MAP_COLORS.rail])
@@ -59,7 +59,8 @@ describe('renderMapSvg with real tiles', () => {
     expect(svg).toContain('stroke-dasharray="10 8"')
     expect(svg).toContain(`fill="${MAP_COLORS.pin}"`)
     expect(svg).toContain(`fill="${MAP_COLORS.gold}"`)
-    expect(svg).toContain('© OpenStreetMap')
+    // The credit is an HTML overlay (the page crops the image), never part of the SVG.
+    expect(svg).not.toMatch(/OpenStreetMap|<text/)
   })
   it('stays under the 80 KB budget in the densest part of Kuala Lumpur', () => {
     expect(Buffer.byteLength(svg)).toBeLessThan(80_000)
@@ -114,11 +115,11 @@ describe('renderMapSvg edge cases', () => {
     const bad = new Map(win.tiles.map((t) => [`${t.x}/${t.y}`, new Uint8Array([0x1a, 0xff, 0xff, 0xff, 0xff, 0x0f, 1])] as const))
     expect(() => renderMapSvg(win, bad)).toThrow()
   })
-  it('fallback map is land, pin and attribution only', () => {
+  it('fallback map is land and pin only (the credit is HTML)', () => {
     const svg = fallbackMapSvg()
     expect(svg).toContain(MAP_COLORS.land)
     expect(svg).toContain(MAP_COLORS.pin)
-    expect(svg).toContain('OpenStreetMap')
+    expect(svg).not.toContain('OpenStreetMap')
     expect(svg).not.toContain('stroke=')
   })
 })

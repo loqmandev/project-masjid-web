@@ -2,6 +2,7 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { act, cleanup, render } from '@testing-library/react'
+import { readFileSync } from 'node:fs'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/components/Header', () => ({ default: () => null }))
@@ -14,6 +15,7 @@ import { jsonLdScript, mosqueJsonLd } from './jsonld'
 import type { MasjidReviews } from './masjid-reviews'
 import type { PublicMasjidPage } from './masjid-types'
 
+const styles = readFileSync('src/styles.css', 'utf8')
 const pageCatalogue = facilityCatalogue.map(
   ({ code, label, shortDescription, definition, group, sortOrder }) => ({
     code, label, shortDescription, definition, group, sortOrder,
@@ -40,7 +42,7 @@ const reviews = (count: number, items = Math.min(count, 3), over: Partial<Masjid
 type Props = Partial<Parameters<typeof MasjidPage>[0]>
 const markup = (props: Props = {}) =>
   renderToStaticMarkup(
-    createElement(MasjidPage, { page, prayers: null, ajk: false, reviews: null, facilityCatalogue: pageCatalogue, ...props }),
+    createElement(MasjidPage, { page, prayers: null, ajk: false, mapEnabled: true, reviews: null, facilityCatalogue: pageCatalogue, ...props }),
   )
 function dom(props: Props = {}) {
   const doc = document.implementation.createHTMLDocument()
@@ -384,6 +386,86 @@ describe('reviews', () => {
     const html = markup({ reviews: reviews(23), page: withPhotos(8) })
     expect(html).not.toMatch(/AggregateRating|aggregateRating|"@type":"Review"|ratingValue|itemprop/)
     expect(jsonLdScript(mosqueJsonLd(page))).not.toMatch(/AggregateRating|Review/)
+  })
+})
+
+describe('place card below lg', () => {
+  const placeCard = (doc: Document) => doc.querySelector('aside[aria-label] > div:not(.on-deep)')!
+  it('with photos and the map on it carries the map and shows on phones', () => {
+    const card = placeCard(dom({ page: withPhotos(3) }))
+    expect(card.querySelector('img[src$="/map.svg"]')).not.toBeNull()
+    expect(card.className).toContain('grid')
+    expect(card.className).not.toContain('hidden')
+  })
+  it.each([
+    ['no photos, map on (the map is already in the gallery slot)', { page: withPhotos(0), mapEnabled: true }],
+    ['no photos, map off', { page: withPhotos(0), mapEnabled: false }],
+    ['photos, map off (it would only repeat the title block)', { page: withPhotos(3), mapEnabled: false }],
+  ])('is hidden below lg but kept from lg, and the app card stays: %s', (_name, props) => {
+    const doc = dom(props)
+    const card = placeCard(doc)
+    expect(card.className).toContain('hidden')
+    expect(card.className).toContain('lg:grid')
+    expect(card.textContent).toContain('Synthetic street')
+    expect(card.querySelector('a[href^="https://www.google.com/maps"]')).not.toBeNull()
+    expect(card.querySelector('a[href^="https://waze.com"]')).not.toBeNull()
+    expect(card.querySelector('img')).toBeNull()
+    // The title block's row (below lg) and the app card are unaffected.
+    expect(doc.querySelector('header .lg\\:hidden a[href^="https://waze.com"]')).not.toBeNull()
+    expect(doc.querySelector('aside .on-deep')!.textContent).toContain('Singgah with Jejak Masjid')
+  })
+})
+
+describe('OpenStreetMap credit', () => {
+  const credit = (container: Element) => container.querySelectorAll('a.m-map-credit')
+  it('every map container has the visible HTML credit, and the SVG has none', () => {
+    for (const n of [0, 3]) {
+      const doc = dom({ page: withPhotos(n) })
+      const maps = [...doc.querySelectorAll('.m-map')]
+      expect(maps).toHaveLength(1)
+      const link = credit(maps[0])
+      expect(link).toHaveLength(1)
+      expect(link[0].textContent).toBe('\u00a9 OpenStreetMap')
+      expect(link[0].getAttribute('href')).toBe('https://www.openstreetmap.org/copyright')
+      expect(link[0].getAttribute('rel')).toBe('noopener')
+      // Inside the container that crops the image, as a sibling of the <img>.
+      expect(link[0].parentElement).toBe(maps[0])
+      expect(maps[0].querySelector('img[src$="/map.svg"]')).not.toBeNull()
+    }
+    expect(styles).toMatch(/\.m-map-credit\s*\{[^}]*position:\s*absolute;[^}]*right:[^}]*bottom:/s)
+    expect(styles).toMatch(/\.m-map\s*\{[^}]*position:\s*relative;[^}]*overflow:\s*hidden/s)
+  })
+})
+
+describe('MASJID_MAP_ENABLED off', () => {
+  const noMap = (doc: Document) => {
+    expect(doc.querySelector('img[src*="map.svg"]')).toBeNull()
+    expect(doc.querySelector('.m-map, .m-map-hero, .m-map-credit')).toBeNull()
+    expect(doc.body.innerHTML).not.toMatch(/map\.svg|OpenStreetMap/)
+  }
+  it('is the default when the prop is absent', () => {
+    const html = renderToStaticMarkup(createElement(MasjidPage, { page: withPhotos(0), prayers: null, ajk: false }))
+    expect(html).not.toMatch(/map\.svg|OpenStreetMap/)
+  })
+  it('no photos: the gallery slot shows only the standalone "No photos yet" card', () => {
+    const doc = dom({ page: withPhotos(0), mapEnabled: false })
+    noMap(doc)
+    expect(doc.querySelector('.m-strip')).toBeNull()
+    const card = [...doc.querySelectorAll('div')].find((d) => d.children.length === 2 && d.textContent === 'No photos yetVisitors add photos in the Jejak Masjid app when they singgah.')!
+    expect(card).toBeTruthy()
+    expect(card.className).not.toContain('lg:absolute')
+    expect(card.previousElementSibling!.tagName).toBe('P') // right under the place line
+    expect(doc.body.textContent).toContain('Singgah with Jejak Masjid')
+  })
+  it('with photos: the gallery is unchanged and the place card has no map', () => {
+    const doc = dom({ page: withPhotos(5), mapEnabled: false })
+    noMap(doc)
+    expect(doc.querySelectorAll('.m-strip img')).toHaveLength(5)
+    expect(doc.body.textContent).not.toContain('No photos yet')
+  })
+  it('with the map on there is exactly one map either way (no regression)', () => {
+    expect(dom({ page: withPhotos(0), mapEnabled: true }).querySelectorAll('img[src$="/map.svg"]')).toHaveLength(1)
+    expect(dom({ page: withPhotos(4), mapEnabled: true }).querySelectorAll('img[src$="/map.svg"]')).toHaveLength(1)
   })
 })
 

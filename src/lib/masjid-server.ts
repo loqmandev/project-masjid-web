@@ -41,6 +41,7 @@ export const loadMasjid = createServerFn({ method: 'GET' })
       reviews: validateReviews(rawReviews),
       prayers: times,
       ajk: env.MASJID_AJK_ENABLED === 'true',
+      mapEnabled: env.MASJID_MAP_ENABLED === 'true',
       facilityCatalogue:
         catalogue?.status === 200 && Array.isArray(catalogue.body)
           ? catalogue.body

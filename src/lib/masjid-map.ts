@@ -6,9 +6,13 @@ import { VectorTile, type VectorTileLayer } from '@mapbox/vector-tile'
  * bytes in, SVG text out. No network, no Worker bindings (see
  * masjid-map-response.ts for those).
  *
+ * The OpenStreetMap credit is deliberately NOT drawn here: the page crops the
+ * image (object-fit: cover) in the phone and desktop heroes, which would cut an
+ * in-image credit off. It is an HTML overlay in components/masjid/MapImage.tsx.
+ *
  * Tiles are Protomaps basemap schema v4 vector tiles (max zoom 15). The map is
  * drawn as if at zoom 16 (each z15 tile covers 512 px), centred on the masjid in
- * an 800 x 500 window, so a window needs at most four z15 tiles.
+ * an 800 x 500 window, so a window needs at most six z15 tiles (3 x 2).
  */
 
 export const MAP_WIDTH = 800
@@ -33,7 +37,6 @@ export const MAP_COLORS = {
   rail: '#b4cfcc',
   pin: '#003130',
   gold: '#ffcc00',
-  credit: '#4f6b68',
 } as const
 
 export type MapTileRef = { z: number; x: number; y: number }
@@ -368,10 +371,9 @@ const fill = (paths: string[], color: string): string =>
 
 // Pin tip at the window centre, matching sketch 108.
 const PIN = `<ellipse cx="400" cy="252" rx="15" ry="5" fill="${MAP_COLORS.pin}" opacity=".18"/><path d="M400 250C378 224 366 206 366 190a34 34 0 1 1 68 0C434 206 422 224 400 250z" fill="${MAP_COLORS.pin}"/><circle cx="400" cy="190" r="12" fill="${MAP_COLORS.gold}"/>`
-const CREDIT = `<rect x="654" y="474" width="138" height="20" rx="6" fill="#fff" fill-opacity=".85"/><text x="723" y="488.5" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="12" fill="${MAP_COLORS.credit}">© OpenStreetMap</text>`
 
 const wrap = (body: string) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${MAP_WIDTH} ${MAP_HEIGHT}" width="${MAP_WIDTH}" height="${MAP_HEIGHT}" role="img"><rect width="${MAP_WIDTH}" height="${MAP_HEIGHT}" fill="${MAP_COLORS.land}"/>${body}${PIN}${CREDIT}</svg>`
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${MAP_WIDTH} ${MAP_HEIGHT}" width="${MAP_WIDTH}" height="${MAP_HEIGHT}" role="img"><rect width="${MAP_WIDTH}" height="${MAP_HEIGHT}" fill="${MAP_COLORS.land}"/>${body}${PIN}</svg>`
 
 /** Plain land colour, the pin and the attribution. Used whenever tiles fail. */
 export const fallbackMapSvg = () => wrap('')
