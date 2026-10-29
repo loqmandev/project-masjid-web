@@ -6,7 +6,7 @@
     "nodejs_compat"
   ],
   "main": "@tanstack/react-start/server-entry",
-  "vars": { "MASJID_PAGES_ENABLED": "true", "MASJID_AJK_ENABLED": "false", "JM_API_BASE": "https://apiv2.jejakmasjid.my" },
+  "vars": { "MASJID_PAGES_ENABLED": "true", "MASJID_AJK_ENABLED": "false", "JM_API_BASE": "https://apiv2.jejakmasjid.my", "GOOGLE_MAPS_EMBED_KEY": "AIzaSyCf_ds-8aGX_IXC-VwD_ij-orPEe4NcXak" },
   "routes": [
     {
       "custom_domain": true,
