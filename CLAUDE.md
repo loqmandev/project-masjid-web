@@ -77,7 +77,7 @@ src/
   styles.css          # Light-only brand tokens, .on-deep / .eyebrow / .path-rule / .prose-jm
 public/
   screens/*.webp      # Real screenshots (480 / `@2x` 720 / `-320` px); the bento excludes unreleased 05-facilities
-  hero/*.webp         # Approved H8 city painting (1254 px + 640/800/960 px variants) and four masjid sprites
+  hero/*.webp|avif    # Approved H8 city painting (WebP + AVIF at 640/800/960/1254 px) and four masjid sprites
   logo.png · og-image.png · icon-*.png · apple-touch-icon.png · favicon.ico
                       # all derived from project-masjid-mobile/assets/images/icon.png
   sitemap-pages.xml · robots.txt · manifest.json · _headers
@@ -281,19 +281,22 @@ no script. It renders what reduced-motion visitors always saw: the city painting
 sprites at their plotted positions, the four route lines fully drawn, the floating phone with the Explore
 screen (from 761 px), the static locator ring and the text column (h1, supporting line, two store badges).
 Nothing in the hero moves; other sections keep the gentle `Reveal`.
-- **LCP image.** The city painting is a real `<img class="city-art">` with `fetchPriority="high"`,
-  `decoding="async"`, never lazy, explicit 1254 x 1254, `srcset` 640 / 800 / 960 / 1254 w and `sizes` that mirror
-  the `.map-stage` width in `hero.css` (110vw on phones, `min(720px, 66vw)` to 1200 px, then 60vw). The
-  `filter: saturate(.85)` is on the img. `homepageHead()` adds the matching `<link rel="preload" as="image"
-  imagesrcset imagesizes fetchpriority="high">` (`lib/hero-art.ts` feeds both), so only `/` and `/en` carry it. React
-  also hoists its own preload for the high-priority img; the head has two identical links and browsers fetch the
-  file once.
+- **LCP image.** The city painting is a `<picture>`: an AVIF `<source type="image/avif">` (`srcset` 640 / 800 / 960 /
+  1254 w, q50, 70-193 KB) in front of the WebP `<img class="city-art">` fallback (same widths, q70, original 1254 px
+  file). The img carries `fetchPriority="high"`, `decoding="async"`, never lazy, explicit 1254 x 1254; both use the same
+  `sizes`, which mirror the `.map-stage` width in `hero.css` (110vw on phones, `min(720px, 66vw)` to 1200 px, then
+  60vw). The `filter: saturate(.85)` is on the img. `homepageHead()` adds the one matching `<link rel="preload"
+  as="image" type="image/avif" imagesrcset imagesizes fetchpriority="high">` (`lib/hero-art.ts` feeds both); a browser
+  without AVIF ignores it and loads the WebP. React does not hoist a preload of its own for an `<img>` inside
+  `<picture>`, so the head has exactly one city preload (a test and the host check assert it). Only `/` and `/en`
+  carry it.
 - **Other hero images** are real `<img>` elements too (no CSS backgrounds): sprites `fetchPriority="low"` with
   intrinsic sizes, the phone screen `loading="lazy"` with `srcset` 320 / 480 / 720 w (it is `display:none` on
   phones, so lazy keeps it from downloading there). Never put the art back in a CSS `url()`: backgrounds are
   discovered late and cost the LCP 2.9 s of render delay.
-- **Variants** are plain Lanczos resizes of the approved art (city WebP q70, screens q80); never recolour, crop
-  or redraw. Bento screenshots also have `-320` variants and tile-specific `sizes` (`Features.tsx`).
+- **Variants** are plain Lanczos resizes of the approved art (city AVIF q50 and WebP q70, screens WebP q80);
+  never recolour, crop or redraw (regenerate with ImageMagick `magick l4-city.webp -filter Lanczos -resize Nx
+  -quality 50 l4-city-N.avif`). Bento screenshots also have `-320` variants and tile-specific `sizes` (`Features.tsx`).
 - **Removed:** `lib/hero-motion.js` / `.d.ts`, the `mountHero` effect, canvases, replay button, `data-state` /
   `data-zoom` / `data-art*`, the `html[data-motion='on']` background suppression, the path-reveal mask, radar
   ring, beams, shockwaves, the locator pulse animation, and `public/hero/l1-*`, `l2`, `l3`, `screen-*`
@@ -309,7 +312,8 @@ Nothing in the hero moves; other sections keep the gentle `Reveal`.
 serves HTML that points at old asset hashes. Only a 200 `text/html` without `Set-Cookie`, `no-store` or `private` is
 stored; HEAD and every other method or path pass through; cache read/write errors fall back to a normal render; the
 write goes through `waitUntil` from `cloudflare:workers` (awaited inline where it is missing). Responses carry
-`Cache-Control: public, max-age=60` (the stored copy 300 s) and `X-JM-Html-Cache: hit|miss`. Off under `vite dev`
+`Cache-Control: public, max-age=0, must-revalidate` (browsers always revalidate, because a deploy removes the old
+hashed assets; only the Worker's build-id-keyed entry lives 300 s) and `X-JM-Html-Cache: hit|miss`. Off under `vite dev`
 (`import.meta.env.DEV`). Public stats stay fresh within 300 s plus their own 1 h cache. To bypass while checking,
 add any query string.
 
