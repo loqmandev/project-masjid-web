@@ -49,7 +49,7 @@ describe('homepage HTML cache middleware (src/start.ts)', () => {
       const hit = await server({ request: get(path), next: again }) as Response
       expect(again).not.toHaveBeenCalled()
       expect(hit.headers.get(HTML_CACHE_HEADER)).toBe('hit')
-      expect(hit.headers.get('Cache-Control')).toBe('public, max-age=60')
+      expect(hit.headers.get('Cache-Control')).toBe('public, max-age=0, must-revalidate')
     }
     expect(cache.put).toHaveBeenCalledTimes(2)
   })

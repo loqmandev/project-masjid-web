@@ -20,8 +20,13 @@
 declare const __JM_BUILD_ID__: string | undefined
 
 export const HTML_CACHE_TTL = 300
-/** What browsers (and any shared cache in front) may keep. */
-export const HTML_BROWSER_MAX_AGE = 60
+/**
+ * What browsers (and any shared cache in front) get: always revalidate. A deploy
+ * removes the old hashed assets, so a browser-side copy of the HTML would point
+ * at files that no longer exist. Only the Worker's own entry (keyed by build id)
+ * is kept for HTML_CACHE_TTL.
+ */
+export const HTML_BROWSER_CACHE_CONTROL = 'public, max-age=0, must-revalidate'
 export const HTML_CACHE_HEADER = 'X-JM-Html-Cache'
 
 const CACHEABLE_PATHS: ReadonlySet<string> = new Set(['/', '/en'])
@@ -77,7 +82,7 @@ export async function serveHtmlFromCache<T>(
   const key = htmlCacheKey(path, buildId)
   try {
     const hit = await cache.match(key)
-    if (hit) return withHeaders(hit, `public, max-age=${HTML_BROWSER_MAX_AGE}`, 'hit')
+    if (hit) return withHeaders(hit, HTML_BROWSER_CACHE_CONTROL, 'hit')
   } catch {
     /* Read through on cache failure. */
   }
@@ -91,5 +96,5 @@ export async function serveHtmlFromCache<T>(
     })
   if (waitUntil) waitUntil(write)
   else await write
-  return withHeaders(rendered, `public, max-age=${HTML_BROWSER_MAX_AGE}`, 'miss')
+  return withHeaders(rendered, HTML_BROWSER_CACHE_CONTROL, 'miss')
 }

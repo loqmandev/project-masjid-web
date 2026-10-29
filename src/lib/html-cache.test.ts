@@ -73,14 +73,14 @@ describe('isStorableHtml', () => {
 describe('serveHtmlFromCache', () => {
   afterEach(() => vi.restoreAllMocks())
 
-  it('renders on a miss, stores for 300 s, and hands the browser max-age=60', async () => {
+  it('renders on a miss, stores for 300 s, and hands the browser max-age=0, must-revalidate', async () => {
     const cache = fakeCache()
     const render = vi.fn(async () => html('<p>hello</p>'))
     const response = await serveHtmlFromCache('/', render, { cache, buildId: 'b1' }) as Response
     expect(render).toHaveBeenCalledTimes(1)
     expect(response.status).toBe(200)
     expect(await response.text()).toBe('<p>hello</p>')
-    expect(response.headers.get('Cache-Control')).toBe('public, max-age=60')
+    expect(response.headers.get('Cache-Control')).toBe('public, max-age=0, must-revalidate')
     expect(response.headers.get(HTML_CACHE_HEADER)).toBe('miss')
     expect(response.headers.get('Content-Type')).toBe('text/html; charset=utf-8')
     const stored = cache.store.get(htmlCacheKey('/', 'b1'))!
@@ -97,7 +97,7 @@ describe('serveHtmlFromCache', () => {
     expect(render).not.toHaveBeenCalled()
     expect(await hit.text()).toBe('<p>one</p>')
     expect(hit.headers.get(HTML_CACHE_HEADER)).toBe('hit')
-    expect(hit.headers.get('Cache-Control')).toBe('public, max-age=60')
+    expect(hit.headers.get('Cache-Control')).toBe('public, max-age=0, must-revalidate')
     expect(hit.status).toBe(200)
   })
 
