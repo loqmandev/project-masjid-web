@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseHeader } from '@tanstack/react-start/server'
 import { validPrayerTimes } from './masjid-format'
+import { validateReviews } from './masjid-reviews'
 import { getWorkerEnv } from './worker-env'
 import { notFound, redirect } from '@tanstack/react-router'
 import {
@@ -32,8 +33,12 @@ export const loadMasjid = createServerFn({ method: 'GET' })
     ])
     const times = prayers.status === 200 ? validPrayerTimes(prayers.body) : null
     const env = await getWorkerEnv()
+    // Reviews are validated strictly and travel beside the page, never inside it, so
+    // an invalid or oversharing payload cannot reach the HTML or the hydration data.
+    const { reviews: rawReviews, ...page } = r.body
     return {
-      page: r.body,
+      page,
+      reviews: validateReviews(rawReviews),
       prayers: times,
       ajk: env.MASJID_AJK_ENABLED === 'true',
       facilityCatalogue:

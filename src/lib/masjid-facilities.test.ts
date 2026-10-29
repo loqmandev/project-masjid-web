@@ -42,7 +42,7 @@ it('keeps reported facilities exclusively inside the initially collapsed disclos
   const doc = render()
   const reported = doc.querySelector('details.facility-reported')!
   expect(reported.hasAttribute('open')).toBe(false)
-  expect(reported.querySelector(':scope > summary')?.textContent).toBe('1 reported, not confirmed')
+  expect(reported.querySelector(':scope > summary')?.textContent).toBe('+ 1 reported by visitors')
   expect(reported.textContent).toContain("Visitors haven't confirmed these yet. Visiting? Confirm them in the Jejak Masjid app.")
   const chip = doc.querySelector('[data-facility-state="unconfirmed"]')!
   expect(reported.contains(chip)).toBe(true)

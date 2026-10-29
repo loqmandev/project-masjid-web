@@ -19,7 +19,7 @@ function PrivacyPolicyPage() {
     <PageLayout
       eyebrow="Legal"
       title="Privacy Policy"
-      updated="26 Oktober 2026 / 26 October 2026"
+      updated="29 Oktober 2026 / 29 October 2026"
       intro="What we collect, why we collect it, and what we never do with it."
     >
       <PrivacyPolicy />

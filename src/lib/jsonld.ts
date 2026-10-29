@@ -7,6 +7,7 @@ import { isProvenFacility, publicFacilityDetails } from './masjid-facilities'
 import { SITE } from './site'
 import { directionsUrl, localISO, placeParts } from './masjid-format'
 import { trustedImage } from './masjid-seo'
+import { galleryPhotos } from './masjid-gallery'
 
 export function countryAddress(state: string) {
   const malaysianStates = new Set([
@@ -44,6 +45,13 @@ export function jsonLdScript(value: unknown) {
     '\u2029': '\\u2029',
   }
   return JSON.stringify(value).replace(/[<>&\u2028\u2029]/g, (c) => escapes[c])
+}
+// The AJK cover wins; otherwise up to three trusted visitor photos.
+function imageField(page: PublicMasjidPage) {
+  const cover = trustedImage(page.profile?.coverUrl)
+  if (cover) return { image: cover }
+  const photos = galleryPhotos({ profile: null, photos: page.photos }).slice(0, 3)
+  return photos.length ? { image: photos } : {}
 }
 export function mosqueJsonLd(
   page: PublicMasjidPage,
@@ -92,9 +100,7 @@ export function mosqueJsonLd(
     ...(page.profile?.contactPhone
       ? { telephone: page.profile.contactPhone }
       : {}),
-    ...(trustedImage(page.profile?.coverUrl)
-      ? { image: trustedImage(page.profile?.coverUrl) }
-      : {}),
+    ...imageField(page),
     ...(events.length ? { event: events } : {}),
     ...(amenities.length ? { amenityFeature: amenities } : {}),
   }

@@ -106,6 +106,9 @@ export type PublicMasjidPage = {
   indexable: boolean
   // Omitted by the backend when facility info is off (including older backends).
   facilities?: PublicFacility[]
+  // Optional reviews summary (backend flag). Untrusted until validateReviews() accepts it;
+  // the loader strips it from `page` and returns the validated copy separately.
+  reviews?: unknown
   profile: null | {
     description: string | null
     contactPhone: string | null

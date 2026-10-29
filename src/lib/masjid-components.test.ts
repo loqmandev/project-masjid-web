@@ -78,13 +78,15 @@ it('renders distinct claimed and unclaimed deep-teal CTAs', () => {
   expect(html).not.toContain('Claim this surau')
   expect(html).toMatch(/<aside class="on-deep[^"]*bg-deep/)
 })
-it('puts app/directions actions in title band with fallback copy', () => {
+it('has no title band: one h1, Directions and Waze, the app card and the sticky bar', () => {
   const html = render()
-  expect(html.indexOf('Open in Jejak Masjid')).toBeLessThan(
-    html.indexOf('</header>'),
-  )
-  expect(html.indexOf('Get directions')).toBeLessThan(html.indexOf('</header>'))
-  expect(html).toContain('have the app? Get it below.')
+  expect(html.match(/<h1[ >]/g)).toHaveLength(1)
+  expect(html).not.toContain('bg-deep py-16')
+  expect(html).toContain('Directions')
+  expect(html).toContain('Waze')
+  expect(html).toContain('Open in Jejak Masjid')
+  expect(html).toContain('Open in app')
+  expect(html).toContain('Singgah with Jejak Masjid')
 })
 it('renders MYT prayer and recurring times, singular history and program 404 copy', () => {
   const html = renderToString(
@@ -108,8 +110,9 @@ it('renders MYT prayer and recurring times, singular history and program 404 cop
       ),
     }),
   )
-  expect(html).toContain('8:30 pm')
-  expect(html).toContain('9:00 pm')
+  const text = html.replace(/<!-- -->/g, '').replace(/<[^>]+>/g, '')
+  expect(text).toContain('8:30 pm')
+  expect(text).toContain('9:00 pm')
   expect(html).not.toContain('T12:30')
   expect(html).not.toContain('programs<!-- --> held')
   expect(renderToString(createElement(MissingProgram))).toContain(
@@ -161,14 +164,15 @@ it.each([false, true])('ajk off (claimed: %s): no programs, news, claim or commi
     'News',
     'committee?',
     'Register your interest',
-    '<aside',
+    '<aside class="on-deep',
   ])
     expect(html).not.toContain(s)
   for (const s of [
     'Surau Fixture',
     'Synthetic street',
     'Open in Jejak Masjid',
-    'Get directions',
+    'Directions',
+    'Waze',
     'https://bucket.jejakmasjid.my/one.jpg',
     'https://bucket.jejakmasjid.my/two.jpg',
   ])
