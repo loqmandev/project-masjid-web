@@ -300,3 +300,55 @@ Implementation evidence and the host-only Chromium script are under
 `.hermes/reviews/website-revamp/` in the parent project. The script checks the built local
 Worker, captures screens and records actual outcomes. Deployment still needs the owner's
 ratings/review refresh, Opus review and browser approval.
+
+### Masjid page redesign — "Place card" (local implementation, 2026-10-29)
+
+Spec `SPEC_masjid-page-redesign.md` (project-masjid-web, unmoved), design sketch 108 variant A. Only
+`/masjid/$slug` changed; the program page, missing/resting pages, sitemaps, redirects, noindex rules and the AJK
+flag behaviour are as before. English only, light only.
+
+**Structure.** `MasjidPage` (`components/MasjidPages.tsx`) renders `components/masjid/MasjidPlacePage.tsx`:
+Header, place line (`Masjid · District · State`), gallery, then two columns from `lg` (main + sticky 340 px
+`<aside>`) or one column below it with a `sticky bottom-0` action bar (inside `<main>`, never `fixed`, so it rests
+above the footer). Main order: title block (tags, h1, title-cased address, Directions + Waze below `lg`), AJK "About"
+profile text (claimed pages only), prayer times, facilities, reviews, `#photos` grid (lg only, only when more than five
+photos), then the AJK sections (programs, news, claim callout) behind `MASJID_AJK_ENABLED`. The aside is the place
+card (map when there are photos, address, Directions + Waze) and the deep-teal app card. Parts live in
+`components/masjid/`: `Gallery` (one set of `<img>`s: scroll-snap strip below `lg`, mosaic from `lg` via CSS
+`data-mosaic`; counter "N photos" in SSR, "i / N" after hydration through IntersectionObserver; no photos = `MapHero`),
+`PrayerTimes` (SSR has no highlight or countdown; after hydration the next prayer is marked and a once-a-minute
+countdown shows; a page left open past midnight never highlights), `Reviews`, `PlaceCards` (Address, MapLinks, PlaceCard,
+AppCard, StickyBar), `MapImage`, `OpenMasjid` (keeps the Android `intent://` swap; re-exported from `MasjidPages`).
+`MasjidFacilities` keeps its behaviour and tests; proven items are white pills (shield / people-check icon), reported
+items collapse into one dashed "+ N reported by visitors" chip that opens the existing disclosure, plus an icon legend.
+Pure helpers: `lib/masjid-format.ts` (`titleCaseAddress`, `wazeUrl`, `venueLabel`, `nextPrayer`, countdown, MYT date),
+`lib/masjid-gallery.ts` (`galleryPhotos`: AJK cover, then photos, trusted hosts, de-duplicated, at most eight),
+`lib/masjid-reviews.ts`. Page styles are the `m-*` / `facility-*` rules in `styles.css`.
+
+**Reviews contract** (backend `SPEC_masjid-page-reviews.md` §3, flag `PUBLIC_MASJID_REVIEWS_ENABLED`). The by-slug payload
+may carry `reviews: { count, average, items[{ id, rating, tip, createdAt }] }`. `loadMasjid` validates it strictly with
+`validateReviews` (count integer >= 0; average null or 1–5, required from three reviews; <= 3 items and <= count;
+rating integer 1–5; tip 1–150 chars; id `^[A-Za-z0-9_-]{1,64}$`; ISO date with zone) and returns it as `loaderData.reviews`,
+removed from `page`; anything invalid or absent means no Reviews section, never a partial one. Only those four item
+keys survive, so an oversharing backend cannot reach the HTML or hydration data. Tips render as escaped text, the
+reviewer is "Visitor · Month YYYY" (MYT), "Report" is a `mailto:` to `SITE.email` with the review id and slug, and the
+tile with average + gold stars (half stars) appears from three reviews. No `AggregateRating`/`Review` JSON-LD.
+JSON-LD keeps `Mosque` as before and adds `image` (up to three trusted visitor photos) when there is no AJK cover.
+
+**Static map.** `GET|HEAD /masjid/<slug>/map.svg` (`routes/masjid.$slug_.map[.]svg.ts`, logic in
+`lib/masjid-map-response.ts`) draws an 800 x 500 SVG centred on the masjid at zoom 16 from the z15 Protomaps basemap
+v4 tiles (`lib/masjid-map.ts`: `@mapbox/vector-tile` 2.0.4 + `pbf` 4.0.1, pinned; land, parks, water, buildings
+(budgeted), roads by tier with casing, dashed rail, pin, "© OpenStreetMap"; no labels, no third-party map). Tiles come
+from the service binding **`TILES` → Worker `project-masjid-tiles`** declared in `wrangler.jsonc` (typed in
+`lib/worker-env.ts`); when the binding is absent it fetches `TILES_BASE` (optional var, default
+`https://tiles.jejakmasjid.my`). Gzip and already-decoded tile bodies are both accepted. Responses: `image/svg+xml`,
+`Cache-Control: public, max-age=2592000`, Cache API keyed by slug + coordinates rounded to four decimals, a sandboxing
+CSP and `nosniff`. Any tile failure returns a plain fallback SVG (land colour, pin, attribution) with a 300 s cache and
+is never cached; invalid slug or unknown masjid is 404, an alias is a 301 to the canonical map. Measured on Masjid
+Negara (the densest case): ~65 KB, ~15 ms warm CPU (first render in a cold isolate ~90 ms). Test fixtures are real tiles
+(pruned, gzipped) in `lib/fixtures/map/` built by `scripts/map/make-fixtures.mjs`; tests never use the network. Both new
+dependencies are server-only: the client bundle does not contain them.
+
+Host check (local built Worker only): `.hermes/reviews/masjid-page-redesign/{mock-api.mjs,check-masjid.mjs}` (loopback
+API, tile and https image mocks; Chromium via global `playwright-core`). Start the Worker with
+`--persist-to <dir outside dist>` or wrangler restarts on every Cache API write and truncates responses.
