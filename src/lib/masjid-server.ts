@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { setResponseHeader } from '@tanstack/react-start/server'
 import { validPrayerTimes } from './masjid-format'
 import { validateReviews } from './masjid-reviews'
+import { validEmbedKey } from './embed-map'
 import { getWorkerEnv } from './worker-env'
 import { notFound, redirect } from '@tanstack/react-router'
 import {
@@ -41,7 +42,7 @@ export const loadMasjid = createServerFn({ method: 'GET' })
       reviews: validateReviews(rawReviews),
       prayers: times,
       ajk: env.MASJID_AJK_ENABLED === 'true',
-      mapEnabled: env.MASJID_MAP_ENABLED === 'true',
+      mapKey: validEmbedKey(env.GOOGLE_MAPS_EMBED_KEY),
       facilityCatalogue:
         catalogue?.status === 200 && Array.isArray(catalogue.body)
           ? catalogue.body

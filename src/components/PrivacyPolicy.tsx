@@ -48,6 +48,9 @@ const PrivacyPolicy = () => {
           When you access the Service, we may automatically collect certain information, including your IP address, browser type, operating system, access times, and the pages you have viewed directly before and after accessing the Service.
         </p>
         <p>
+          Masjid pages can show a map from Google Maps. When the map loads, Google receives your IP address and may set cookies, under <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>.
+        </p>
+        <p>
           We do not collect sensitive personal information such as race, ethnicity, religious beliefs, health data, or financial information.
         </p>
 

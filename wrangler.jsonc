@@ -6,8 +6,7 @@
     "nodejs_compat"
   ],
   "main": "@tanstack/react-start/server-entry",
-  "vars": { "MASJID_PAGES_ENABLED": "true", "MASJID_AJK_ENABLED": "false", "MASJID_MAP_ENABLED": "false", "JM_API_BASE": "https://apiv2.jejakmasjid.my" },
-  "services": [{ "binding": "TILES", "service": "project-masjid-tiles" }],
+  "vars": { "MASJID_PAGES_ENABLED": "true", "MASJID_AJK_ENABLED": "false", "JM_API_BASE": "https://apiv2.jejakmasjid.my" },
   "routes": [
     {
       "custom_domain": true,

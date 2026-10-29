@@ -21,6 +21,7 @@ const pageCatalogue = facilityCatalogue.map(
     code, label, shortDescription, definition, group, sortOrder,
   }),
 )
+const KEY = 'AIzaSyDummyDummyDummyDummy12345_-'
 const photoUrl = (i: number) => `https://bucket.jejakmasjid.my/p${i}.jpg`
 const photos = (n: number) => Array.from({ length: n }, (_, i) => ({ url: photoUrl(i) }))
 const day = (hhmm: string) => `2026-10-29T${hhmm}:00+08:00`
@@ -42,7 +43,7 @@ const reviews = (count: number, items = Math.min(count, 3), over: Partial<Masjid
 type Props = Partial<Parameters<typeof MasjidPage>[0]>
 const markup = (props: Props = {}) =>
   renderToStaticMarkup(
-    createElement(MasjidPage, { page, prayers: null, ajk: false, mapEnabled: true, reviews: null, facilityCatalogue: pageCatalogue, ...props }),
+    createElement(MasjidPage, { page, prayers: null, ajk: false, mapKey: KEY, reviews: null, facilityCatalogue: pageCatalogue, ...props }),
   )
 function dom(props: Props = {}) {
   const doc = document.implementation.createHTMLDocument()
@@ -104,21 +105,18 @@ describe('gallery', () => {
     expect(grid.querySelector('.grid')!.className).toContain('grid-cols-4')
     for (const img of grid.querySelectorAll('img')) expect(img.getAttribute('loading')).toBe('lazy')
   })
-  it('with photos the map lives in the place card only (lazy); without photos it takes the gallery slot (eager)', () => {
+  it('with photos the Google map lives in the place card only (lazy); without photos it takes the gallery slot', () => {
     const withImages = dom({ page: withPhotos(3) })
-    const maps = withImages.querySelectorAll('img[src$="/map.svg"]')
+    const maps = withImages.querySelectorAll('iframe')
     expect(maps).toHaveLength(1)
     expect(maps[0].getAttribute('loading')).toBe('lazy')
-    expect(maps[0].getAttribute('src')).toBe('/masjid/surau-fixture/map.svg')
-    expect(maps[0].getAttribute('width')).toBe('800')
-    expect(maps[0].getAttribute('height')).toBe('500')
-    expect(maps[0].getAttribute('alt')).toBe('Map of the area around Surau Fixture')
     expect(withImages.querySelector('aside')!.contains(maps[0])).toBe(true)
+    expect(maps[0].closest('.m-map')!.className).not.toContain('m-map-hero')
 
     const none = dom({ page: withPhotos(0) })
-    const hero = none.querySelectorAll('img[src$="/map.svg"]')
+    const hero = none.querySelectorAll('iframe')
     expect(hero).toHaveLength(1)
-    expect(hero[0].getAttribute('loading')).toBe('eager')
+    expect(hero[0].getAttribute('loading')).toBe('lazy')
     expect(none.querySelector('.m-map-hero')!.contains(hero[0])).toBe(true)
     expect(none.querySelector('aside')!.contains(hero[0])).toBe(false)
     expect(none.querySelector('.m-strip')).toBeNull()
@@ -391,16 +389,16 @@ describe('reviews', () => {
 
 describe('place card below lg', () => {
   const placeCard = (doc: Document) => doc.querySelector('aside[aria-label] > div:not(.on-deep)')!
-  it('with photos and the map on it carries the map and shows on phones', () => {
+  it('with photos and a map key it carries the map and shows on phones', () => {
     const card = placeCard(dom({ page: withPhotos(3) }))
-    expect(card.querySelector('img[src$="/map.svg"]')).not.toBeNull()
+    expect(card.querySelector('iframe')).not.toBeNull()
     expect(card.className).toContain('grid')
     expect(card.className).not.toContain('hidden')
   })
   it.each([
-    ['no photos, map on (the map is already in the gallery slot)', { page: withPhotos(0), mapEnabled: true }],
-    ['no photos, map off', { page: withPhotos(0), mapEnabled: false }],
-    ['photos, map off (it would only repeat the title block)', { page: withPhotos(3), mapEnabled: false }],
+    ['no photos, map key set (the map is already in the gallery slot)', { page: withPhotos(0), mapKey: KEY }],
+    ['no photos, no key', { page: withPhotos(0), mapKey: null }],
+    ['photos, no key (it would only repeat the title block)', { page: withPhotos(3), mapKey: null }],
   ])('is hidden below lg but kept from lg, and the app card stays: %s', (_name, props) => {
     const doc = dom(props)
     const card = placeCard(doc)
@@ -409,47 +407,60 @@ describe('place card below lg', () => {
     expect(card.textContent).toContain('Synthetic street')
     expect(card.querySelector('a[href^="https://www.google.com/maps"]')).not.toBeNull()
     expect(card.querySelector('a[href^="https://waze.com"]')).not.toBeNull()
-    expect(card.querySelector('img')).toBeNull()
+    expect(card.querySelector('iframe')).toBeNull()
     // The title block's row (below lg) and the app card are unaffected.
     expect(doc.querySelector('header .lg\\:hidden a[href^="https://waze.com"]')).not.toBeNull()
     expect(doc.querySelector('aside .on-deep')!.textContent).toContain('Singgah with Jejak Masjid')
   })
 })
 
-describe('OpenStreetMap credit', () => {
-  const credit = (container: Element) => container.querySelectorAll('a.m-map-credit')
-  it('every map container has the visible HTML credit, and the SVG has none', () => {
+describe('Google Maps embed', () => {
+  it('renders one lazy iframe with encoded coordinates, a title and the referrer policy', () => {
     for (const n of [0, 3]) {
       const doc = dom({ page: withPhotos(n) })
-      const maps = [...doc.querySelectorAll('.m-map')]
-      expect(maps).toHaveLength(1)
-      const link = credit(maps[0])
-      expect(link).toHaveLength(1)
-      expect(link[0].textContent).toBe('\u00a9 OpenStreetMap')
-      expect(link[0].getAttribute('href')).toBe('https://www.openstreetmap.org/copyright')
-      expect(link[0].getAttribute('rel')).toBe('noopener')
-      // Inside the container that crops the image, as a sibling of the <img>.
-      expect(link[0].parentElement).toBe(maps[0])
-      expect(maps[0].querySelector('img[src$="/map.svg"]')).not.toBeNull()
+      const frames = doc.querySelectorAll('iframe')
+      expect(frames).toHaveLength(1)
+      const frame = frames[0]
+      const url = new URL(frame.getAttribute('src')!)
+      expect(url.origin + url.pathname).toBe('https://www.google.com/maps/embed/v1/place')
+      expect(url.searchParams.get('key')).toBe(KEY)
+      expect(url.searchParams.get('q')).toBe('2.9,101.7') // coordinates, never the name
+      expect(url.searchParams.get('zoom')).toBe('16')
+      expect(url.searchParams.get('language')).toBe('en')
+      expect(frame.getAttribute('src')).toContain('q=2.9%2C101.7')
+      expect(frame.getAttribute('src')).not.toContain('Surau')
+      expect(frame.getAttribute('title')).toBe('Map of Surau Fixture')
+      expect(frame.getAttribute('loading')).toBe('lazy')
+      expect(frame.getAttribute('referrerpolicy')).toBe('no-referrer-when-downgrade')
+      expect(frame.hasAttribute('allowfullscreen')).toBe(true)
+      // Fixed-aspect box: the iframe fills it, so nothing shifts while Google loads.
+      expect(frame.parentElement!.className).toContain('m-map')
+      expect(frame.parentElement!.children).toHaveLength(1)
     }
-    expect(styles).toMatch(/\.m-map-credit\s*\{[^}]*position:\s*absolute;[^}]*right:[^}]*bottom:/s)
-    expect(styles).toMatch(/\.m-map\s*\{[^}]*position:\s*relative;[^}]*overflow:\s*hidden/s)
+    expect(styles).toMatch(/\.m-map\s*\{[^}]*aspect-ratio:\s*16\s*\/\s*10/s)
+    expect(styles).toMatch(/\.m-map-hero\s*\{[^}]*aspect-ratio:\s*4\s*\/\s*3/s)
+    expect(styles).toMatch(/\.m-map iframe\s*\{[^}]*width:\s*100%;[^}]*height:\s*100%;[^}]*border:\s*0/s)
   })
-})
-
-describe('MASJID_MAP_ENABLED off', () => {
-  const noMap = (doc: Document) => {
-    expect(doc.querySelector('img[src*="map.svg"]')).toBeNull()
-    expect(doc.querySelector('.m-map, .m-map-hero, .m-map-credit')).toBeNull()
-    expect(doc.body.innerHTML).not.toMatch(/map\.svg|OpenStreetMap/)
-  }
-  it('is the default when the prop is absent', () => {
-    const html = renderToStaticMarkup(createElement(MasjidPage, { page: withPhotos(0), prayers: null, ajk: false }))
-    expect(html).not.toMatch(/map\.svg|OpenStreetMap/)
+  it('the masjid name is never the query, even when it is odd', () => {
+    const doc = dom({ page: { ...withPhotos(3), masjid: { ...page.masjid, name: 'A & B <Masjid> "x"' } } })
+    const src = doc.querySelector('iframe')!.getAttribute('src')!
+    expect(new URL(src).searchParams.get('q')).toBe('2.9,101.7')
+    expect(doc.querySelector('iframe')!.getAttribute('title')).toBe('Map of A & B <Masjid> "x"')
   })
-  it('no photos: the gallery slot shows only the standalone "No photos yet" card', () => {
-    const doc = dom({ page: withPhotos(0), mapEnabled: false })
-    noMap(doc)
+  it.each([null, undefined, '', 'short', 'has spaces in it but is long enough 123', 'a'.repeat(61), 'bad/char!bad/char!bad/char!'])(
+    'no key (%s): no iframe, no empty container, no map markup anywhere',
+    (key) => {
+      for (const n of [0, 3, 8]) {
+        const html = markup({ page: withPhotos(n), mapKey: key as string | null })
+        const doc = dom({ page: withPhotos(n), mapKey: key as string | null })
+        expect(doc.querySelector('iframe')).toBeNull()
+        expect(doc.querySelector('.m-map, .m-map-hero')).toBeNull()
+        expect(html).not.toMatch(/google\.com\/maps\/embed|<iframe|map\.svg/)
+      }
+    },
+  )
+  it('without a key the no-photo slot is only the standalone "No photos yet" card', () => {
+    const doc = dom({ page: withPhotos(0), mapKey: null })
     expect(doc.querySelector('.m-strip')).toBeNull()
     const card = [...doc.querySelectorAll('div')].find((d) => d.children.length === 2 && d.textContent === 'No photos yetVisitors add photos in the Jejak Masjid app when they singgah.')!
     expect(card).toBeTruthy()
@@ -457,15 +468,18 @@ describe('MASJID_MAP_ENABLED off', () => {
     expect(card.previousElementSibling!.tagName).toBe('P') // right under the place line
     expect(doc.body.textContent).toContain('Singgah with Jejak Masjid')
   })
-  it('with photos: the gallery is unchanged and the place card has no map', () => {
-    const doc = dom({ page: withPhotos(5), mapEnabled: false })
-    noMap(doc)
+  it('with photos and no key the gallery is unchanged', () => {
+    const doc = dom({ page: withPhotos(5), mapKey: null })
     expect(doc.querySelectorAll('.m-strip img')).toHaveLength(5)
     expect(doc.body.textContent).not.toContain('No photos yet')
   })
-  it('with the map on there is exactly one map either way (no regression)', () => {
-    expect(dom({ page: withPhotos(0), mapEnabled: true }).querySelectorAll('img[src$="/map.svg"]')).toHaveLength(1)
-    expect(dom({ page: withPhotos(4), mapEnabled: true }).querySelectorAll('img[src$="/map.svg"]')).toHaveLength(1)
+  it('the prop defaults to no map', () => {
+    const html = renderToStaticMarkup(createElement(MasjidPage, { page: withPhotos(0), prayers: null, ajk: false }))
+    expect(html).not.toContain('<iframe')
+  })
+  it('never loads the embed for impossible coordinates', () => {
+    const doc = dom({ page: { ...withPhotos(3), masjid: { ...page.masjid, lat: 120, lng: 0 } } })
+    expect(doc.querySelector('iframe')).toBeNull()
   })
 })
 

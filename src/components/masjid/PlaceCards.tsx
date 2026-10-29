@@ -1,7 +1,7 @@
 import { MapPin, Navigation } from 'lucide-react'
 import StoreBadges from '@/components/ui/StoreBadges'
 import { directionsUrl, wazeUrl } from '@/lib/masjid-format'
-import MapImage from './MapImage'
+import MapEmbed from './MapEmbed'
 import { OpenMasjid } from './OpenMasjid'
 
 export function Address({ address, className = '' }: { address: string; className?: string }) {
@@ -47,31 +47,30 @@ export function MapLinks({
 }
 
 /**
- * White card: map (when the gallery has photos and the map is on), address,
- * Directions + Waze.
+ * White card: map (when the gallery has photos and there is a valid embed key),
+ * address, Directions + Waze.
  */
 export function PlaceCard({
-  slug,
+  mapKey,
   name,
   address,
   lat,
   lng,
-  withMap,
 }: {
-  slug: string
+  /** Valid embed key when the card should carry the map (photos present), else null. */
+  mapKey: string | null
   name: string
   address: string
   lat: number
   lng: number
-  withMap: boolean
 }) {
   // Without a map the card only repeats the title block's address and buttons, so
   // phones skip it; from lg the aside always has it.
   return (
     <div
-      className={`gap-3 rounded-[20px] border border-border bg-card p-3 ${withMap ? 'grid' : 'hidden lg:grid'}`}
+      className={`gap-3 rounded-[20px] border border-border bg-card p-3 ${mapKey ? 'grid' : 'hidden lg:grid'}`}
     >
-      {withMap && <MapImage slug={slug} name={name} />}
+      <MapEmbed mapKey={mapKey} lat={lat} lng={lng} name={name} />
       <Address address={address} className="px-1 text-[0.92rem]" />
       <MapLinks lat={lat} lng={lng} className="[&>a]:flex-1" />
     </div>

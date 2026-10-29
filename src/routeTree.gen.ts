@@ -26,7 +26,6 @@ import { Route as DotwellKnownAssetlinksDotjsonRouteImport } from './routes/[.]w
 import { Route as DotwellKnownAppleAppSiteAssociationRouteImport } from './routes/[.]well-known.apple-app-site-association'
 import { Route as SitemapsMasjidPageRouteImport } from './routes/sitemaps.masjid.$page'
 import { Route as PrayerCirclesInviteCodeRouteImport } from './routes/prayer-circles.invite.$code'
-import { Route as MasjidSlugMapDotsvgRouteImport } from './routes/masjid.$slug_.map[.]svg'
 import { Route as MasjidSlugPProgramIdRouteImport } from './routes/masjid.$slug_.p.$programId'
 
 const TosRoute = TosRouteImport.update({
@@ -116,11 +115,6 @@ const PrayerCirclesInviteCodeRoute = PrayerCirclesInviteCodeRouteImport.update({
   path: '/prayer-circles/invite/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MasjidSlugMapDotsvgRoute = MasjidSlugMapDotsvgRouteImport.update({
-  id: '/masjid/$slug_/map.svg',
-  path: '/masjid/$slug/map.svg',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MasjidSlugPProgramIdRoute = MasjidSlugPProgramIdRouteImport.update({
   id: '/masjid/$slug_/p/$programId',
   path: '/masjid/$slug/p/$programId',
@@ -143,7 +137,6 @@ export interface FileRoutesByFullPath {
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/en/collaboration': typeof EnCollaborationRoute
   '/masjid/$slug': typeof MasjidSlugRoute
-  '/masjid/$slug/map.svg': typeof MasjidSlugMapDotsvgRoute
   '/prayer-circles/invite/$code': typeof PrayerCirclesInviteCodeRoute
   '/sitemaps/masjid/$page': typeof SitemapsMasjidPageRoute
   '/masjid/$slug/p/$programId': typeof MasjidSlugPProgramIdRoute
@@ -164,7 +157,6 @@ export interface FileRoutesByTo {
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/en/collaboration': typeof EnCollaborationRoute
   '/masjid/$slug': typeof MasjidSlugRoute
-  '/masjid/$slug/map.svg': typeof MasjidSlugMapDotsvgRoute
   '/prayer-circles/invite/$code': typeof PrayerCirclesInviteCodeRoute
   '/sitemaps/masjid/$page': typeof SitemapsMasjidPageRoute
   '/masjid/$slug/p/$programId': typeof MasjidSlugPProgramIdRoute
@@ -186,7 +178,6 @@ export interface FileRoutesById {
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/en_/collaboration': typeof EnCollaborationRoute
   '/masjid/$slug': typeof MasjidSlugRoute
-  '/masjid/$slug_/map.svg': typeof MasjidSlugMapDotsvgRoute
   '/prayer-circles/invite/$code': typeof PrayerCirclesInviteCodeRoute
   '/sitemaps/masjid/$page': typeof SitemapsMasjidPageRoute
   '/masjid/$slug_/p/$programId': typeof MasjidSlugPProgramIdRoute
@@ -209,7 +200,6 @@ export interface FileRouteTypes {
     | '/.well-known/assetlinks.json'
     | '/en/collaboration'
     | '/masjid/$slug'
-    | '/masjid/$slug/map.svg'
     | '/prayer-circles/invite/$code'
     | '/sitemaps/masjid/$page'
     | '/masjid/$slug/p/$programId'
@@ -230,7 +220,6 @@ export interface FileRouteTypes {
     | '/.well-known/assetlinks.json'
     | '/en/collaboration'
     | '/masjid/$slug'
-    | '/masjid/$slug/map.svg'
     | '/prayer-circles/invite/$code'
     | '/sitemaps/masjid/$page'
     | '/masjid/$slug/p/$programId'
@@ -251,7 +240,6 @@ export interface FileRouteTypes {
     | '/.well-known/assetlinks.json'
     | '/en_/collaboration'
     | '/masjid/$slug'
-    | '/masjid/$slug_/map.svg'
     | '/prayer-circles/invite/$code'
     | '/sitemaps/masjid/$page'
     | '/masjid/$slug_/p/$programId'
@@ -273,7 +261,6 @@ export interface RootRouteChildren {
   DotwellKnownAssetlinksDotjsonRoute: typeof DotwellKnownAssetlinksDotjsonRoute
   EnCollaborationRoute: typeof EnCollaborationRoute
   MasjidSlugRoute: typeof MasjidSlugRoute
-  MasjidSlugMapDotsvgRoute: typeof MasjidSlugMapDotsvgRoute
   PrayerCirclesInviteCodeRoute: typeof PrayerCirclesInviteCodeRoute
   SitemapsMasjidPageRoute: typeof SitemapsMasjidPageRoute
   MasjidSlugPProgramIdRoute: typeof MasjidSlugPProgramIdRoute
@@ -400,13 +387,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrayerCirclesInviteCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/masjid/$slug_/map.svg': {
-      id: '/masjid/$slug_/map.svg'
-      path: '/masjid/$slug/map.svg'
-      fullPath: '/masjid/$slug/map.svg'
-      preLoaderRoute: typeof MasjidSlugMapDotsvgRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/masjid/$slug_/p/$programId': {
       id: '/masjid/$slug_/p/$programId'
       path: '/masjid/$slug/p/$programId'
@@ -434,7 +414,6 @@ const rootRouteChildren: RootRouteChildren = {
   DotwellKnownAssetlinksDotjsonRoute: DotwellKnownAssetlinksDotjsonRoute,
   EnCollaborationRoute: EnCollaborationRoute,
   MasjidSlugRoute: MasjidSlugRoute,
-  MasjidSlugMapDotsvgRoute: MasjidSlugMapDotsvgRoute,
   PrayerCirclesInviteCodeRoute: PrayerCirclesInviteCodeRoute,
   SitemapsMasjidPageRoute: SitemapsMasjidPageRoute,
   MasjidSlugPProgramIdRoute: MasjidSlugPProgramIdRoute,

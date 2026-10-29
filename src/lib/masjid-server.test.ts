@@ -20,9 +20,9 @@ vi.mock('@tanstack/react-start', () => ({
 }))
 vi.mock('@tanstack/react-start/server', () => ({ setResponseHeader: vi.fn() }))
 let ajkVar: string | undefined
-let mapVar: string | undefined
+let embedKey: string | undefined
 vi.mock('./worker-env', () => ({
-  getWorkerEnv: async () => ({ MASJID_AJK_ENABLED: ajkVar, MASJID_MAP_ENABLED: mapVar }),
+  getWorkerEnv: async () => ({ MASJID_AJK_ENABLED: ajkVar, GOOGLE_MAPS_EMBED_KEY: embedKey }),
 }))
 vi.mock('./jm-api', async (importOriginal) => ({
   ...(await importOriginal<typeof import('./jm-api')>()),
@@ -38,7 +38,7 @@ import { setResponseHeader } from '@tanstack/react-start/server'
 beforeEach(() => {
   vi.clearAllMocks()
   ajkVar = 'true'
-  mapVar = undefined
+  embedKey = undefined
   vi.mocked(getMasjidPage).mockResolvedValue({ status: 200, body: page })
   vi.mocked(getFacilityCatalogue).mockResolvedValue({ status: 200, body: facilityCatalogue })
   vi.mocked(getProgram).mockResolvedValue({ status: 200, body: program })
@@ -290,12 +290,16 @@ it.each([
   expect(result.page).not.toHaveProperty('reviews')
 })
 
-it('loadMasjid returns mapEnabled:true only for exactly "true" (independent of the AJK flag)', async () => {
-  for (const [value, expected] of [[undefined, false], ['false', false], ['TRUE', false], ['1', false], ['', false], ['true', true]] as const) {
-    mapVar = value
+it('loadMasjid returns the Google Maps embed key only when it is well-formed (independent of the AJK flag)', async () => {
+  const good = 'AIzaSyDummyDummyDummyDummy12345_-'
+  for (const [value, expected] of [
+    [undefined, null], ['', null], ['short', null], ['has a space inside it, long enough', null],
+    ['x'.repeat(61), null], ['bad/char!bad/char!bad/char!', null], [good, good],
+  ] as const) {
+    embedKey = value
     ajkVar = 'false'
     const result = await loadMasjid({ data: { slug: page.masjid.slug } })
-    expect(result.mapEnabled).toBe(expected)
+    expect(result.mapKey).toBe(expected)
     expect(result.ajk).toBe(false)
   }
 })

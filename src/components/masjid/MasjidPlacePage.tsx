@@ -3,6 +3,7 @@ import Footer from '@/components/Footer'
 import Header from '@/components/Header'
 import MasjidFacilities from '@/components/MasjidFacilities'
 import { Container } from '@/components/ui/Section'
+import { googleMapEmbedUrl } from '@/lib/embed-map'
 import { galleryPhotos, MOSAIC_MAX } from '@/lib/masjid-gallery'
 import { placeParts, titleCaseAddress, venueLabel } from '@/lib/masjid-format'
 import type { MasjidReviews } from '@/lib/masjid-reviews'
@@ -20,7 +21,7 @@ import Reviews from './Reviews'
 export default function MasjidPlacePage({
   page,
   prayers,
-  mapEnabled,
+  mapKey,
   reviews,
   facilityCatalogue,
   about,
@@ -28,7 +29,7 @@ export default function MasjidPlacePage({
 }: {
   page: PublicMasjidPage
   prayers: Record<string, string> | null
-  mapEnabled: boolean
+  mapKey: string | null
   reviews: MasjidReviews | null
   facilityCatalogue: FacilityCatalogueDetails[]
   about?: ReactNode
@@ -40,6 +41,8 @@ export default function MasjidPlacePage({
   const venue = venueLabel(m.type, m.name)
   const address = titleCaseAddress(m.address)
   const hasPhotos = photos.length > 0
+  // Only a key that yields a valid embed URL for this masjid counts as a map.
+  const key = mapKey && googleMapEmbedUrl(mapKey, m.lat, m.lng) ? mapKey : null
   return (
     <>
       <Header />
@@ -52,8 +55,8 @@ export default function MasjidPlacePage({
 
           {hasPhotos ? (
             <Gallery photos={photos} name={m.name} />
-          ) : mapEnabled ? (
-            <MapHero slug={m.slug} name={m.name} />
+          ) : key ? (
+            <MapHero mapKey={key} lat={m.lat} lng={m.lng} name={m.name} />
           ) : (
             <NoPhotosCard />
           )}
@@ -122,12 +125,11 @@ export default function MasjidPlacePage({
 
             <aside className="grid min-w-0 gap-3.5 lg:sticky lg:top-28" aria-label="Directions and the app">
               <PlaceCard
-                slug={m.slug}
+                mapKey={hasPhotos ? key : null}
                 name={m.name}
                 address={address}
                 lat={m.lat}
                 lng={m.lng}
-                withMap={hasPhotos && mapEnabled}
               />
               <AppCard masjidId={m.id} />
             </aside>

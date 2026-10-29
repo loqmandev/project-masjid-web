@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Camera } from 'lucide-react'
 import { MOSAIC_MAX } from '@/lib/masjid-gallery'
-import MapImage from './MapImage'
+import MapEmbed from './MapEmbed'
 
 /**
  * One set of <img> elements, restyled by CSS: a scroll-snap strip below lg and a
@@ -97,11 +97,21 @@ export function NoPhotosCard({ overlay = false }: { overlay?: boolean }) {
   )
 }
 
-/** No photos and the map is on: the map takes the gallery slot, with the card. */
-export function MapHero({ slug, name }: { slug: string; name: string }) {
+/** No photos and a valid map key: the map takes the gallery slot, with the card. */
+export function MapHero({
+  mapKey,
+  lat,
+  lng,
+  name,
+}: {
+  mapKey: string
+  lat: number
+  lng: number
+  name: string
+}) {
   return (
     <div className="relative mt-2.5">
-      <MapImage slug={slug} name={name} eager className="m-map-hero" />
+      <MapEmbed mapKey={mapKey} lat={lat} lng={lng} name={name} className="m-map-hero" />
       <NoPhotosCard overlay />
     </div>
   )

@@ -64,9 +64,3 @@ it('both route error heads omit noindex, with no-store on success and errors', (
     expect(route.options.errorComponent).toBeDefined()
   }
 })
-
-it('the map route serves GET and HEAD for /masjid/<slug>/map.svg', async () => {
-  const { Route: map } = await import('@/routes/masjid.$slug_.map[.]svg')
-  const handlers = (map.options as unknown as { server: { handlers: Record<string, unknown> } }).server.handlers
-  expect(Object.keys(handlers).sort()).toEqual(['GET', 'HEAD'])
-})

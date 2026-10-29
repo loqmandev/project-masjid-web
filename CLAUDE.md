@@ -313,13 +313,13 @@ Header, place line (`Masjid · District · State`), gallery, then two columns fr
 above the footer). Main order: title block (tags, h1, title-cased address, Directions + Waze below `lg`), AJK "About"
 profile text (claimed pages only), prayer times, facilities, reviews, `#photos` grid (lg only, only when more than five
 photos), then the AJK sections (programs, news, claim callout) behind `MASJID_AJK_ENABLED`. The aside is the place
-card (map when there are photos and the map is on, address, Directions + Waze; below `lg` it is shown only when it carries
+card (Google map when there are photos and a valid key, address, Directions + Waze; below `lg` it is shown only when it carries
 the map, otherwise it would repeat the title block) and the deep-teal app card. Parts live in
 `components/masjid/`: `Gallery` (one set of `<img>`s: scroll-snap strip below `lg`, mosaic from `lg` via CSS
 `data-mosaic`; counter "N photos" in SSR, "i / N" after hydration through IntersectionObserver; no photos = `MapHero`),
 `PrayerTimes` (SSR has no highlight or countdown; after hydration the next prayer is marked and a once-a-minute
 countdown shows; a page left open past midnight never highlights), `Reviews`, `PlaceCards` (Address, MapLinks, PlaceCard,
-AppCard, StickyBar), `MapImage`, `OpenMasjid` (keeps the Android `intent://` swap; re-exported from `MasjidPages`).
+AppCard, StickyBar), `MapEmbed`, `OpenMasjid` (keeps the Android `intent://` swap; re-exported from `MasjidPages`).
 `MasjidFacilities` keeps its behaviour and tests; proven items are white pills (shield / people-check icon), reported
 items collapse into one dashed "+ N reported by visitors" chip that opens the existing disclosure, plus an icon legend.
 Pure helpers: `lib/masjid-format.ts` (`titleCaseAddress`, `wazeUrl`, `venueLabel`, `nextPrayer`, countdown, MYT date),
@@ -336,30 +336,25 @@ reviewer is "Visitor · Month YYYY" (MYT), "Report" is a `mailto:` to `SITE.emai
 tile with average + gold stars (half stars) appears from three reviews. No `AggregateRating`/`Review` JSON-LD.
 JSON-LD keeps `Mosque` as before and adds `image` (up to three trusted visitor photos) when there is no AJK cover.
 
-**Static map.** `GET|HEAD /masjid/<slug>/map.svg` (`routes/masjid.$slug_.map[.]svg.ts`, logic in
-`lib/masjid-map-response.ts`) draws an 800 x 500 SVG centred on the masjid at zoom 16 from the z15 Protomaps basemap
-v4 tiles (`lib/masjid-map.ts`: `@mapbox/vector-tile` 2.0.4 + `pbf` 4.0.1, pinned; land, parks, water, buildings
-(budgeted), roads by tier with casing, dashed rail, pin; no labels, no third-party map). The OpenStreetMap credit
-(ODbL) is **not** in the SVG: the heroes crop the image, so `MapImage` renders `© OpenStreetMap` as an HTML overlay
-(bottom-right pill linking to openstreetmap.org/copyright) inside every map container. Tiles come
-from the service binding **`TILES` → Worker `project-masjid-tiles`** declared in `wrangler.jsonc` (typed in
-`lib/worker-env.ts`); when the binding is absent it fetches `TILES_BASE` (optional var, default
-`https://tiles.jejakmasjid.my`). Gzip and already-decoded tile bodies are both accepted. Responses: `image/svg+xml`,
-`Cache-Control: public, max-age=2592000`, Cache API keyed by slug + coordinates rounded to four decimals, a sandboxing
-CSP and `nosniff`. Any tile failure returns a plain fallback SVG (land colour, pin, attribution) with a 300 s cache and
-is never cached; invalid slug or unknown masjid is 404, an alias is a 301 to the canonical map. Measured on Masjid
-Negara (the densest case): ~65 KB, ~15 ms warm CPU (first render in a cold isolate ~90 ms). Test fixtures are real tiles
-(pruned, gzipped) in `lib/fixtures/map/` built by `scripts/map/make-fixtures.mjs`; tests never use the network. Both new
-dependencies are server-only: the client bundle does not contain them.
+**Map = Google Maps Embed API** (owner decision 2026-10-29, replacing the server-rendered SVG map and its tile
+source, which no longer exists). `components/masjid/MapEmbed.tsx` renders
+`<iframe src="https://www.google.com/maps/embed/v1/place?key=…&q={lat},{lng}&zoom=16&language=en" title="Map of {name}"
+loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen>` inside the fixed-aspect `.m-map` box (16:10 in
+the place card, 4:3 in the phone no-photo hero, 300 px tall in the desktop no-photo hero), so nothing shifts while Google
+loads. `lib/embed-map.ts` builds the URL with `URLSearchParams` from **coordinates only** (never the name: Google could
+match another place) and validates the key. The key is the Worker var **`GOOGLE_MAPS_EMBED_KEY`** (typed in
+`lib/worker-env.ts`), validated as `^[A-Za-z0-9_-]{20,60}$`; `loadMasjid` returns it as `mapKey`. **No value is committed to
+`wrangler.jsonc`:** the owner provides it (set it as a `vars` entry there, never dashboard-only, which the next deploy
+overwrites). Absent or malformed key: no map anywhere, no empty container; the no-photo gallery slot is only the "No photos
+yet" card and the place card (lg only) is address + Directions + Waze. Below `lg` the place card is shown only when it
+carries the map. The key is public by nature, so the owner restricts it in Google Cloud to **HTTP referrers
+`jejakmasjid.my/*` and `www.jejakmasjid.my/*`** and to the **Maps Embed API only**. The site sets no Content-Security-Policy
+(`public/_headers` has none); if one is ever added it needs `frame-src https://www.google.com`. The privacy policy
+discloses that Google receives the visitor's IP address and may set cookies when the map loads. The earlier SVG map route,
+`TILES` service binding, `TILES_BASE`, `@mapbox/vector-tile`/`pbf` and the map fixtures are deleted; `lib/embed-map.test.ts`
+fails if any of them comes back.
 
-**Map switch `MASJID_MAP_ENABLED`** (Worker var, read via `lib/worker-env.ts`, `"false"` in `wrangler.jsonc` while the tile
-source is down: the R2 bucket `project-masjid-tiles` no longer exists, owner to decide whether it returns). Only the exact
-string `"true"` turns the map on. Off: no map `<img>` or credit anywhere on the page, the no-photo gallery slot is just the
-"No photos yet" card, the place card (lg only) has address + Directions + Waze, and `/masjid/<slug>/map.svg` is a 404
-(`Cache-Control: no-store`) before any backend or tile call. `loadMasjid` returns `mapEnabled`; the `TILES` binding and
-`TILES_BASE` only matter when it is on. Turn it on by setting the var to `"true"` in `wrangler.jsonc` and redeploying
-(a dashboard-only var is overwritten by the next deploy).
-
-Host check (local built Worker only; `MAP=on|off` must match the Worker's `MASJID_MAP_ENABLED`): `.hermes/reviews/masjid-page-redesign/{mock-api.mjs,check-masjid.mjs}` (loopback
-API, tile and https image mocks; Chromium via global `playwright-core`). Start the Worker with
+Host check (local built Worker only; `KEY=dummy|none` must match whether the Worker has `GOOGLE_MAPS_EMBED_KEY`):
+`.hermes/reviews/masjid-page-redesign/{mock-api.mjs,check-masjid.mjs}` (loopback API and https image mocks; Chromium via
+global `playwright-core`, Google requests stubbed so nothing leaves the machine). Start the Worker with
 `--persist-to <dir outside dist>` or wrangler restarts on every Cache API write and truncates responses.

@@ -99,15 +99,15 @@ export function MasjidPage({
   page,
   prayers,
   ajk,
-  mapEnabled = false,
+  mapKey = null,
   reviews = null,
   facilityCatalogue = [],
 }: {
   page: PublicMasjidPage
   prayers: Record<string, string> | null
   ajk: boolean
-  /** MASJID_MAP_ENABLED: draws the static map (and credit); off renders no map anywhere. */
-  mapEnabled?: boolean
+  /** GOOGLE_MAPS_EMBED_KEY when valid; null renders no map anywhere. */
+  mapKey?: string | null
   reviews?: MasjidReviews | null
   facilityCatalogue?: FacilityCatalogueDetails[]
 }) {
@@ -118,7 +118,7 @@ export function MasjidPage({
       <MasjidPlacePage
         page={page}
         prayers={prayers}
-        mapEnabled={mapEnabled}
+        mapKey={mapKey}
         reviews={reviews}
         facilityCatalogue={facilityCatalogue}
         about={<AboutSection page={page} />}
