@@ -1,6 +1,4 @@
 import { useEffect, useRef, type CSSProperties } from 'react'
-import { useDiscoveryAreas } from './DiscoveryAvailability'
-import { discoveryHome } from '@/lib/discovery'
 import StoreBadges from '@/components/ui/StoreBadges'
 import { t, type Locale } from '@/lib/i18n'
 import { mountHero } from '@/lib/hero-motion.js'
@@ -10,7 +8,6 @@ import '@/hero.css'
  * camera and reveals are mounted by this client effect. */
 export default function Hero({ locale = 'ms' }: { locale?: Locale }) {
   const copy = t(locale).hero
-  const areas = useDiscoveryAreas()
   const paneRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (paneRef.current) return mountHero(paneRef.current)
@@ -21,7 +18,6 @@ export default function Hero({ locale = 'ms' }: { locale?: Locale }) {
         <h1 id="hero-title">{copy.lines.map((line, index) => <span key={line}>{line}{index < copy.lines.length - 1 ? ' ' : ''}</span>)}</h1>
         <p className="supporting">{copy.supporting}</p>
         <StoreBadges locale={locale} className="store-badges" />
-        {areas ? <a href={discoveryHome(locale)} className="hero-discovery mt-5 inline-block min-h-11 text-sm underline underline-offset-4">{t(locale).discovery.hero}</a> : null}
       </div></div>
    <div ref={paneRef} className="art-pane" data-state="rest">
     <div className="map-stage">

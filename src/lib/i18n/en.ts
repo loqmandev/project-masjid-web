@@ -1,8 +1,6 @@
-import { discoveryEn } from './discovery'
 import type { Dictionary } from './ms'
 
 export const en = {
-  discovery: discoveryEn,
   nav: { collaborate: 'Collaborate', products: 'Products', features: 'Features', reviews: 'Reviews', faq: 'Questions', download: 'Download', language: 'Bahasa Melayu', main: 'Main navigation', mobile: 'Mobile navigation', open: 'Open menu', close: 'Close menu', home: 'Jejak Masjid home', skip: 'Skip to content', external: 'External site' },
   products: {
     app: { name: 'Jejak Masjid', status: 'iOS & Android app', description: 'Find nearby mosques and keep a record of your visits.' },

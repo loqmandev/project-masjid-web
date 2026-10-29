@@ -1,6 +1,4 @@
-import { discoveryMs } from './discovery'
 export const ms = {
-  discovery: discoveryMs,
   nav: { collaborate: 'Kolaborasi', products: 'Produk', features: 'Ciri aplikasi', reviews: 'Ulasan', faq: 'Soalan', download: 'Muat turun', language: 'English', main: 'Navigasi utama', mobile: 'Navigasi mudah alih', open: 'Buka menu', close: 'Tutup menu', home: 'Laman utama Jejak Masjid', skip: 'Ke kandungan', external: 'Laman luar' },
   products: {
     app: { name: 'Jejak Masjid', status: 'Aplikasi iOS & Android', description: 'Cari masjid berdekatan dan simpan jejak kunjungan anda.' },

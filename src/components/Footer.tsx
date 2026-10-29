@@ -1,5 +1,3 @@
-import { useDiscoveryAreas } from './DiscoveryAvailability'
-import { discoveryHome } from '@/lib/discovery'
 import { useLocation } from '@tanstack/react-router'
 import { Wordmark } from '@/components/ui/Logo'
 import { Container } from '@/components/ui/Section'
@@ -10,7 +8,6 @@ export default function Footer() {
   const path = useLocation({ select: location => location.pathname })
   const locale = localeForPath(path)
   const copy = t(locale)
-  const areas = useDiscoveryAreas()
   return (
     <footer className="on-deep bg-deep py-14">
       <Container>
@@ -31,7 +28,6 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-deep-muted">
               <li><a href={APP_STORE_URL} className="hover:text-deep-foreground">App Store</a></li>
               <li><a href={PLAY_STORE_URL} className="hover:text-deep-foreground">Google Play</a></li>
-              {areas ? <li><a href={discoveryHome(locale)} className="hover:text-deep-foreground">{copy.discovery.nav}</a></li> : null}
               <li><a href="/download" className="hover:text-deep-foreground">{copy.nav.download}</a></li>
             </ul>
           </nav>
