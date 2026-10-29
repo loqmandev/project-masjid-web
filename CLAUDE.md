@@ -64,17 +64,20 @@ src/
     public-stats-server.ts # createServerFn boundary for the homepage loaders
     public-stats-api.server.ts # Optional SSR read via jm-api, 1.5 s timeout, 1 h cache
     fixtures/public-stats.json # Synthetic snapshot shared by tests and the host mock
-    hero-motion.js    # Dependency-free H8 canvas renderer; mounted/cleaned up by Hero effect
+    hero-art.ts       # Static hero image candidate sets (city, phone) + the head preload link
+    html-cache.ts     # 300 s Cache API wrapper for `/` and `/en` (used by src/start.ts)
     seo.ts            # seo() head builder + structuredData() + faqStructuredData()
     faq.ts            # FAQ_MS / FAQ_EN aliases of the dictionary answers
     app.ts            # Mobile app bundle ID + custom scheme (public identifiers)
     invite.ts         # Invite code normaliser + app/intent URL builders
     app-association.ts # AASA + assetlinks builders, var parsing, 404 response
     worker-env.ts     # Reads Worker vars via a dynamic `cloudflare:workers` import
+  start.ts            # Request middleware: homepage HTML edge cache (`/`, `/en`)
+  hero.css            # Static hero styles (imported by Hero.tsx)
   styles.css          # Light-only brand tokens, .on-deep / .eyebrow / .path-rule / .prose-jm
 public/
-  screens/*.webp      # Real screenshots; the bento excludes unreleased 05-facilities
-  hero/*.webp         # Approved H8 paintings, sprites and pre-warped phone overlays
+  screens/*.webp      # Real screenshots (480 / `@2x` 720 / `-320` px); the bento excludes unreleased 05-facilities
+  hero/*.webp         # Approved H8 city painting (1254 px + 640/800/960 px variants) and four masjid sprites
   logo.png · og-image.png · icon-*.png · apple-touch-icon.png · favicon.ico
                       # all derived from project-masjid-mobile/assets/images/icon.png
   sitemap-pages.xml · robots.txt · manifest.json · _headers
@@ -99,7 +102,8 @@ utilities without being asked.
 IntersectionObserver, never a scroll listener. Everything animated is gated behind
 `html[data-motion="on"]`, set by `MOTION_INIT` in `__root.tsx` only when JS runs and the
 visitor has not asked for reduced motion, so the page always renders complete and static
-otherwise. Animate only `transform` and `opacity`.
+otherwise. Animate only `transform` and `opacity`. The homepage hero is the exception: it is
+fully static (see "Static hero" below).
 
 **Layout rhythm.** Max 1 section eyebrow per 3 sections, max 4 text elements in the hero, and
 no more than 2 consecutive image-and-text split rows. The feature bento is asymmetric; its map tile spans two rows on desktop.
@@ -224,6 +228,8 @@ Host evidence lives in `../.hermes/reviews/website-revamp/` relative to the proj
 `mock-stats.mjs [port] [200|404|503|invalid|timeout]` serves the synthetic fixture on loopback
 and proxies nothing. Start only the built local Worker using
 `npx wrangler dev -c dist/server/wrangler.json --local --var JM_API_BASE:http://127.0.0.1:8799`.
+The hero is checked by `check-static-hero.mjs` in the same directory (the motion groups of
+`check-hero.mjs` describe the removed animation and are obsolete; its stats groups still apply).
 Run `STATS_EXPECT=present ONLY=stats node check-hero.mjs <local-worker-url>` with the 200 mock;
 use `STATS_EXPECT=absent` and another mock port/base for 404/failure checks to avoid a cached
 success. Optional `STATS_ABSENT_BASE` checks a second local Worker in the same run.
@@ -265,23 +271,55 @@ the future deploy operator must preserve the pilot setting. This change does not
 
 ### Homepage revamp (phase 1, local implementation 2026-10-26)
 
-Normative contract: `SPEC_website-revamp.md`. H8 camera geometry, 600–2300 ms zoom,
-3600 ms sequence, and sprite plot coordinates are ported from sketch 107, rounds 9–9d.
-`Hero.tsx` server-renders the full rest composition. The text never starts transparent.
-CSS image backgrounds provide no-JS/canvas-failure rest. Because URL backgrounds can
-be LCP candidates, the synchronous head motion gate suppresses them on normal-motion
-startup, before hydration. Source images load only after text paint, then canvases paint
-the rest city, sprites and phone. Reduced motion allocates
-no canvas backing. The React effect cancels/releases work on unmount; visibility,
-pagehide, replay and motion changes return to rest. One session-scoped play, explicit replay.
-The zoom uses a stage-sized canvas capped at DPR 3; no art DOM layer may exceed 1.25 ×
-the stage, and temporary buffers are capped at 1254 px and freed after each run.
+Normative contract: `SPEC_website-revamp.md` (its H8 animation requirements are superseded by the
+static hero below).
 
-`hero-motion.js` is intentionally the dependency-free JavaScript port; its public mount
-signature is declared in `hero-motion.d.ts`. Keep the camera math/timings stable. Offline
-screen regeneration: `python3 scripts/hero/warp-screen.py /path/to/light-mode-explore.png`
-(Pillow + numpy; details in `scripts/hero/README.md`). Current Explore art is the dark
-placeholder from the approved sketch, pending the owner's light-mode screenshot.
+**Static hero (owner 2026-10-29, performance): rest composition only, LCP `<img>` with preload; no hero
+canvas.** The H8 canvas zoom (`hero-motion.js`) was ~95 % of first-party blocking time and shipped 433 KiB
+of extra paintings, so it is gone for every visitor. `Hero.tsx` is a plain server component with no effect and
+no script. It renders what reduced-motion visitors always saw: the city painting, the four masjid/surau
+sprites at their plotted positions, the four route lines fully drawn, the floating phone with the Explore
+screen (from 761 px), the static locator ring and the text column (h1, supporting line, two store badges).
+Nothing in the hero moves; other sections keep the gentle `Reveal`.
+- **LCP image.** The city painting is a real `<img class="city-art">` with `fetchPriority="high"`,
+  `decoding="async"`, never lazy, explicit 1254 x 1254, `srcset` 640 / 800 / 960 / 1254 w and `sizes` that mirror
+  the `.map-stage` width in `hero.css` (110vw on phones, `min(720px, 66vw)` to 1200 px, then 60vw). The
+  `filter: saturate(.85)` is on the img. `homepageHead()` adds the matching `<link rel="preload" as="image"
+  imagesrcset imagesizes fetchpriority="high">` (`lib/hero-art.ts` feeds both), so only `/` and `/en` carry it. React
+  also hoists its own preload for the high-priority img; the head has two identical links and browsers fetch the
+  file once.
+- **Other hero images** are real `<img>` elements too (no CSS backgrounds): sprites `fetchPriority="low"` with
+  intrinsic sizes, the phone screen `loading="lazy"` with `srcset` 320 / 480 / 720 w (it is `display:none` on
+  phones, so lazy keeps it from downloading there). Never put the art back in a CSS `url()`: backgrounds are
+  discovered late and cost the LCP 2.9 s of render delay.
+- **Variants** are plain Lanczos resizes of the approved art (city WebP q70, screens q80); never recolour, crop
+  or redraw. Bento screenshots also have `-320` variants and tile-specific `sizes` (`Features.tsx`).
+- **Removed:** `lib/hero-motion.js` / `.d.ts`, the `mountHero` effect, canvases, replay button, `data-state` /
+  `data-zoom` / `data-art*`, the `html[data-motion='on']` background suppression, the path-reveal mask, radar
+  ring, beams, shockwaves, the locator pulse animation, and `public/hero/l1-*`, `l2`, `l3`, `screen-*`
+  (animation-only paintings and phone overlays). `scripts/hero/` (warp tooling) stays but is unused.
+  `MOTION_INIT` and `ui/Reveal.tsx` remain for the rest of the page.
+- **Do not reintroduce** a hero animation or canvas without the owner; `src/lib/hero-static.test.ts` fails if
+  `hero-motion`, `@keyframes`, a canvas or the removed images come back.
+
+**Homepage HTML edge cache.** `src/start.ts` registers a request middleware (`createStart`
+`requestMiddleware`) that serves `GET /` and `GET /en` (exact path, no query string, no `Range`) from
+`caches.default` for 300 s via `lib/html-cache.ts`. Key: `https://jejakmasjid.my/__jm-internal-cache/html/<buildId>/<path>`;
+`<buildId>` is `__JM_BUILD_ID__`, defined per build in `vite.config.ts` (short commit + timestamp), so a deploy never
+serves HTML that points at old asset hashes. Only a 200 `text/html` without `Set-Cookie`, `no-store` or `private` is
+stored; HEAD and every other method or path pass through; cache read/write errors fall back to a normal render; the
+write goes through `waitUntil` from `cloudflare:workers` (awaited inline where it is missing). Responses carry
+`Cache-Control: public, max-age=60` (the stored copy 300 s) and `X-JM-Html-Cache: hit|miss`. Off under `vite dev`
+(`import.meta.env.DEV`). Public stats stay fresh within 300 s plus their own 1 h cache. To bypass while checking,
+add any query string.
+
+Measure performance the same way before and after a change: build, run the built Worker
+(`npx wrangler dev -c dist/server/wrangler.json --local --port 8792 --persist-to <dir outside dist> --var JM_API_BASE:http://127.0.0.1:9`;
+the stats section is simply absent), then `CHROME_PATH=/usr/bin/chromium npx -y lighthouse@12 http://127.0.0.1:8792/
+--only-categories=performance --chrome-flags="--headless=new --no-sandbox --disable-extensions"` three times and
+take the median. Local `wrangler dev` is HTTP/1.1, so concurrent downloads share bandwidth and `fetchpriority` has
+less effect than on the live HTTP/2 site; compare builds, not absolute numbers. Evidence for the static hero:
+`.hermes/reviews/homepage-performance/BUILD-web.md` in the parent project.
 
 `seo({ alternates: { ms, en } })` emits one own-page canonical, language-only `ms` / `en`
 and English `x-default`; OG locale is `ms_MY` / `en_US`. `__root.tsx` derives `html lang`
