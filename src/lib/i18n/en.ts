@@ -13,7 +13,7 @@ export const en = {
     description: 'Free app to find mosques near you, at home or on your travels. Check prayer times and keep a private record of every masjid you visit. iPhone and Android.',
     lines: ['Find mosques', 'near you, keep', 'your record.'],
     supporting: 'Jejak Masjid is a free app for finding mosques and surau near you, at home or on your travels. Check prayer times and keep a record of every visit.',
-    caption: 'AI-generated illustration', replay: 'Replay animation',
+    caption: 'AI-generated illustration',
     city: 'A watercolour map of a fictional neighbourhood, with four nearby mosques and surau.',
     phone: 'An actual screenshot of the Explore map in the Jejak Masjid app.',
     destinations: ['Nearby neighbourhood surau, 350 metres', 'Nearby shophouse surau, 600 metres', 'Nearby modern mosque, 900 metres', 'Nearby city mosque, 1400 metres'],

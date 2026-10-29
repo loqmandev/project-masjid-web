@@ -13,10 +13,13 @@ import CollaborationBand from './CollaborationBand'
 import type { PublicStats as Stats } from '@/lib/public-stats'
 import { t, type Locale, HOME_ALTERNATES } from '@/lib/i18n'
 import { faqStructuredData, seo } from '@/lib/seo'
+import { heroPreloadLink } from '@/lib/hero-art'
 
 export function homepageHead(locale: Locale) {
   const { title, description } = t(locale).hero
-  return seo({ title, description, path: HOME_ALTERNATES[locale], alternates: HOME_ALTERNATES })
+  const head = seo({ title, description, path: HOME_ALTERNATES[locale], alternates: HOME_ALTERNATES })
+  // Only `/` and `/en` render the hero, so only they preload its LCP image.
+  return { ...head, links: [...head.links, heroPreloadLink()] }
 }
 
 export default function Homepage({ locale, stats = null }: { locale: Locale; stats?: Stats | null }) {
