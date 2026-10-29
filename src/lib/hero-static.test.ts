@@ -24,10 +24,15 @@ describe('static hero', () => {
     const html = renderToStaticMarkup(createElement(Hero, { locale }))
     const copy = t(locale).hero
 
-    it('renders the city painting as the one high-priority, eager LCP image with srcset and sizes', () => {
-      const city = tags(html, 'img').filter(tag => attr(tag, 'class') === 'city-art')
-      expect(city).toHaveLength(1)
-      const [tag] = city
+    it('renders the city painting as a <picture>: AVIF source, then the one high-priority, eager WebP fallback img', () => {
+      const picture = html.match(/<picture>(<source[^>]*>)(<img[^>]*class="city-art"[^>]*>)<\/picture>/)
+      expect(picture).not.toBeNull()
+      const [, source, tag] = picture!
+      expect(attr(source, 'type')).toBe('image/avif')
+      expect(attr(source, 'srcset')).toBe(HERO_CITY.avifSrcSet)
+      expect(descriptors(attr(source, 'srcset')!).map(([url, width]) => [url.replace(/^.*\./, ''), width])).toEqual([['avif', '640w'], ['avif', '800w'], ['avif', '960w'], ['avif', '1254w']])
+      expect(attr(source, 'sizes')).toBe(HERO_CITY.sizes)
+      expect(tags(html, 'img').filter(img => attr(img, 'class') === 'city-art')).toHaveLength(1)
       expect(attr(tag, 'src')).toBe('/hero/l4-city-960.webp')
       expect(attr(tag, 'srcset')).toBe(HERO_CITY.srcSet)
       expect(descriptors(attr(tag, 'srcset')!).map(([, width]) => width)).toEqual(['640w', '800w', '960w', '1254w'])
@@ -95,24 +100,32 @@ describe('static hero', () => {
       'city-masjid.webp', 'condo-surau.webp', 'l4-city-640.webp', 'l4-city-800.webp', 'l4-city-960.webp', 'l4-city.webp',
       'modern-masjid.webp', 'shophouse-surau.webp',
     ])
+    expect(readdirSync(new URL('public/hero/', root)).filter(name => name.endsWith('.avif')).sort())
+      .toEqual(['l4-city-1254.avif', 'l4-city-640.avif', 'l4-city-800.avif', 'l4-city-960.avif'])
     expect(readdirSync(new URL('public/screens/', root)).filter(name => /occlusion|splash/.test(name))).toEqual([])
   })
 
   it('serves only files that exist, with every variant smaller than the original', () => {
-    const urls = [...HERO_CITY.srcSet.split(','), ...HERO_PHONE.srcSet.split(',')].map(part => part.trim().split(/\s+/)[0])
+    const urls = [...HERO_CITY.avifSrcSet.split(','), ...HERO_CITY.srcSet.split(','), ...HERO_PHONE.srcSet.split(',')].map(part => part.trim().split(/\s+/)[0])
     for (const url of urls) expect(existsSync(publicFile(url)), url).toBe(true)
     const size = (src: string) => statSync(publicFile(src)).size
     expect(size('/hero/l4-city-640.webp')).toBeLessThan(size('/hero/l4-city-800.webp'))
     expect(size('/hero/l4-city-800.webp')).toBeLessThan(size('/hero/l4-city-960.webp'))
     expect(size('/hero/l4-city-960.webp')).toBeLessThan(size('/hero/l4-city.webp'))
     expect(size('/screens/02-explore-320.webp')).toBeLessThan(size('/screens/02-explore.webp'))
+    // AVIF is the smaller format at every width (and the 1254 px AVIF beats the original WebP).
+    for (const width of ['640', '800', '960']) expect(size(`/hero/l4-city-${width}.avif`)).toBeLessThan(size(`/hero/l4-city-${width}.webp`))
+    expect(size('/hero/l4-city-1254.avif')).toBeLessThan(size('/hero/l4-city.webp'))
+    expect(size('/hero/l4-city-640.avif')).toBeLessThan(size('/hero/l4-city-800.avif'))
+    expect(size('/hero/l4-city-800.avif')).toBeLessThan(size('/hero/l4-city-960.avif'))
+    expect(size('/hero/l4-city-960.avif')).toBeLessThan(size('/hero/l4-city-1254.avif'))
   })
 })
 
 describe('LCP preload', () => {
-  it('uses the same candidate set as the rendered image, with high fetch priority', () => {
+  it('matches the AVIF <source> (type, candidates, sizes) with high fetch priority, and has no href', () => {
     expect(heroPreloadLink()).toEqual({
-      rel: 'preload', as: 'image', href: HERO_CITY.src, imageSrcSet: HERO_CITY.srcSet, imageSizes: HERO_CITY.sizes, fetchPriority: 'high',
+      rel: 'preload', as: 'image', type: 'image/avif', imageSrcSet: HERO_CITY.avifSrcSet, imageSizes: HERO_CITY.sizes, fetchPriority: 'high',
     })
   })
 
@@ -120,6 +133,7 @@ describe('LCP preload', () => {
     for (const locale of ['ms', 'en'] as const) {
       const links = homepageHead(locale).links
       expect(links.filter(link => link.rel === 'preload')).toEqual([heroPreloadLink()])
+      // Exactly one city preload: React adds none for an <img> inside <picture>.
       expect(links.some(link => link.rel === 'canonical')).toBe(true)
       expect(links.filter(link => link.rel === 'alternate')).toHaveLength(3)
     }

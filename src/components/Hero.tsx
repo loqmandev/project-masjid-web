@@ -26,7 +26,7 @@ const ROUTES = [
 
 /**
  * Static hero (owner 2026-10-29, performance): the rest composition only. The
- * city painting is the LCP `<img>`, preloaded from the route head; nothing in
+ * city painting is the LCP `<img>` (AVIF source, WebP fallback), preloaded from the route head; nothing in
  * the hero moves and no script runs for it.
  */
 export default function Hero({ locale = 'ms' }: { locale?: Locale }) {
@@ -41,7 +41,10 @@ export default function Hero({ locale = 'ms' }: { locale?: Locale }) {
       <div className="art-pane">
         <div className="map-stage">
           <div className="map-layers">
-            <img className="city-art" src={HERO_CITY.src} srcSet={HERO_CITY.srcSet} sizes={HERO_CITY.sizes} alt={copy.city} width={HERO_CITY.width} height={HERO_CITY.height} fetchPriority="high" decoding="async" />
+            <picture>
+              <source type="image/avif" srcSet={HERO_CITY.avifSrcSet} sizes={HERO_CITY.sizes} />
+              <img className="city-art" src={HERO_CITY.src} srcSet={HERO_CITY.srcSet} sizes={HERO_CITY.sizes} alt={copy.city} width={HERO_CITY.width} height={HERO_CITY.height} fetchPriority="high" decoding="async" />
+            </picture>
             <svg className="map-paths" viewBox="0 0 1000 1000" aria-hidden="true"><g className="route-ink">{ROUTES.map(d => <path key={d} d={d} />)}</g></svg>
             <div className="origin" style={{ '--x': '49.6%', '--y': '53%' } as CSSProperties} aria-hidden="true"><span className="locator-pulse"></span><span className="locator-dot"></span></div>
             {DESTINATIONS.map((place, index) => (

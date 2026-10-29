@@ -3,10 +3,13 @@
  * rendered `<img>` and the `<link rel="preload">` in the route head, so the
  * browser sees one candidate set and fetches the city painting exactly once.
  *
- * Variants are plain resizes of the approved painting (Lanczos, WebP q70) and
- * of the Explore screenshot (WebP q80); the artwork is never recoloured,
- * cropped or redrawn. Widths: 640 / 800 / 960 / 1254 (the original) for the
- * city, 320 / 480 / 720 for the phone screen.
+ * Variants are plain resizes of the approved painting (Lanczos; AVIF q50 and
+ * WebP q70) and of the Explore screenshot (WebP q80); the artwork is never
+ * recoloured, cropped or redrawn. Widths: 640 / 800 / 960 / 1254 (the original
+ * size) for the city, 320 / 480 / 720 for the phone screen.
+ *
+ * The city painting is a `<picture>`: the AVIF `<source>` is about 40 % smaller
+ * than WebP (640 px: 70 KB vs 120 KB), and the WebP `<img>` is the fallback.
  */
 
 /**
@@ -17,6 +20,8 @@
 const CITY_SIZES = '(max-width: 760px) 110vw, (max-width: 1200px) min(720px, 66vw), 60vw'
 
 export const HERO_CITY = {
+  /** AVIF `<source>`; same widths and `sizes` as the WebP fallback. */
+  avifSrcSet: '/hero/l4-city-640.avif 640w, /hero/l4-city-800.avif 800w, /hero/l4-city-960.avif 960w, /hero/l4-city-1254.avif 1254w',
   src: '/hero/l4-city-960.webp',
   srcSet: '/hero/l4-city-640.webp 640w, /hero/l4-city-800.webp 800w, /hero/l4-city-960.webp 960w, /hero/l4-city.webp 1254w',
   sizes: CITY_SIZES,
@@ -37,18 +42,18 @@ export const HERO_PHONE = {
 } as const
 
 /**
- * Head link for `/` and `/en`: the LCP image is discovered before the CSS.
- * `href` is the `<img>` fallback `src`, used only by a browser that ignores
- * `imagesrcset`. React also hoists its own preload for the high-priority
- * `<img>` (same candidate set), so the head carries two identical links;
- * browsers fetch the file once, and this one keeps the preload explicit if
- * that React behaviour ever changes.
+ * Head link for `/` and `/en`: the LCP image is discovered before the CSS. It
+ * matches the AVIF `<source>` (same candidates, same `sizes`); a browser
+ * without AVIF ignores it (`type`) and fetches the WebP `<img>` normally.
+ * `href` is omitted on purpose (optional with `imagesrcset`). React does not
+ * hoist a preload of its own for an `<img>` inside `<picture>`, so this is the
+ * only city preload in the head.
  */
 export const heroPreloadLink = () => ({
   rel: 'preload',
   as: 'image',
-  href: HERO_CITY.src,
-  imageSrcSet: HERO_CITY.srcSet,
+  type: 'image/avif',
+  imageSrcSet: HERO_CITY.avifSrcSet,
   imageSizes: HERO_CITY.sizes,
   fetchPriority: 'high' as const,
 })
