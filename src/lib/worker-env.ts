@@ -10,6 +10,10 @@ export type WebEnv = AssociationEnv & {
   MASJID_AJK_ENABLED?: string
   JM_API_BASE?: string
   JM_API?: { fetch(request: Request): Promise<Response> }
+  /** Service binding to the `project-masjid-tiles` Worker (masjid page map). */
+  TILES?: { fetch(request: Request): Promise<Response> }
+  /** Tile origin used when the TILES binding is absent (default tiles.jejakmasjid.my). */
+  TILES_BASE?: string
 }
 export async function getWorkerEnv(): Promise<WebEnv> {
   const { env } = await import('cloudflare:workers')
