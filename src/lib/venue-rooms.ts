@@ -234,8 +234,8 @@ export function roomTitle(name: string, district: string | null, rooms: PrayerRo
 const AUDIENCE_NAME: Record<RoomAudience, string> = { all: '', men: 'Lelaki', women: 'Wanita' }
 export const DESCRIPTION_LIMIT = 155
 const SUFFIXES = [
-  " Today's prayer times, facilities and visitor photos on Jejak Masjid.",
-  ' Prayer times and photos on Jejak Masjid.',
+  ' Waktu solat hari ini, kemudahan dan foto pengunjung di Jejak Masjid.',
+  ' Waktu solat dan foto di Jejak Masjid.',
   '',
 ]
 
@@ -252,7 +252,7 @@ export function roomDescription(rooms: PrayerRoom[] | undefined): string | null 
       const who = v.length > 1 || r.audience !== 'all' ? AUDIENCE_NAME[r.audience] : ''
       return who ? `${who} ${where}` : where
     })
-    return `Where to find it: ${bits.join(', ')}.${suffix}`
+    return `Lokasi: ${bits.join(', ')}.${suffix}`
   }
   for (const suffix of SUFFIXES)
     for (const [landmark, zone] of [[true, true], [false, true], [false, false]] as const) {
@@ -330,6 +330,6 @@ export const venueLinkText = (v: Pick<VenueSummary, 'name' | 'placeCount'>) =>
 /** Venue page description (spec §4). */
 export function venueDescription(name: string, placeCount: number, floors: string[]) {
   return floors.length
-    ? `Where to pray in ${name}: ${placeCount} prayer ${placeCount === 1 ? 'space' : 'spaces'}, ${floors.join(', ')}. Floors, wudhu and directions on Jejak Masjid.`
-    : `Where to pray in ${name}: floors, wudhu and directions on Jejak Masjid.`
+    ? `Tempat solat di ${name}: ${placeCount} ruang solat, ${floors.join(', ')}. Aras, tempat wudhu dan arah ke surau di Jejak Masjid.`
+    : `Tempat solat di ${name}: aras, tempat wudhu dan arah ke surau di Jejak Masjid.`
 }

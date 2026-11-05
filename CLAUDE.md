@@ -10,7 +10,7 @@ deployed to Cloudflare Workers.
 
 **Brand voice is normative.** Read `BRAND.md` before writing or editing any copy: calm,
 bersahaja, gentle motivation, never competitive. The homepage is Bahasa Melayu first at `/`, with English at `/en`.
-Keep both dictionaries in `src/lib/i18n/` aligned. Other existing routes keep their original language. Never use urgency or
+Keep both dictionaries in `src/lib/i18n/` aligned. Other existing routes keep their original language. Search titles/descriptions of venue pages (`/surau/{slug}`) and of room-bearing masjid pages are Malay (spec `SPEC_venue-seo-malay.md`); page bodies, `lang`, hreflang and JSON-LD stay English. Never use urgency or
 streak-panic language.
 
 Product facts come from `../FEATURES.md` and `../store-assets-v2/ASO_COPY.md`. Where the two

@@ -71,7 +71,7 @@ it('both route error heads omit noindex, with no-store on success and errors', (
 it('venue route: head from the payload, noindex when not indexable, error head and no-store', async () => {
   const head = venueRoute.options.head as (ctx: { loaderData: unknown }) => { meta: Meta[]; links?: Meta[]; scripts?: { children: string }[] }
   const ok = head({ loaderData: { venue: venuePage } })
-  expect(ok.meta[0].title).toContain('Surau at Mall Fixture')
+  expect(ok.meta[0].title).toContain('Surau di Mall Fixture')
   expect(ok.links![0].href).toBe('https://jejakmasjid.my/surau/mall-fixture')
   expect(JSON.parse(ok.scripts![0].children)['@type']).toBe('ShoppingCenter')
   const hidden = head({ loaderData: { venue: { ...venuePage, indexable: false } } })

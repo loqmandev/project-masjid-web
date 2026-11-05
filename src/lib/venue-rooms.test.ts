@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import {
-  nameMentionsFloor, roomBlock, roomDescription, roomTitle, validateRooms,
+  DESCRIPTION_LIMIT, nameMentionsFloor, roomBlock, roomDescription, roomTitle, validateRooms,
   validateVenuePage, validateVenueSummary, venueDescription, venueLinkText, verifiedLabel,
 } from './venue-rooms'
 import { allRoom, menRoom, womenRoom, unverifiedRoom, venue, venuePage } from './masjid-fixture'
@@ -56,7 +56,7 @@ it('F1: floor in the title only for a verified all room or the masjid\'s only ve
   const unverifiedWomen = { ...womenRoom, verified: false, verifiedAt: null }
   expect(roomTitle('Surau Mall', 'X', [menRoom, unverifiedWomen])).toBe('Surau Mall · X')
   expect(roomTitle('Surau Mall', 'X', [menRoom])).toBe('Surau Mall · Level 2, North Court · X')
-  expect(roomDescription([menRoom, unverifiedWomen])).toContain('Where to find it: Lelaki Level 2')
+  expect(roomDescription([menRoom, unverifiedWomen])).toContain('Lokasi: Lelaki Level 2')
 })
 it('F4: name and floor are never cut, even over 60 characters', () => {
   const t = roomTitle('Surau '.padEnd(60, 'N'), 'Kuala Lumpur', [allRoom])
@@ -64,11 +64,11 @@ it('F4: name and floor are never cut, even over 60 characters', () => {
   expect(t.length).toBeGreaterThan(60)
 })
 it('F5: a men + women description stays within 155 characters', () => {
-  const long = (audience: 'men' | 'women') => ({ ...(audience === 'men' ? menRoom : womenRoom), floorLabel: 'F'.repeat(29) })
+  const long = (audience: 'men' | 'women') => ({ ...(audience === 'men' ? menRoom : womenRoom), floorLabel: 'F'.repeat(47) })
   const d = roomDescription([long('men'), long('women')])!
   expect(d.length).toBeLessThanOrEqual(155)
-  const mid = roomDescription([{ ...menRoom, floorLabel: 'F'.repeat(28) }, { ...womenRoom, floorLabel: 'G'.repeat(28) }])!
-  expect(mid).toContain('Prayer times and photos on Jejak Masjid.')
+  const mid = roomDescription([{ ...menRoom, floorLabel: 'F'.repeat(40) }, { ...womenRoom, floorLabel: 'G'.repeat(40) }])!
+  expect(mid).toContain('Waktu solat dan foto di Jejak Masjid.')
 })
 it('F6: an all room next to men/women rooms wins', () => {
   expect(validateRooms([allRoom, menRoom, womenRoom]).map((r) => r.audience)).toEqual(['all'])
@@ -80,10 +80,10 @@ it('no title floor with two verified rooms or only unverified ones', () => {
 })
 it('description: single, lone women, men + women, unverified, truncation', () => {
   expect(roomDescription([allRoom])).toBe(
-    "Where to find it: Level UG, North Court, Between Typo and Uniqlo. Today's prayer times, facilities and visitor photos on Jejak Masjid.",
+    "Lokasi: Level UG, North Court, Between Typo and Uniqlo. Waktu solat hari ini, kemudahan dan foto pengunjung di Jejak Masjid.",
   )
-  expect(roomDescription([womenRoom])).toContain('Where to find it: Wanita Level 1.')
-  expect(roomDescription([menRoom, womenRoom])).toContain('Where to find it: Lelaki Level 2, Wanita Level 1.')
+  expect(roomDescription([womenRoom])).toContain('Lokasi: Wanita Level 1.')
+  expect(roomDescription([menRoom, womenRoom])).toContain('Lokasi: Lelaki Level 2, Wanita Level 1.')
   expect(roomDescription([unverifiedRoom])).toBeNull()
   const big = { ...allRoom, landmark: 'L'.repeat(60), zone: 'Z'.repeat(60) }
   const d = roomDescription([big])!
@@ -110,8 +110,23 @@ it('block lines: all, men+women, unverified, wudhu false/null', () => {
 it('venue link text and description', () => {
   expect(venueLinkText(venue)).toBe('All prayer spaces in Mall Fixture →')
   expect(venueLinkText({ ...venue, placeCount: 1 })).toBe('More about Mall Fixture')
-  expect(venueDescription('M', 3, ['Level 1', 'Level 2'])).toBe('Where to pray in M: 3 prayer spaces, Level 1, Level 2. Floors, wudhu and directions on Jejak Masjid.')
-  expect(venueDescription('M', 1, [])).toBe('Where to pray in M: floors, wudhu and directions on Jejak Masjid.')
+  expect(venueDescription('M', 3, ['Level 1', 'Level 2'])).toBe('Tempat solat di M: 3 ruang solat, Level 1, Level 2. Aras, tempat wudhu dan arah ke surau di Jejak Masjid.')
+  expect(venueDescription('M', 1, [])).toBe('Tempat solat di M: aras, tempat wudhu dan arah ke surau di Jejak Masjid.')
+})
+it('a 1-place venue reads "1 ruang solat"', () => {
+  expect(venueDescription('M', 1, ['Level 2'])).toContain(': 1 ruang solat, Level 2.')
+})
+it('every fixture venue and room description stays within the limit', () => {
+  const descs = [
+    venueDescription('Setia City Mall', 12, ['Level 1', 'Level UG', 'Level 2']),
+    venueDescription('Mall Fixture', 3, ['Level 1', 'Level UG']),
+    venueDescription('Mall Fixture', 3, []),
+    roomDescription([menRoom, womenRoom]),
+    roomDescription([allRoom]),
+    roomDescription([menRoom]),
+    roomDescription([womenRoom]),
+  ].filter((d): d is string => d !== null)
+  for (const d of descs) expect(d.length).toBeLessThanOrEqual(DESCRIPTION_LIMIT)
 })
 it('validateRooms drops malformed rooms, caps strings, sorts and strips unknown keys', () => {
   const rooms = validateRooms([
