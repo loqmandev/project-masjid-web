@@ -329,7 +329,12 @@ export const venueLinkText = (v: Pick<VenueSummary, 'name' | 'placeCount'>) =>
 
 /** Venue page description (spec §4). */
 export function venueDescription(name: string, placeCount: number, floors: string[]) {
-  return floors.length
-    ? `Tempat solat di ${name}: ${placeCount} ruang solat, ${floors.join(', ')}. Aras, tempat wudhu dan arah ke surau di Jejak Masjid.`
-    : `Tempat solat di ${name}: aras, tempat wudhu dan arah ke surau di Jejak Masjid.`
+  const withFloors = (list: string[]) =>
+    `Tempat solat di ${name}: ${placeCount} ruang solat, ${list.join(', ')}. Aras, tempat wudhu dan arah ke surau di Jejak Masjid.`
+  // Drop floors from the end until it fits; the venue name is never cut.
+  for (let n = floors.length; n >= 1; n--) {
+    const d = withFloors(floors.slice(0, n))
+    if (d.length <= DESCRIPTION_LIMIT) return d
+  }
+  return `Tempat solat di ${name}: aras, tempat wudhu dan arah ke surau di Jejak Masjid.`
 }

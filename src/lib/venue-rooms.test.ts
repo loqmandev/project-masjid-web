@@ -63,6 +63,7 @@ it('F4: name and floor are never cut, even over 60 characters', () => {
   expect(t).toBe(`${'Surau '.padEnd(60, 'N')} · Level UG`)
   expect(t.length).toBeGreaterThan(60)
 })
+// Synthetic inputs: validateRoom caps floorLabel at 30, so real data never reaches suffix 2 / no suffix.
 it('F5: a men + women description stays within 155 characters', () => {
   const long = (audience: 'men' | 'women') => ({ ...(audience === 'men' ? menRoom : womenRoom), floorLabel: 'F'.repeat(47) })
   const d = roomDescription([long('men'), long('women')])!
@@ -89,6 +90,36 @@ it('description: single, lone women, men + women, unverified, truncation', () =>
   const d = roomDescription([big])!
   expect(d.length).toBeLessThanOrEqual(155)
   expect(d).not.toContain('LLL')
+})
+it('F2: single all room reaches the floor-only step with suffix 1', () => {
+  const floor = 'F'.repeat(30)
+  const d = roomDescription([{ ...allRoom, floorLabel: floor, zone: 'Z'.repeat(60), landmark: 'L'.repeat(60) }])
+  expect(d).toBe(`Lokasi: ${floor}. Waktu solat hari ini, kemudahan dan foto pengunjung di Jejak Masjid.`)
+})
+it('venueDescription: fits the limit by dropping floors from the end', () => {
+  const name = 'N'.repeat(30)
+  const d = venueDescription(name, 4, ['Level One', 'Level Two', 'Level Three', 'Level Four'])
+  expect(d.length).toBeLessThanOrEqual(DESCRIPTION_LIMIT)
+  expect(d).toContain(', Level One')
+  expect(d).not.toContain('Level Four')
+  expect(d).toContain(name)
+})
+it('venueDescription: falls back to the no-floor template when no floor fits', () => {
+  const name = 'N'.repeat(85)
+  expect(venueDescription(name, 2, ['A very long floor label here'])).toBe(
+    `Tempat solat di ${name}: aras, tempat wudhu dan arah ke surau di Jejak Masjid.`,
+  )
+})
+it('venueDescription: a very long name returns the no-floor template unchanged', () => {
+  const name = 'N'.repeat(120)
+  const d = venueDescription(name, 3, ['Level 1'])
+  expect(d).toBe(`Tempat solat di ${name}: aras, tempat wudhu dan arah ke surau di Jejak Masjid.`)
+  expect(d.length).toBeGreaterThan(DESCRIPTION_LIMIT)
+})
+it('venueDescription: the live TRX shape is unchanged at 152 characters', () => {
+  const d = venueDescription('Tun Razak Exchange (TRX)', 6, ['Concourse', 'UG (Upper Ground)', 'Park level'])
+  expect(d).toBe('Tempat solat di Tun Razak Exchange (TRX): 6 ruang solat, Concourse, UG (Upper Ground), Park level. Aras, tempat wudhu dan arah ke surau di Jejak Masjid.')
+  expect(d.length).toBe(152)
 })
 it('block lines: all, men+women, unverified, wudhu false/null', () => {
   expect(roomBlock([allRoom]).lines).toEqual([
