@@ -30,6 +30,12 @@ it.each([
   ['Surau Level 1', '1st Floor', true],
   ['Surau 2nd Floor Mall', 'Level 2', true],
   ['Surau Floor 3 Mall', 'Aras 3', true],
+  ['Surau Lobby Hotel', 'Lobby', true],
+  ['Surau Concourse X', 'Concourse', true],
+  ['Surau X', 'Concourse', false],
+  ['Surau Tingkat Bawah KLIA', 'Tingkat Bawah', true],
+  ['Surau B1 B2 Mall', 'B2', true],
+  ['Surau B1 B2 Mall', 'B1', true],
   // Known rare false positive, accepted: "L1" in a block name reads as level 1.
   ['Surau Blok L1 Hospital', 'Level 1', true],
 ])('floor in name: %s / %s -> %s', (name, floor, expected) => {

@@ -88,9 +88,10 @@ it('never lists an areas sitemap, whichever way masjid pages are switched', asyn
 })
 
 it('index always lists /sitemaps/venues while pages are on, whatever the venue upstream does', async () => {
-  for (const venue of [{ status: 404, body: null }, { status: 503, body: null }, { status: 200, body: { items: [] } }])
+  for (const venue of [{ status: 404, body: null }, { status: 503, body: null }, { status: 200, body: { items: [] } }]) {
     vi.mocked(getVenueSitemap).mockResolvedValue(venue as never)
-  expect(await (await sitemapIndexResponse()).text()).toContain('https://jejakmasjid.my/sitemaps/venues')
+    expect(await (await sitemapIndexResponse()).text()).toContain('https://jejakmasjid.my/sitemaps/venues')
+  }
   expect(getVenueSitemap).not.toHaveBeenCalled()
   vi.mocked(getSitemapCount).mockResolvedValue({ status: 503, body: null })
   const r = await sitemapIndexResponse()

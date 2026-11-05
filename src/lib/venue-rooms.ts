@@ -169,15 +169,15 @@ export function floorKeys(text: string): Set<string> {
       return ' '
     })
   }
-  take(/ (?:level |lvl |aras |tingkat |tkt |floor |fl )?(?:upper ground|ug) /g, () => 'ug')
-  take(/ (?:level |lvl |aras |tingkat |tkt |floor |fl )?(?:lower ground|lg) /g, () => 'lg')
-  take(/ (?:basement|bsmt) (\d{1,2}) /g, (m) => `b${m[1]}`)
-  take(/ (?:level |lvl |aras |tingkat |tkt |floor |fl )?b(\d{1,2}) /g, (m) => `b${m[1]}`)
-  take(/ (?:ground floor|ground|g floor) /g, () => 'g')
-  take(new RegExp(` ${LEVEL} g `, 'g'), () => 'g')
-  take(new RegExp(` ${LEVEL} ?(\\d{1,2}) `, 'g'), (m) => String(Number(m[1])))
-  take(/ l(\d{1,2}) /g, (m) => String(Number(m[1])))
-  take(/ (\d{1,2})(?:st|nd|rd|th) floor /g, (m) => String(Number(m[1])))
+  take(/ (?:level |lvl |aras |tingkat |tkt |floor |fl )?(?:upper ground|ug)(?= )/g, () => 'ug')
+  take(/ (?:level |lvl |aras |tingkat |tkt |floor |fl )?(?:lower ground|lg)(?= )/g, () => 'lg')
+  take(/ (?:basement|bsmt) (\d{1,2})(?= )/g, (m) => `b${m[1]}`)
+  take(/ (?:level |lvl |aras |tingkat |tkt |floor |fl )?b(\d{1,2})(?= )/g, (m) => `b${m[1]}`)
+  take(/ (?:ground floor|ground|g floor)(?= )/g, () => 'g')
+  take(new RegExp(` ${LEVEL} g(?= )`, 'g'), () => 'g')
+  take(new RegExp(` ${LEVEL} ?(\\d{1,2})(?= )`, 'g'), (m) => String(Number(m[1])))
+  take(/ l(\d{1,2})(?= )/g, (m) => String(Number(m[1])))
+  take(/ (\d{1,2})(?:st|nd|rd|th) floor(?= )/g, (m) => String(Number(m[1])))
   return keys
 }
 
@@ -189,7 +189,10 @@ export function nameMentionsFloor(name: string, floorLabel: string): boolean {
     if (bare === 'g') label.add('g')
     else if (/^\d{1,2}$/.test(bare)) label.add(String(Number(bare)))
   }
-  if (!label.size) return false
+  if (!label.size) {
+    // No level key (Lobby, Mezzanine, P1): the whole label as words in the name.
+    return !!bare && ` ${tokens(name)} `.includes(` ${bare} `)
+  }
   const found = floorKeys(name)
   return [...label].some((k) => found.has(k))
 }
