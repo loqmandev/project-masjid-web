@@ -395,3 +395,14 @@ Host check (local built Worker only; `KEY=dummy|none` must match whether the Wor
 `.hermes/reviews/masjid-page-redesign/{mock-api.mjs,check-masjid.mjs}` (loopback API and https image mocks; Chromium via
 global `playwright-core`, Google requests stubbed so nothing leaves the machine). Start the Worker with
 `--persist-to <dir outside dist>` or wrangler restarts on every Cache API write and truncates responses.
+
+### Venue prayer rooms and `/surau/<venue>` — built 2026-11-05 (`feature/venue-prayer-rooms`, not merged)
+
+Spec `SPEC_venue-prayer-rooms.md` (root brief + backend spec §4 for the API). Goal: tell people where inside a mall/station/hospital the surau is.
+- **Types** (`lib/masjid-types.ts`): optional `venue` (`VenueSummary`) and `rooms` (`PrayerRoom[]`) on `PublicMasjidPage`; `PublicVenuePage`, `VenueSitemap`. Absent = old backend = no block.
+- **`lib/venue-rooms.ts`** holds everything pure: validators (`validateRooms`, `validateVenueSummary`, `validateVenuePage`: malformed rooms dropped, optional strings capped to backend limits, unknown keys never survive, bad venue slug drops the venue), `nameMentionsFloor` (Level 2 / L2 / Aras 2 / Tingkat 2 / UG / LG / B1 / Ground), `roomTitle`, `roomDescription`, `roomBlock` (display lines), `venueLinkText`, `venueDescription`. `loadMasjid` replaces the raw fields with validated copies (absent stays absent); `loadVenue` returns 503-page on a malformed payload.
+- **Verified rule:** `verified` rooms only in titles, descriptions and JSON-LD (one verified room in the title; a men + women pair names no floor in the title and both in the description, men first). Unverified rooms show on the page with the muted label "Not yet confirmed". JSON-LD gets only `containedInPlace` (venue name + `/surau/<slug>`), never room data.
+- **Masjid page:** `components/masjid/RoomsBlock.tsx` under the H1 (`<section aria-label="Where to find it">`, closed `<details>` "How to get there", venue link by `placeCount`, opening-hours line). **Venue page:** route `/surau/$slug` (`routes/surau.$slug.tsx`, `components/masjid/VenuePlacePage.tsx`), gated by `MASJID_PAGES_ENABLED`, 404 / resting page / `noindex` when `indexable:false`, `ShoppingCenter`/`Place` JSON-LD with `containsPlace` (name + url only). No nearby-venue list (anti-scraping).
+- **Sitemap:** `/sitemaps/venues` (`routes/sitemaps.venues.ts`) from `GET /api/public/venue-sitemap`; the index lists it only when the backend returns a non-empty list (so an older backend adds nothing).
+- **Cache:** venue pages and masjid pages go through `apiGet` with the same 60 s Cache API entries tagged `jm-ajk-public` (`PUBLIC_CACHE_TAG`). After a data backfill purge that tag (or wait 60 s); there is no URL-based cache to clear.
+- Host check: fixtures `allRoom`, `menRoom`, `womenRoom`, `unverifiedRoom`, `venue`, `venuePage` in `lib/masjid-fixture.ts`; screenshots in `.hermes/reviews/venue-prayer-rooms/`.

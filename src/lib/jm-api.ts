@@ -3,7 +3,9 @@ import type {
   FacilityCatalogueItem,
   PublicMasjidPage,
   PublicProgramDetail,
+  PublicVenuePage,
   SitemapPage,
+  VenueSitemap,
 } from './masjid-types'
 
 export const validSlug = (s: string) =>
@@ -110,6 +112,13 @@ export const getMasjidPage = (slug: string) =>
         { ttl: 60 },
       )
     : Promise.resolve({ status: 404, body: null })
+// Venue pages share the masjid page cache (same 60 s TTL, same `jm-ajk-public` tag).
+export const getVenuePage = (slug: string) =>
+  validSlug(slug)
+    ? apiGet<PublicVenuePage>(`/api/public/venues/by-slug/${slug}`, { ttl: 60 })
+    : Promise.resolve({ status: 404, body: null })
+export const getVenueSitemap = () =>
+  apiGet<VenueSitemap>('/api/public/venue-sitemap', { ttl: 60 })
 export const getFacilityCatalogue = () =>
   apiGet<FacilityCatalogueItem[]>('/api/facilities', { ttl: 60 })
 export const getProgram = (id: string) =>

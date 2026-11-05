@@ -1,6 +1,6 @@
 import { it, expect } from 'vitest'
-import { jsonLdScript, mosqueJsonLd, eventJsonLd } from './jsonld'
-import { facilityCatalogue, publicFacilities, page, program } from './masjid-fixture'
+import { jsonLdScript, mosqueJsonLd, eventJsonLd, venueJsonLd } from './jsonld'
+import { facilityCatalogue, publicFacilities, page, program, venue, venuePage, unverifiedRoom, allRoom } from './masjid-fixture'
 import type { PublicFacility } from './masjid-types'
 it('omits addressLocality when the cleaned district equals the region', () => {
   const m = mosqueJsonLd({ ...page, masjid: { ...page.masjid, districtName: 'PULAU PINANG', stateName: 'Pulau Pinang' } })
@@ -129,4 +129,24 @@ it('uses up to three trusted visitor photos as image when there is no AJK cover,
   expect(mosqueJsonLd(page)).not.toHaveProperty('image')
   const json = jsonLdScript(mosqueJsonLd({ ...page, photos, reviews: { count: 23, average: 4.7, items: [] } } as never))
   expect(json).not.toMatch(/AggregateRating|"Review"|aggregateRating|ratingValue/)
+})
+
+it('containedInPlace only with a venue, and no room data in JSON-LD', () => {
+  expect(mosqueJsonLd(page)).not.toHaveProperty('containedInPlace')
+  const m = mosqueJsonLd({ ...page, venue, rooms: [unverifiedRoom, { ...allRoom, audience: 'men', landmark: 'SECRET-LANDMARK' }] })
+  expect(m.containedInPlace).toEqual({
+    '@type': 'ShoppingCenter', name: 'Mall Fixture', url: 'https://jejakmasjid.my/surau/mall-fixture',
+  })
+  expect(JSON.stringify(m)).not.toMatch(/SECRET-LANDMARK|North Court|Level UG|wudhu/i)
+  expect(mosqueJsonLd({ ...page, venue: { ...venue, kind: 'hospital' } }).containedInPlace!['@type']).toBe('Place')
+})
+it('venue JSON-LD lists member mosques by name and url only', () => {
+  const v = venueJsonLd(venuePage)
+  expect(v['@type']).toBe('ShoppingCenter')
+  expect(v.containsPlace).toEqual([
+    { '@type': 'Mosque', name: 'Surau Mall Fixture (Women)', url: 'https://jejakmasjid.my/masjid/surau-mall-fixture-women' },
+    { '@type': 'Mosque', name: 'Surau Mall Fixture', url: 'https://jejakmasjid.my/masjid/surau-mall-fixture' },
+    { '@type': 'Mosque', name: 'Surau Annex', url: 'https://jejakmasjid.my/masjid/surau-mall-fixture-annex' },
+  ])
+  expect(jsonLdScript(v)).not.toContain('Level')
 })

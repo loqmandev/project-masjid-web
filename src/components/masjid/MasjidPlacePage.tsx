@@ -12,6 +12,7 @@ import { Gallery, MapHero, NoPhotosCard } from './Gallery'
 import { Address, AppCard, MapLinks, PlaceCard, StickyBar } from './PlaceCards'
 import PrayerTimes from './PrayerTimes'
 import Reviews from './Reviews'
+import { RoomsBlock } from './RoomsBlock'
 
 /**
  * The public masjid page, sketch 108 variant A "Place card". Two columns from lg
@@ -71,6 +72,7 @@ export default function MasjidPlacePage({
                 <h1 className="mt-2 mb-1.5 text-[2rem] leading-[1.1] text-primary text-balance lg:text-[2.7rem]">
                   {m.name}
                 </h1>
+                <RoomsBlock rooms={page.rooms} venue={page.venue} />
                 <Address address={address} className="mt-2.5" />
                 <MapLinks lat={m.lat} lng={m.lng} className="mt-4 flex-wrap lg:hidden" />
               </header>

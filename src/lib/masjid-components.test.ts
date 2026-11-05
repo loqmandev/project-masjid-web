@@ -8,8 +8,9 @@ import {
   MasjidPage,
   ProgramPage,
   MissingProgram,
+  VenuePage,
 } from '@/components/MasjidPages'
-import { page, program } from './masjid-fixture'
+import { page, program, allRoom, menRoom, womenRoom, unverifiedRoom, venue, venuePage } from './masjid-fixture'
 import type { PublicMasjidPage, PublicMasjidPost } from './masjid-types'
 const render = (p: PublicMasjidPage = page, ajk = true) =>
   renderToString(createElement(MasjidPage, { page: p, prayers: null, ajk }))
@@ -200,4 +201,51 @@ it('ajk off still hides programs and posts when the data carries them', () => {
   )
   for (const s of ['Fixture program', 'Upcoming programs', 'Secret', 'News', '/p/', 'ajk.jejakmasjid.my', 'held here'])
     expect(html).not.toContain(s)
+})
+
+it('rooms block is hidden without rooms or on an old payload', () => {
+  expect(render()).not.toContain('Where to find it')
+  expect(render({ ...page, rooms: [] , venue: null })).not.toContain('Where to find it')
+})
+it('rooms block shows floor, landmark, wudhu, verified month and the venue link', () => {
+  const html = render({ ...page, rooms: [allRoom], venue })
+  expect(html).toContain('aria-label="Where to find it"')
+  expect(html).toContain('<span aria-hidden="true">📍</span>')
+  expect(html).toContain('Level UG · North Court')
+  expect(html).toContain('Between Typo and Uniqlo · Tempat wudhu ada')
+  expect(html).toContain('Lelaki &amp; wanita · Verified Oct 2026')
+  expect(html).toContain('How to get there')
+  expect(html).toContain('<details')
+  expect(html).not.toContain('<details open')
+  expect(html).toContain('href="/surau/mall-fixture"')
+  expect(html).toContain('All prayer spaces in Mall Fixture →')
+  expect(html).toContain('Open when Mall Fixture is open · 10am to 10pm')
+  expect(render({ ...page, rooms: [allRoom], venue: { ...venue, placeCount: 1 } })).toContain('More about Mall Fixture')
+})
+it('wudhu true / false / null', () => {
+  expect(render({ ...page, rooms: [allRoom] })).toContain('Tempat wudhu ada')
+  expect(render({ ...page, rooms: [{ ...allRoom, hasWudhu: false }] })).toContain('Tiada tempat wudhu')
+  const none = render({ ...page, rooms: [{ ...allRoom, hasWudhu: null }] })
+  expect(none).not.toContain('wudhu')
+})
+it('unverified rooms carry the soft label and no Verified text', () => {
+  const html = render({ ...page, rooms: [unverifiedRoom] })
+  expect(html).toContain('Not yet confirmed')
+  expect(html).not.toContain('Verified')
+})
+it('men and women get one line each with a shared verified line', () => {
+  const html = render({ ...page, rooms: [womenRoom, menRoom] })
+  expect(html).toContain('Wanita: Level 1')
+  expect(html).toContain('Lelaki: Level 2 · North Court')
+  expect(html.match(/Verified Oct 2026/g)).toHaveLength(1)
+})
+it('venue page renders places in order, links, directions and no raw html', () => {
+  const html = renderToString(createElement(VenuePage, { page: { ...venuePage, venue: { ...venuePage.venue, name: '<b>Mall</b>' } } }))
+  expect(html).toContain('Surau at &lt;b&gt;Mall&lt;/b&gt;')
+  expect(html).not.toContain('<b>Mall')
+  expect(html.indexOf('Surau Mall Fixture (Women)')).toBeLessThan(html.indexOf('Surau Annex'))
+  expect(html).toContain('href="/masjid/surau-mall-fixture"')
+  expect(html).toContain('https://www.google.com/maps/search/?api=1&amp;query=2.9,101.7')
+  expect(html).toContain('Get directions')
+  expect(html).toContain('Exact floor not listed yet.')
 })

@@ -1,5 +1,5 @@
 import { SITE } from './site'
-import { getSitemapCount, getSitemapPage, validSitemapPage } from './jm-api'
+import { getSitemapCount, getSitemapPage, getVenueSitemap, validSitemapPage, validSlug } from './jm-api'
 import { getWorkerEnv } from './worker-env'
 export const xmlEscape = (s: string) =>
   s.replace(
@@ -13,8 +13,8 @@ export const xmlEscape = (s: string) =>
         "'": '&apos;',
       })[c]!,
   )
-export function sitemapIndex(total = 0, pageSize = 5000) {
-  return `<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${['/sitemap-pages.xml', ...Array.from({ length: Math.min(999, Math.ceil(total / pageSize)) }, (_, i) => `/sitemaps/masjid/${i + 1}`)].map((p) => `<sitemap><loc>${SITE.url}${p}</loc></sitemap>`).join('')}</sitemapindex>`
+export function sitemapIndex(total = 0, pageSize = 5000, venues = false) {
+  return `<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${['/sitemap-pages.xml', ...Array.from({ length: Math.min(999, Math.ceil(total / pageSize)) }, (_, i) => `/sitemaps/masjid/${i + 1}`), ...(venues ? ['/sitemaps/venues'] : [])].map((p) => `<sitemap><loc>${SITE.url}${p}</loc></sitemap>`).join('')}</sitemapindex>`
 }
 export function sitemapUrls(items: { slug: string; lastmod: string }[]) {
   return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${items.map((i) => `<url><loc>${xmlEscape(`${SITE.url}/masjid/${i.slug}`)}</loc><lastmod>${xmlEscape(i.lastmod)}</lastmod></url>`).join('')}</urlset>`
@@ -35,13 +35,36 @@ function validPagination(p: { total: number; pageSize: number }) {
     p.pageSize > 0
   )
 }
+export function validVenueItems(body: unknown) {
+  const items = (body as { items?: unknown } | null)?.items
+  if (!Array.isArray(items)) return []
+  return items.filter(
+    (i): i is { slug: string; updatedAt: string } =>
+      !!i &&
+      typeof i.slug === 'string' &&
+      validSlug(i.slug) &&
+      typeof i.updatedAt === 'string' &&
+      Number.isFinite(Date.parse(i.updatedAt)),
+  )
+}
+export function venueSitemapUrls(items: { slug: string; updatedAt: string }[]) {
+  return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${items.map((i) => `<url><loc>${xmlEscape(`${SITE.url}/surau/${i.slug}`)}</loc><lastmod>${xmlEscape(i.updatedAt)}</lastmod></url>`).join('')}</urlset>`
+}
+export async function venueSitemapResponse() {
+  const r = await getVenueSitemap()
+  if (r.status === 200 && r.body && Array.isArray(r.body.items))
+    return response(venueSitemapUrls(validVenueItems(r.body)))
+  return response('', r.status === 503 ? 503 : 404)
+}
 export async function sitemapIndexResponse() {
   const env = await getWorkerEnv()
   if (env.MASJID_PAGES_ENABLED !== 'true') return response(sitemapIndex())
-  const r = await getSitemapCount()
+  const [r, v] = await Promise.all([getSitemapCount(), getVenueSitemap()])
+  // The venue sitemap is listed only when the backend serves a non-empty one.
+  const venues = v.status === 200 && validVenueItems(v.body).length > 0
   return r.status === 200 && r.body && validPagination(r.body)
-    ? response(sitemapIndex(r.body.total, r.body.pageSize))
-    : response(sitemapIndex(), 200, 'public, max-age=300')
+    ? response(sitemapIndex(r.body.total, r.body.pageSize, venues))
+    : response(sitemapIndex(0, 5000, venues), 200, 'public, max-age=300')
 }
 export async function sitemapPageResponse(n: string) {
   if (!validSitemapPage(n)) return response('', 404)

@@ -90,6 +90,46 @@ export type PublicFacility = {
   }
   photos: { id: string; url: string; createdAt: string }[]
 }
+export const VENUE_KINDS = ['mall', 'transit', 'airport', 'hospital', 'office', 'campus', 'rest_area', 'hotel', 'other'] as const
+export type VenueKind = (typeof VENUE_KINDS)[number]
+export type RoomAudience = 'all' | 'men' | 'women'
+export type PrayerRoom = {
+  audience: RoomAudience
+  floorLabel: string
+  floorOrder: number
+  zone: string | null
+  landmark: string | null
+  directions: string | null
+  hasWudhu: boolean | null
+  accessNotes: string | null
+  verified: boolean
+  verifiedAt: string | null
+}
+export type VenueSummary = {
+  slug: string
+  name: string
+  kind: VenueKind
+  openingHours: string | null
+  placeCount: number
+}
+// GET /api/public/venues/by-slug/:slug (backend SPEC_venue-prayer-rooms.md 4.2)
+export type PublicVenuePage = {
+  venue: {
+    slug: string
+    name: string
+    kind: VenueKind
+    address: string
+    districtName: string | null
+    stateName: string
+    lat: number
+    lng: number
+    openingHours: string | null
+    websiteUrl: string | null
+  }
+  indexable: boolean
+  places: { slug: string; name: string; type: string | null; rooms: PrayerRoom[] }[]
+}
+export type VenueSitemap = { items: { slug: string; updatedAt: string }[] }
 export type PublicMasjidPage = {
   masjid: {
     id: string
@@ -106,6 +146,10 @@ export type PublicMasjidPage = {
   indexable: boolean
   // Omitted by the backend when facility info is off (including older backends).
   facilities?: PublicFacility[]
+  // In-venue prayer rooms. Optional: older backends omit both (absent = no block).
+  // The loader replaces them with validated copies (validateRooms / validateVenueSummary).
+  venue?: VenueSummary | null
+  rooms?: PrayerRoom[]
   // Optional reviews summary (backend flag). Untrusted until validateReviews() accepts it;
   // the loader strips it from `page` and returns the validated copy separately.
   reviews?: unknown

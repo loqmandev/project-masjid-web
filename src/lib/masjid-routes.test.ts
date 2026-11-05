@@ -1,12 +1,15 @@
 import { expect, it, vi } from 'vitest'
 vi.mock('./masjid-server', () => ({
+  loadVenue: vi.fn(),
   loadMasjid: vi.fn(),
   loadProgram: vi.fn(),
 }))
 import { Route as masjid } from '@/routes/masjid.$slug'
 import { Route as program } from '@/routes/masjid.$slug_.p.$programId'
+import { Route as venueRoute } from '@/routes/surau.$slug'
+import { Route as venueSitemapRoute } from '@/routes/sitemaps.venues'
 import { Route as root } from '@/routes/__root'
-import { page, program as programFixture } from './masjid-fixture'
+import { page, program as programFixture, venuePage } from './masjid-fixture'
 import { SITE, absoluteUrl } from './site'
 
 // Merge the actual root and page heads by name/property, as TanStack does.
@@ -63,4 +66,22 @@ it('both route error heads omit noindex, with no-store on success and errors', (
     expect(headers({ loaderData: {} })['Cache-Control']).toBe('no-store')
     expect(route.options.errorComponent).toBeDefined()
   }
+})
+
+it('venue route: head from the payload, noindex when not indexable, error head and no-store', async () => {
+  const head = venueRoute.options.head as (ctx: { loaderData: unknown }) => { meta: Meta[]; links?: Meta[]; scripts?: { children: string }[] }
+  const ok = head({ loaderData: { venue: venuePage } })
+  expect(ok.meta[0].title).toContain('Surau at Mall Fixture')
+  expect(ok.links![0].href).toBe('https://jejakmasjid.my/surau/mall-fixture')
+  expect(JSON.parse(ok.scripts![0].children)['@type']).toBe('ShoppingCenter')
+  const hidden = head({ loaderData: { venue: { ...venuePage, indexable: false } } })
+  expect(hidden.meta).toContainEqual({ name: 'robots', content: 'noindex, nofollow' })
+  expect(head({ loaderData: undefined })).toEqual({ meta: [] })
+  const headers = venueRoute.options.headers as () => Record<string, string>
+  expect(headers()['Cache-Control']).toBe('no-store')
+  expect(venueRoute.options.notFoundComponent).toBeDefined()
+  expect(venueRoute.options.errorComponent).toBeDefined()
+})
+it('masjid page discovery routes stay absent, venue sitemap route exists', () => {
+  expect(venueSitemapRoute.options.server?.handlers).toBeDefined()
 })

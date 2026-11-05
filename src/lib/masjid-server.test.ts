@@ -30,9 +30,11 @@ vi.mock('./jm-api', async (importOriginal) => ({
   getFacilityCatalogue: vi.fn(),
   getProgram: vi.fn(),
   getPrayerTimes: vi.fn(),
+  getVenuePage: vi.fn(),
 }))
-import { getMasjidPage, getFacilityCatalogue, getProgram, getPrayerTimes } from './jm-api'
-import { loadMasjid, loadProgram } from './masjid-server'
+import { getMasjidPage, getFacilityCatalogue, getProgram, getPrayerTimes, getVenuePage } from './jm-api'
+import { loadMasjid, loadProgram, loadVenue } from './masjid-server'
+import { allRoom, menRoom, venue, venuePage } from './masjid-fixture'
 import { setResponseHeader } from '@tanstack/react-start/server'
 
 beforeEach(() => {
@@ -302,4 +304,38 @@ it('loadMasjid returns the Google Maps embed key only when it is well-formed (in
     expect(result.mapKey).toBe(expected)
     expect(result.ajk).toBe(false)
   }
+})
+
+it('loader validates rooms and venue, keeps absent fields absent', async () => {
+  vi.mocked(getMasjidPage).mockResolvedValue({
+    status: 200,
+    body: { ...page, venue, rooms: [{ ...menRoom, notes: 'internal', source: 'research' }, { ...allRoom, audience: 'x' }, 'junk'] } as never,
+  })
+  const r = await loadMasjid({ data: { slug: page.masjid.slug } })
+  expect(r.page.venue).toEqual(venue)
+  expect(r.page.rooms).toEqual([menRoom])
+  expect(JSON.stringify(r)).not.toContain('internal')
+  vi.mocked(getMasjidPage).mockResolvedValue({ status: 200, body: { ...page, venue: { ...venue, slug: 'Bad Slug' }, rooms: 'nope' } as never })
+  const bad = await loadMasjid({ data: { slug: page.masjid.slug } })
+  expect(bad.page.venue).toBeNull()
+  expect(bad.page.rooms).toEqual([])
+  vi.mocked(getMasjidPage).mockResolvedValue({ status: 200, body: page })
+  const old = await loadMasjid({ data: { slug: page.masjid.slug } })
+  expect(old.page).not.toHaveProperty('venue')
+  expect(old.page).not.toHaveProperty('rooms')
+})
+it('loadVenue: 404, 503, malformed payload and success', async () => {
+  vi.mocked(getVenuePage).mockResolvedValue({ status: 200, body: venuePage })
+  expect((await loadVenue({ data: { slug: 'mall-fixture' } })).venue).toEqual(venuePage)
+  for (const slug of ['../bad', 'Bad', 'ab'])
+    expect(isNotFound(await loadVenue({ data: { slug } }).catch((e) => e))).toBe(true)
+  expect(getVenuePage).toHaveBeenCalledTimes(1)
+  vi.mocked(getVenuePage).mockResolvedValue({ status: 404, body: null })
+  expect(isNotFound(await loadVenue({ data: { slug: 'mall-fixture' } }).catch((e) => e))).toBe(true)
+  vi.mocked(getVenuePage).mockResolvedValue({ status: 503, body: null })
+  await expect(loadVenue({ data: { slug: 'mall-fixture' } })).rejects.toThrow('JM_API_UNAVAILABLE')
+  vi.mocked(getVenuePage).mockResolvedValue({ status: 200, body: { venue: {}, places: [] } as never })
+  await expect(loadVenue({ data: { slug: 'mall-fixture' } })).rejects.toThrow('JM_API_UNAVAILABLE')
+  vi.mocked(getVenuePage).mockResolvedValue({ status: 200, body: { ...venuePage, venue: { ...venuePage.venue, slug: 'other-mall' } } })
+  expect(isRedirect(await loadVenue({ data: { slug: 'mall-fixture' } }).catch((e) => e))).toBe(true)
 })

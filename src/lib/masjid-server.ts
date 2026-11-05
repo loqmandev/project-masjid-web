@@ -3,6 +3,7 @@ import { setResponseHeader } from '@tanstack/react-start/server'
 import { validPrayerTimes } from './masjid-format'
 import { validateReviews } from './masjid-reviews'
 import { validEmbedKey } from './embed-map'
+import { validateRooms, validateVenueSummary, validateVenuePage } from './venue-rooms'
 import { getWorkerEnv } from './worker-env'
 import { notFound, redirect } from '@tanstack/react-router'
 import {
@@ -10,6 +11,7 @@ import {
   getFacilityCatalogue,
   getProgram,
   getPrayerTimes,
+  getVenuePage,
   validSlug,
   validProgramId,
 } from './jm-api'
@@ -36,7 +38,14 @@ export const loadMasjid = createServerFn({ method: 'GET' })
     const env = await getWorkerEnv()
     // Reviews are validated strictly and travel beside the page, never inside it, so
     // an invalid or oversharing payload cannot reach the HTML or the hydration data.
-    const { reviews: rawReviews, ...page } = r.body
+    // Venue and rooms follow the same rule: validated copies replace the raw fields,
+    // and an absent field stays absent (older backends).
+    const { reviews: rawReviews, venue: rawVenue, rooms: rawRooms, ...rest } = r.body
+    const page = {
+      ...rest,
+      ...(rawVenue !== undefined ? { venue: validateVenueSummary(rawVenue) } : {}),
+      ...(rawRooms !== undefined ? { rooms: validateRooms(rawRooms) } : {}),
+    }
     return {
       page,
       reviews: validateReviews(rawReviews),
@@ -81,4 +90,18 @@ export const loadProgram = createServerFn({ method: 'GET' })
         statusCode: 301,
       })
     return { program: r.body }
+  })
+export const loadVenue = createServerFn({ method: 'GET' })
+  .inputValidator((data: { slug: string }) => data)
+  .handler(async ({ data }) => {
+    if (!validSlug(data.slug)) throw notFound()
+    const r = await getVenuePage(data.slug)
+    if (r.status === 404) throw notFound()
+    if (!r.body || r.status !== 200) return unavailable()
+    const venue = validateVenuePage(r.body)
+    if (!venue) return unavailable()
+    // The backend resolves renamed slugs by returning the canonical one.
+    if (venue.venue.slug !== data.slug)
+      throw redirect({ href: `/surau/${venue.venue.slug}`, statusCode: 301 })
+    return { venue }
   })

@@ -1,5 +1,6 @@
 import type {
   FacilityCatalogueDetails,
+  PublicVenuePage,
   PublicMasjidPage,
   PublicProgramDetail,
 } from './masjid-types'
@@ -101,6 +102,15 @@ export function mosqueJsonLd(
       ? { telephone: page.profile.contactPhone }
       : {}),
     ...imageField(page),
+    ...(page.venue
+      ? {
+          containedInPlace: {
+            '@type': page.venue.kind === 'mall' ? 'ShoppingCenter' : 'Place',
+            name: page.venue.name,
+            url: `${SITE.url}/surau/${page.venue.slug}`,
+          },
+        }
+      : {}),
     ...(events.length ? { event: events } : {}),
     ...(amenities.length ? { amenityFeature: amenities } : {}),
   }
@@ -135,5 +145,30 @@ export function eventJsonLd(p: PublicProgramDetail) {
     ...(p.sponsorName
       ? { sponsor: { '@type': 'Organization', name: p.sponsorName } }
       : {}),
+  }
+}
+export function venueJsonLd(p: PublicVenuePage) {
+  const v = p.venue,
+    place = placeParts(v.districtName, v.stateName)
+  return {
+    '@context': 'https://schema.org',
+    '@type': v.kind === 'mall' ? 'ShoppingCenter' : 'Place',
+    '@id': `${SITE.url}/surau/${v.slug}#place`,
+    name: v.name,
+    url: `${SITE.url}/surau/${v.slug}`,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: v.address,
+      ...(place.district ? { addressLocality: place.district } : {}),
+      addressRegion: place.state ?? v.stateName,
+      ...countryAddress(v.stateName),
+    },
+    geo: { '@type': 'GeoCoordinates', latitude: v.lat, longitude: v.lng },
+    hasMap: directionsUrl(v.lat, v.lng),
+    containsPlace: p.places.map((x) => ({
+      '@type': 'Mosque',
+      name: x.name,
+      url: `${SITE.url}/masjid/${x.slug}`,
+    })),
   }
 }

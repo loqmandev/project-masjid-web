@@ -3,14 +3,16 @@ vi.mock('./jm-api', async (importOriginal) => ({
   ...(await importOriginal<typeof import('./jm-api')>()),
   getSitemapCount: vi.fn(),
   getSitemapPage: vi.fn(),
+  getVenueSitemap: vi.fn(),
 }))
 vi.mock('./worker-env', () => ({ getWorkerEnv: vi.fn() }))
-import { getSitemapCount, getSitemapPage } from './jm-api'
+import { getSitemapCount, getSitemapPage, getVenueSitemap } from './jm-api'
 import { getWorkerEnv } from './worker-env'
-import { sitemapIndexResponse, sitemapPageResponse } from './sitemap'
+import { sitemapIndexResponse, sitemapPageResponse, venueSitemapResponse } from './sitemap'
 beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(getWorkerEnv).mockResolvedValue({ MASJID_PAGES_ENABLED: 'true' })
+  vi.mocked(getVenueSitemap).mockResolvedValue({ status: 404, body: null })
   vi.mocked(getSitemapCount).mockResolvedValue({
     status: 200,
     body: { total: 9725, pageSize: 5000, masjids: [] },
@@ -83,4 +85,38 @@ it('never lists an areas sitemap, whichever way masjid pages are switched', asyn
     expect(body).toContain('/sitemap-pages.xml')
     expect(body).not.toContain('/sitemaps/areas')
   }
+})
+
+it('index lists /sitemaps/venues only when the backend serves a non-empty venue sitemap', async () => {
+  expect(await (await sitemapIndexResponse()).text()).not.toContain('/sitemaps/venues')
+  vi.mocked(getVenueSitemap).mockResolvedValue({ status: 200, body: { items: [] } })
+  expect(await (await sitemapIndexResponse()).text()).not.toContain('/sitemaps/venues')
+  vi.mocked(getVenueSitemap).mockResolvedValue({
+    status: 200,
+    body: { items: [{ slug: 'mall-fixture', updatedAt: '2026-10-14T01:00:00Z' }] },
+  })
+  expect(await (await sitemapIndexResponse()).text()).toContain('https://jejakmasjid.my/sitemaps/venues')
+})
+it('venue sitemap lists /surau/ urls, drops invalid items, 503 on upstream failure, 404 when absent', async () => {
+  vi.mocked(getVenueSitemap).mockResolvedValue({
+    status: 200,
+    body: {
+      items: [
+        { slug: 'mall-fixture', updatedAt: '2026-10-14T01:00:00Z' },
+        { slug: '../bad', updatedAt: '2026-10-14' },
+        { slug: 'no-date', updatedAt: 'nope' },
+      ],
+    },
+  })
+  const r = await venueSitemapResponse()
+  expect(r.status).toBe(200)
+  expect(r.headers.get('Cache-Control')).toBe('no-store')
+  const text = await r.text()
+  expect(text).toContain('<loc>https://jejakmasjid.my/surau/mall-fixture</loc>')
+  expect(text).not.toContain('bad')
+  expect(text).not.toContain('no-date')
+  vi.mocked(getVenueSitemap).mockResolvedValue({ status: 503, body: null })
+  expect((await venueSitemapResponse()).status).toBe(503)
+  vi.mocked(getVenueSitemap).mockResolvedValue({ status: 404, body: null })
+  expect((await venueSitemapResponse()).status).toBe(404)
 })

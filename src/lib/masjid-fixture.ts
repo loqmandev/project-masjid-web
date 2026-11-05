@@ -1,4 +1,4 @@
-import type { FacilityCatalogueItem, PublicFacility, PublicMasjidPage, PublicProgramDetail } from './masjid-types'
+import type { FacilityCatalogueItem, PrayerRoom, PublicFacility, PublicMasjidPage, PublicProgramDetail, PublicVenuePage, VenueSummary } from './masjid-types'
 export const facilityCatalogue: FacilityCatalogueItem[] = [
   {
     code: 'PARKING_COMPOUND',
@@ -113,4 +113,35 @@ export const program: PublicProgramDetail = {
   description: null,
   seriesId: null,
   masjid: { ...page.masjid, districtName: 'Fixture' },
+}
+
+// Venue prayer rooms (SPEC_venue-prayer-rooms.md). Synthetic data only.
+export const allRoom: PrayerRoom = {
+  audience: 'all', floorLabel: 'Level UG', floorOrder: -1, zone: 'North Court',
+  landmark: 'Between Typo and Uniqlo', directions: 'Take the lift near the food court to UG.',
+  hasWudhu: true, accessNotes: 'Wheelchair accessible via lift B.', verified: true, verifiedAt: '2026-10-14',
+}
+export const menRoom: PrayerRoom = {
+  audience: 'men', floorLabel: 'Level 2', floorOrder: 2, zone: 'North Court',
+  landmark: null, directions: null, hasWudhu: true, accessNotes: null, verified: true, verifiedAt: '2026-10-14',
+}
+export const womenRoom: PrayerRoom = {
+  audience: 'women', floorLabel: 'Level 1', floorOrder: 1, zone: null,
+  landmark: null, directions: null, hasWudhu: null, accessNotes: null, verified: true, verifiedAt: '2026-10-14',
+}
+export const unverifiedRoom: PrayerRoom = { ...allRoom, verified: false, verifiedAt: null }
+export const venue: VenueSummary = {
+  slug: 'mall-fixture', name: 'Mall Fixture', kind: 'mall', openingHours: '10am to 10pm', placeCount: 2,
+}
+export const venuePage: PublicVenuePage = {
+  venue: {
+    slug: 'mall-fixture', name: 'Mall Fixture', kind: 'mall', address: 'Synthetic mall road',
+    districtName: 'Fixture', stateName: 'Putrajaya', lat: 2.9, lng: 101.7, openingHours: '10am to 10pm', websiteUrl: null,
+  },
+  indexable: true,
+  places: [
+    { slug: 'surau-mall-fixture-women', name: 'Surau Mall Fixture (Women)', type: 'surau', rooms: [womenRoom] },
+    { slug: 'surau-mall-fixture', name: 'Surau Mall Fixture', type: 'surau', rooms: [allRoom] },
+    { slug: 'surau-mall-fixture-annex', name: 'Surau Annex', type: 'surau', rooms: [] },
+  ],
 }

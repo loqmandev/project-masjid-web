@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import PageLayout from './PageLayout'
 import MasjidPlacePage from './masjid/MasjidPlacePage'
 import { OpenMasjid } from './masjid/OpenMasjid'
+import { VenuePlacePage } from './masjid/VenuePlacePage'
 import { trustedImage } from '@/lib/masjid-seo'
 import StoreBadges from './ui/StoreBadges'
 import { API_PUBLIC_URL } from '@/lib/site'
@@ -17,6 +18,7 @@ import type {
   PublicMasjidPage,
   PublicProgramCard,
   PublicProgramDetail,
+  PublicVenuePage,
 } from '@/lib/masjid-types'
 export { OpenMasjid }
 function ViewBeacon({ kind, id }: { kind: 'masjid' | 'program'; id: string }) {
@@ -45,6 +47,16 @@ export function MissingMasjid() {
       <a href="/">Return home</a>
     </PageLayout>
   )
+}
+export function MissingVenue() {
+  return (
+    <PageLayout title="We couldn't find this place">
+      <a href="/">Return home</a>
+    </PageLayout>
+  )
+}
+export function VenuePage({ page }: { page: PublicVenuePage }) {
+  return <VenuePlacePage page={page} />
 }
 export function MissingProgram() {
   return (

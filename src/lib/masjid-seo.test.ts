@@ -1,6 +1,6 @@
 import { it, expect } from 'vitest'
-import { masjidSeo, programSeo, trustedImage } from './masjid-seo'
-import { page, program } from './masjid-fixture'
+import { masjidSeo, programSeo, trustedImage, venueSeo } from './masjid-seo'
+import { page, program, allRoom, menRoom, womenRoom, unverifiedRoom, venuePage } from './masjid-fixture'
 it('does not repeat equal district/state in the title or description', () => {
   const s = masjidSeo({ ...page, masjid: { ...page.masjid, districtName: 'PULAU PINANG', stateName: 'Pulau Pinang' } }, false)
   expect(s.meta[0].title).toContain('Surau Fixture · Pulau Pinang')
@@ -129,4 +129,46 @@ it('uses the place-card description for pages without a profile text, keeping ti
   expect(noPlace.meta.find((m) => m.name === 'description')!.content).toBe(
     "Surau Fixture: today's prayer times, facilities, photos and reviews from visitors on Jejak Masjid.",
   )
+})
+
+const title = (s: ReturnType<typeof masjidSeo>) => s.meta[0].title
+const desc = (s: ReturnType<typeof masjidSeo>) => s.meta.find((m) => m.name === 'description')!.content
+it('verified single room goes in title and description', () => {
+  const s = masjidSeo({ ...page, rooms: [allRoom] })
+  expect(title(s)).toBe('Surau Fixture · Level UG, North Court · Fixture | Jejak Masjid')
+  expect(desc(s)).toContain('Where to find it: Level UG, North Court, Between Typo and Uniqlo.')
+})
+it('lone verified women room and a men + women pair', () => {
+  expect(title(masjidSeo({ ...page, rooms: [womenRoom] }))).toContain('Surau Fixture · Level 1 · Fixture')
+  expect(desc(masjidSeo({ ...page, rooms: [womenRoom] }))).toContain('Wanita Level 1')
+  const pair = masjidSeo({ ...page, rooms: [womenRoom, menRoom] })
+  expect(title(pair)).toBe('Surau Fixture · Fixture | Jejak Masjid')
+  expect(desc(pair)).toContain('Lelaki Level 2, Wanita Level 1')
+})
+it('unverified rooms change neither title nor description', () => {
+  const base = masjidSeo(page)
+  const s = masjidSeo({ ...page, rooms: [unverifiedRoom] })
+  expect(title(s)).toBe(title(base))
+  expect(desc(s)).toBe(desc(base))
+  expect(JSON.stringify(s)).not.toContain('Level UG')
+})
+it('skips the floor when the name already has it, keeps the AJK description first', () => {
+  const named = masjidSeo({ ...page, masjid: { ...page.masjid, name: 'Surau L2 Setia City Mall' }, rooms: [{ ...allRoom, floorLabel: 'Level 2' }] })
+  expect(title(named)).toBe('Surau L2 Setia City Mall · Fixture | Jejak Masjid')
+  const ajk = masjidSeo({ ...page, rooms: [allRoom], profile: { description: 'The AJK says hello.', contactPhone: null, whatsappUrl: null, facilities: [], recurringClasses: [], coverUrl: null, updatedAt: '' } })
+  expect(desc(ajk)).toBe('The AJK says hello.')
+})
+it('title before the site suffix stays within 60 characters', () => {
+  const s = masjidSeo({ ...page, masjid: { ...page.masjid, name: 'Surau Pavilion Bukit Jalil Shopping', districtName: 'Kuala Lumpur' }, rooms: [allRoom] })
+  expect(title(s).replace(' | Jejak Masjid', '').length).toBeLessThanOrEqual(60)
+})
+it('venue page seo: title, description with verified floors, canonical, noindex', () => {
+  const s = venueSeo(venuePage)
+  expect(title(s)).toBe('Surau at Mall Fixture · Fixture | Jejak Masjid')
+  expect(desc(s)).toBe('Where to pray in Mall Fixture: 3 prayer spaces, Level 1, Level UG. Floors, wudhu and directions on Jejak Masjid.')
+  expect(s.links[0].href).toBe('https://jejakmasjid.my/surau/mall-fixture')
+  expect(s.meta).toContainEqual({ name: 'robots', content: 'index, follow, max-image-preview:large' })
+  expect(venueSeo({ ...venuePage, indexable: false }).meta).toContainEqual({ name: 'robots', content: 'noindex, nofollow' })
+  const none = venueSeo({ ...venuePage, places: venuePage.places.map((p) => ({ ...p, rooms: p.rooms.map((r) => ({ ...r, verified: false })) })) })
+  expect(desc(none)).toBe('Where to pray in Mall Fixture: floors, wudhu and directions on Jejak Masjid.')
 })
