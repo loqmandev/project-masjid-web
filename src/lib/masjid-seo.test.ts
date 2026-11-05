@@ -136,7 +136,7 @@ const desc = (s: ReturnType<typeof masjidSeo>) => s.meta.find((m) => m.name === 
 it('verified single room goes in title and description', () => {
   const s = masjidSeo({ ...page, rooms: [allRoom] })
   expect(title(s)).toBe('Surau Fixture · Level UG, North Court · Fixture | Jejak Masjid')
-  expect(desc(s)).toContain('Where to find it: Level UG, North Court, Between Typo and Uniqlo.')
+  expect(desc(s)).toContain('Lokasi: Level UG, North Court, Between Typo and Uniqlo.')
 })
 it('lone verified women room and a men + women pair', () => {
   expect(title(masjidSeo({ ...page, rooms: [womenRoom] }))).toContain('Surau Fixture · Level 1 · Fixture')
@@ -165,15 +165,15 @@ it('title before the site suffix stays within 60 characters', () => {
 it('venue title drops the district when over 60 characters but keeps the name whole', () => {
   const name = 'N'.repeat(55)
   const s = venueSeo({ ...venuePage, venue: { ...venuePage.venue, name } })
-  expect(title(s)).toBe(`Surau at ${name} | Jejak Masjid`)
+  expect(title(s)).toBe(`Surau di ${name} | Jejak Masjid`)
 })
 it('venue page seo: title, description with verified floors, canonical, noindex', () => {
   const s = venueSeo(venuePage)
-  expect(title(s)).toBe('Surau at Mall Fixture · Fixture | Jejak Masjid')
-  expect(desc(s)).toBe('Where to pray in Mall Fixture: 3 prayer spaces, Level 1, Level UG. Floors, wudhu and directions on Jejak Masjid.')
+  expect(title(s)).toBe('Surau di Mall Fixture · Fixture | Jejak Masjid')
+  expect(desc(s)).toBe('Tempat solat di Mall Fixture: 3 ruang solat, Level 1, Level UG. Aras, tempat wudhu dan arah ke surau di Jejak Masjid.')
   expect(s.links[0].href).toBe('https://jejakmasjid.my/surau/mall-fixture')
   expect(s.meta).toContainEqual({ name: 'robots', content: 'index, follow, max-image-preview:large' })
   expect(venueSeo({ ...venuePage, indexable: false }).meta).toContainEqual({ name: 'robots', content: 'noindex, nofollow' })
   const none = venueSeo({ ...venuePage, places: venuePage.places.map((p) => ({ ...p, rooms: p.rooms.map((r) => ({ ...r, verified: false })) })) })
-  expect(desc(none)).toBe('Where to pray in Mall Fixture: floors, wudhu and directions on Jejak Masjid.')
+  expect(desc(none)).toBe('Tempat solat di Mall Fixture: aras, tempat wudhu dan arah ke surau di Jejak Masjid.')
 })
