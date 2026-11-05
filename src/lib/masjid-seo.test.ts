@@ -162,6 +162,11 @@ it('title before the site suffix stays within 60 characters', () => {
   const s = masjidSeo({ ...page, masjid: { ...page.masjid, name: 'Surau Pavilion Bukit Jalil Shopping', districtName: 'Kuala Lumpur' }, rooms: [allRoom] })
   expect(title(s).replace(' | Jejak Masjid', '').length).toBeLessThanOrEqual(60)
 })
+it('venue title drops the district when over 60 characters but keeps the name whole', () => {
+  const name = 'N'.repeat(55)
+  const s = venueSeo({ ...venuePage, venue: { ...venuePage.venue, name } })
+  expect(title(s)).toBe(`Surau at ${name} | Jejak Masjid`)
+})
 it('venue page seo: title, description with verified floors, canonical, noindex', () => {
   const s = venueSeo(venuePage)
   expect(title(s)).toBe('Surau at Mall Fixture · Fixture | Jejak Masjid')

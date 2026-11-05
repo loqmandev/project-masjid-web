@@ -75,7 +75,9 @@ export function validateRooms(value: unknown): PrayerRoom[] {
     seen.add(room.audience)
     rooms.push(room)
   }
-  return rooms
+  // Mirror the backend rule: `all` never coexists with men/women; `all` wins.
+  const only = rooms.some((r) => r.audience === 'all') ? rooms.filter((r) => r.audience === 'all') : rooms
+  return only
     .slice(0, 3)
     .sort(
       (a, b) =>
@@ -148,30 +150,48 @@ export function validateVenuePage(value: unknown): PublicVenuePage | null {
 
 // ---------------------------------------------------------------- floor in name
 
-const FLOOR_PREFIX = '(?:level|lvl|l|aras|tingkat|tkt|floor|fl)'
 const tokens = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+const LEVEL = '(?:level|lvl|aras|tingkat|tkt|floor|fl)'
 
 /**
- * True when the place name already says the floor: "Level 2" ~ "L2" ~ "Aras 2" ~
- * "Tingkat 2"; also "UG", "LG", "B1", "Ground". Case- and space-insensitive.
+ * Canonical floor keys in a text: "Level 2" ~ "L2" ~ "Aras 2" ~ "Tingkat 2" ~ "2nd Floor"
+ * -> "2"; "Basement 1" ~ "B1" -> "b1"; "Upper Ground" ~ "UG" -> "ug"; "Lower Ground" ~
+ * "LG" -> "lg"; "Ground" ~ "Level G" -> "g". `l` is a level prefix only directly before a
+ * digit, so "LG" is never "Level G". Known rare false positive: "Blok L1" reads as level 1.
  */
-export function nameMentionsFloor(name: string, floorLabel: string): boolean {
-  const n = ` ${tokens(name)} `
-  const label = tokens(floorLabel)
-  if (!label) return false
-  const core = label.replace(new RegExp(`^${FLOOR_PREFIX} ?`), '').replace(/ floor$/, '')
-  if (core === 'ground' || label === 'ground floor' || label === 'ground') {
-    return /\b(ground|(?:level|l|aras|tingkat) ?g)\b/.test(n)
+export function floorKeys(text: string): Set<string> {
+  let s = ` ${tokens(text)} `
+  const keys = new Set<string>()
+  const take = (re: RegExp, key: (m: RegExpMatchArray) => string) => {
+    s = s.replace(re, (...m) => {
+      keys.add(key(m as unknown as RegExpMatchArray))
+      return ' '
+    })
   }
-  const escaped = core.replace(/[^a-z0-9 ]/g, '')
-  if (!escaped) return false
-  const e = escaped.replace(/ /g, ' ?')
-  if (new RegExp(` ${FLOOR_PREFIX} ?${e} `).test(n)) return true
-  // A bare designator (ug, lg, b1, b2) is a floor by itself; a lone digit or letter is not.
-  if (/^(?:[a-z]{2}|[a-z]\d{1,2})$/.test(escaped) && new RegExp(` ${e} `).test(n))
-    return true
-  return false
+  take(/ (?:level |lvl |aras |tingkat |tkt |floor |fl )?(?:upper ground|ug) /g, () => 'ug')
+  take(/ (?:level |lvl |aras |tingkat |tkt |floor |fl )?(?:lower ground|lg) /g, () => 'lg')
+  take(/ (?:basement|bsmt) (\d{1,2}) /g, (m) => `b${m[1]}`)
+  take(/ (?:level |lvl |aras |tingkat |tkt |floor |fl )?b(\d{1,2}) /g, (m) => `b${m[1]}`)
+  take(/ (?:ground floor|ground|g floor) /g, () => 'g')
+  take(new RegExp(` ${LEVEL} g `, 'g'), () => 'g')
+  take(new RegExp(` ${LEVEL} ?(\\d{1,2}) `, 'g'), (m) => String(Number(m[1])))
+  take(/ l(\d{1,2}) /g, (m) => String(Number(m[1])))
+  take(/ (\d{1,2})(?:st|nd|rd|th) floor /g, (m) => String(Number(m[1])))
+  return keys
+}
+
+/** True when the place name already says the floor (aliases normalised on both sides). */
+export function nameMentionsFloor(name: string, floorLabel: string): boolean {
+  const label = floorKeys(floorLabel)
+  const bare = tokens(floorLabel)
+  if (!label.size) {
+    if (bare === 'g') label.add('g')
+    else if (/^\d{1,2}$/.test(bare)) label.add(String(Number(bare)))
+  }
+  if (!label.size) return false
+  const found = floorKeys(name)
+  return [...label].some((k) => found.has(k))
 }
 
 // ---------------------------------------------------------------- SEO helpers
@@ -179,10 +199,16 @@ export function nameMentionsFloor(name: string, floorLabel: string): boolean {
 export const verifiedRooms = (rooms: PrayerRoom[] | undefined) =>
   (rooms ?? []).filter((r) => r.verified)
 
-/** The single verified room when there is exactly one (all, or a lone men/women room). */
+/**
+ * The room whose floor may go in the title: a verified `all` room, or the masjid's only
+ * room when that one is verified. A verified men room beside an unverified women room
+ * gives no floor, so nobody is sent to the wrong audience's floor.
+ */
 export function titleRoom(rooms: PrayerRoom[] | undefined): PrayerRoom | null {
-  const v = verifiedRooms(rooms)
-  return v.length === 1 ? v[0] : null
+  const list = rooms ?? []
+  const all = list.find((r) => r.audience === 'all' && r.verified)
+  if (all) return all
+  return list.length === 1 && list[0].verified ? list[0] : null
 }
 
 export const TITLE_LIMIT = 60
@@ -197,17 +223,23 @@ export function roomTitle(name: string, district: string | null, rooms: PrayerRo
     [name, floor, district],
     [name, floor],
   ].map((parts) => parts.filter(Boolean).join(' · '))
+  // Name and floor are never cut: if `name · floor` alone exceeds the limit it stays long
+  // (Google truncates; the floor is the click-through value).
   return candidates.find((c) => c.length <= TITLE_LIMIT) ?? candidates[candidates.length - 1]
 }
 
 const AUDIENCE_NAME: Record<RoomAudience, string> = { all: '', men: 'Lelaki', women: 'Wanita' }
 export const DESCRIPTION_LIMIT = 155
-const SUFFIX = " Today's prayer times, facilities and visitor photos on Jejak Masjid."
+const SUFFIXES = [
+  " Today's prayer times, facilities and visitor photos on Jejak Masjid.",
+  ' Prayer times and photos on Jejak Masjid.',
+  '',
+]
 
 export function roomDescription(rooms: PrayerRoom[] | undefined): string | null {
   const v = byAudience(verifiedRooms(rooms))
   if (!v.length) return null
-  const build = (landmark: boolean, zone: boolean) => {
+  const build = (landmark: boolean, zone: boolean, suffix: string) => {
     const bits = v.map((r) => {
       // A men + women pair names floors only; zone and landmark are for a single room.
       const single = v.length === 1
@@ -217,13 +249,14 @@ export function roomDescription(rooms: PrayerRoom[] | undefined): string | null 
       const who = v.length > 1 || r.audience !== 'all' ? AUDIENCE_NAME[r.audience] : ''
       return who ? `${who} ${where}` : where
     })
-    return `Where to find it: ${bits.join(', ')}.${SUFFIX}`
+    return `Where to find it: ${bits.join(', ')}.${suffix}`
   }
-  for (const [landmark, zone] of [[true, true], [false, true], [false, false]] as const) {
-    const d = build(landmark, zone)
-    if (d.length <= DESCRIPTION_LIMIT) return d
-  }
-  return build(false, false)
+  for (const suffix of SUFFIXES)
+    for (const [landmark, zone] of [[true, true], [false, true], [false, false]] as const) {
+      const d = build(landmark, zone, suffix)
+      if (d.length <= DESCRIPTION_LIMIT) return d
+    }
+  return build(false, false, '')
 }
 
 // ---------------------------------------------------------------- display lines

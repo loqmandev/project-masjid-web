@@ -87,15 +87,30 @@ it('never lists an areas sitemap, whichever way masjid pages are switched', asyn
   }
 })
 
-it('index lists /sitemaps/venues only when the backend serves a non-empty venue sitemap', async () => {
+it('index always lists /sitemaps/venues while pages are on, whatever the venue upstream does', async () => {
+  for (const venue of [{ status: 404, body: null }, { status: 503, body: null }, { status: 200, body: { items: [] } }])
+    vi.mocked(getVenueSitemap).mockResolvedValue(venue as never)
+  expect(await (await sitemapIndexResponse()).text()).toContain('https://jejakmasjid.my/sitemaps/venues')
+  expect(getVenueSitemap).not.toHaveBeenCalled()
+  vi.mocked(getSitemapCount).mockResolvedValue({ status: 503, body: null })
+  const r = await sitemapIndexResponse()
+  expect(r.status).toBe(200)
+  expect(await r.text()).toContain('/sitemaps/venues')
+  vi.mocked(getWorkerEnv).mockResolvedValue({ MASJID_PAGES_ENABLED: 'false' })
   expect(await (await sitemapIndexResponse()).text()).not.toContain('/sitemaps/venues')
+})
+it('an empty venue sitemap is a valid empty urlset; lastmod is normalised to ISO and bad dates drop', async () => {
   vi.mocked(getVenueSitemap).mockResolvedValue({ status: 200, body: { items: [] } })
-  expect(await (await sitemapIndexResponse()).text()).not.toContain('/sitemaps/venues')
+  const empty = await venueSitemapResponse()
+  expect(empty.status).toBe(200)
+  expect(await empty.text()).toContain('<urlset')
   vi.mocked(getVenueSitemap).mockResolvedValue({
     status: 200,
-    body: { items: [{ slug: 'mall-fixture', updatedAt: '2026-10-14T01:00:00Z' }] },
+    body: { items: [{ slug: 'mall-fixture', updatedAt: '2026-10-14 01:00:00Z' }, { slug: 'x-y-z', updatedAt: 'garbage' }] },
   })
-  expect(await (await sitemapIndexResponse()).text()).toContain('https://jejakmasjid.my/sitemaps/venues')
+  const text = await (await venueSitemapResponse()).text()
+  expect(text).toContain('<lastmod>2026-10-14T01:00:00.000Z</lastmod>')
+  expect(text).not.toContain('x-y-z')
 })
 it('venue sitemap lists /surau/ urls, drops invalid items, 503 on upstream failure, 404 when absent', async () => {
   vi.mocked(getVenueSitemap).mockResolvedValue({

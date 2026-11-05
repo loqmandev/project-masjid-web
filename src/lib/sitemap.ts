@@ -48,7 +48,7 @@ export function validVenueItems(body: unknown) {
   )
 }
 export function venueSitemapUrls(items: { slug: string; updatedAt: string }[]) {
-  return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${items.map((i) => `<url><loc>${xmlEscape(`${SITE.url}/surau/${i.slug}`)}</loc><lastmod>${xmlEscape(i.updatedAt)}</lastmod></url>`).join('')}</urlset>`
+  return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${items.map((i) => `<url><loc>${xmlEscape(`${SITE.url}/surau/${i.slug}`)}</loc><lastmod>${new Date(i.updatedAt).toISOString()}</lastmod></url>`).join('')}</urlset>`
 }
 export async function venueSitemapResponse() {
   const r = await getVenueSitemap()
@@ -59,12 +59,11 @@ export async function venueSitemapResponse() {
 export async function sitemapIndexResponse() {
   const env = await getWorkerEnv()
   if (env.MASJID_PAGES_ENABLED !== 'true') return response(sitemapIndex())
-  const [r, v] = await Promise.all([getSitemapCount(), getVenueSitemap()])
-  // The venue sitemap is listed only when the backend serves a non-empty one.
-  const venues = v.status === 200 && validVenueItems(v.body).length > 0
+  // /sitemaps/venues is always listed while pages are on; an empty one is a valid urlset.
+  const r = await getSitemapCount()
   return r.status === 200 && r.body && validPagination(r.body)
-    ? response(sitemapIndex(r.body.total, r.body.pageSize, venues))
-    : response(sitemapIndex(0, 5000, venues), 200, 'public, max-age=300')
+    ? response(sitemapIndex(r.body.total, r.body.pageSize, true))
+    : response(sitemapIndex(0, 5000, true), 200, 'public, max-age=300')
 }
 export async function sitemapPageResponse(n: string) {
   if (!validSitemapPage(n)) return response('', 404)

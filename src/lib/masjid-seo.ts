@@ -83,7 +83,11 @@ export function venueSeo(p: PublicVenuePage) {
       ),
     ]
   return seo({
-    title: short ? `Surau at ${v.name} · ${short}` : `Surau at ${v.name}`,
+    // Drop the district when the title would pass 60 characters; the venue name stays whole.
+    title:
+      short && `Surau at ${v.name} · ${short}`.length <= 60
+        ? `Surau at ${v.name} · ${short}`
+        : `Surau at ${v.name}`,
     description: venueDescription(v.name, p.places.length, floors),
     path: `/surau/${v.slug}`,
     noindex: !p.indexable,

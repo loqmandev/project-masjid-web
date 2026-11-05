@@ -82,6 +82,8 @@ it('venue route: head from the payload, noindex when not indexable, error head a
   expect(venueRoute.options.notFoundComponent).toBeDefined()
   expect(venueRoute.options.errorComponent).toBeDefined()
 })
-it('masjid page discovery routes stay absent, venue sitemap route exists', () => {
-  expect(venueSitemapRoute.options.server?.handlers).toBeDefined()
+it('venue sitemap route serves GET and HEAD', () => {
+  const h = venueSitemapRoute.options.server?.handlers as Record<string, unknown>
+  expect(typeof h.GET).toBe('function')
+  expect(typeof h.HEAD).toBe('function')
 })

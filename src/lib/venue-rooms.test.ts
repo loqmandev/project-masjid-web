@@ -19,6 +19,19 @@ it.each([
   ['Surau Level 12 Mall', 'Level 2', false],
   ['Surau Hall Mall', 'Level 2', false],
   ['Surau Mall', 'G', false],
+  ['Surau LG Sunway Pyramid', 'Ground', false],
+  ['Surau LG Sunway Pyramid', 'G', false],
+  ['Surau LG Sunway Pyramid', 'Level G', false],
+  ['Surau Level G Mall', 'LG', false],
+  ['Surau Level G Mall', 'Ground', true],
+  ['Surau LG Mall', 'Lower Ground', true],
+  ['Surau UG Mall', 'Upper Ground', true],
+  ['Surau B1 KLCC', 'Basement 1', true],
+  ['Surau Level 1', '1st Floor', true],
+  ['Surau 2nd Floor Mall', 'Level 2', true],
+  ['Surau Floor 3 Mall', 'Aras 3', true],
+  // Known rare false positive, accepted: "L1" in a block name reads as level 1.
+  ['Surau Blok L1 Hospital', 'Level 1', true],
 ])('floor in name: %s / %s -> %s', (name, floor, expected) => {
   expect(nameMentionsFloor(name, floor)).toBe(expected)
 })
@@ -32,6 +45,27 @@ it('title uses a single verified room and drops zone, then district, to fit 60 c
   const longer = roomTitle('Surau Pavilion Bukit Jalil Shopping Gallery X', 'Kuala Lumpur', [allRoom])
   expect(longer).toBe('Surau Pavilion Bukit Jalil Shopping Gallery X · Level UG')
   expect(roomTitle('Surau Level 2 Setia City Mall', 'Shah Alam', [{ ...menRoom, audience: 'all' }])).toBe('Surau Level 2 Setia City Mall · Shah Alam')
+})
+it('F1: floor in the title only for a verified all room or the masjid\'s only verified room', () => {
+  const unverifiedWomen = { ...womenRoom, verified: false, verifiedAt: null }
+  expect(roomTitle('Surau Mall', 'X', [menRoom, unverifiedWomen])).toBe('Surau Mall · X')
+  expect(roomTitle('Surau Mall', 'X', [menRoom])).toBe('Surau Mall · Level 2, North Court · X')
+  expect(roomDescription([menRoom, unverifiedWomen])).toContain('Where to find it: Lelaki Level 2')
+})
+it('F4: name and floor are never cut, even over 60 characters', () => {
+  const t = roomTitle('Surau '.padEnd(60, 'N'), 'Kuala Lumpur', [allRoom])
+  expect(t).toBe(`${'Surau '.padEnd(60, 'N')} · Level UG`)
+  expect(t.length).toBeGreaterThan(60)
+})
+it('F5: a men + women description stays within 155 characters', () => {
+  const long = (audience: 'men' | 'women') => ({ ...(audience === 'men' ? menRoom : womenRoom), floorLabel: 'F'.repeat(29) })
+  const d = roomDescription([long('men'), long('women')])!
+  expect(d.length).toBeLessThanOrEqual(155)
+  const mid = roomDescription([{ ...menRoom, floorLabel: 'F'.repeat(28) }, { ...womenRoom, floorLabel: 'G'.repeat(28) }])!
+  expect(mid).toContain('Prayer times and photos on Jejak Masjid.')
+})
+it('F6: an all room next to men/women rooms wins', () => {
+  expect(validateRooms([allRoom, menRoom, womenRoom]).map((r) => r.audience)).toEqual(['all'])
 })
 it('no title floor with two verified rooms or only unverified ones', () => {
   expect(roomTitle('Surau Mall', 'X', [menRoom, womenRoom])).toBe('Surau Mall · X')
