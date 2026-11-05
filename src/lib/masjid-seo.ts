@@ -1,6 +1,8 @@
 import type { PublicMasjidPage, PublicProgramDetail } from './masjid-types'
 import { seo } from './seo'
 import { placeParts } from './masjid-format'
+import { roomDescription, roomTitle, venueDescription, verifiedRooms } from './venue-rooms'
+import type { PublicVenuePage } from './masjid-types'
 export function trustedImage(url: string | null | undefined, program = false) {
   if (!url) return undefined
   try {
@@ -44,9 +46,10 @@ export function masjidSeo(p: PublicMasjidPage, ajk = false) {
     place = placeParts(m.districtName, m.stateName),
     placeShort = place.district || place.state
   return seo({
-    title: placeShort ? `${m.name} · ${placeShort}` : m.name,
+    title: roomTitle(m.name, placeShort, p.rooms),
     description:
       text ||
+      roomDescription(p.rooms) ||
       (ajk
         ? `${m.name} in ${place.prose}. Programs, photos and directions on Jejak Masjid.`
         : `${m.name}${place.prose ? ` in ${place.prose}` : ''}: today's prayer times, facilities, photos and reviews from visitors on Jejak Masjid.`),
@@ -66,5 +69,27 @@ export function programSeo(p: PublicProgramDetail, now = Date.now()) {
     type: 'article',
     noindex: p.status === 'cancelled' || Date.parse(p.endsAt) < now,
     image: trustedImage(p.posterUrl, true),
+  })
+}
+
+/** /surau/{venue}: title, description (verified floors only), canonical, noindex flag. */
+export function venueSeo(p: PublicVenuePage) {
+  const v = p.venue,
+    place = placeParts(v.districtName, v.stateName),
+    short = place.district || place.state,
+    floors = [
+      ...new Set(
+        p.places.flatMap((x) => verifiedRooms(x.rooms).map((r) => r.floorLabel)),
+      ),
+    ]
+  return seo({
+    // Drop the district when the title would pass 60 characters; the venue name stays whole.
+    title:
+      short && `Surau at ${v.name} · ${short}`.length <= 60
+        ? `Surau at ${v.name} · ${short}`
+        : `Surau at ${v.name}`,
+    description: venueDescription(v.name, p.places.length, floors),
+    path: `/surau/${v.slug}`,
+    noindex: !p.indexable,
   })
 }

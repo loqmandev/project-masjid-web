@@ -3,14 +3,16 @@ vi.mock('./jm-api', async (importOriginal) => ({
   ...(await importOriginal<typeof import('./jm-api')>()),
   getSitemapCount: vi.fn(),
   getSitemapPage: vi.fn(),
+  getVenueSitemap: vi.fn(),
 }))
 vi.mock('./worker-env', () => ({ getWorkerEnv: vi.fn() }))
-import { getSitemapCount, getSitemapPage } from './jm-api'
+import { getSitemapCount, getSitemapPage, getVenueSitemap } from './jm-api'
 import { getWorkerEnv } from './worker-env'
-import { sitemapIndexResponse, sitemapPageResponse } from './sitemap'
+import { sitemapIndexResponse, sitemapPageResponse, venueSitemapResponse } from './sitemap'
 beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(getWorkerEnv).mockResolvedValue({ MASJID_PAGES_ENABLED: 'true' })
+  vi.mocked(getVenueSitemap).mockResolvedValue({ status: 404, body: null })
   vi.mocked(getSitemapCount).mockResolvedValue({
     status: 200,
     body: { total: 9725, pageSize: 5000, masjids: [] },
@@ -83,4 +85,54 @@ it('never lists an areas sitemap, whichever way masjid pages are switched', asyn
     expect(body).toContain('/sitemap-pages.xml')
     expect(body).not.toContain('/sitemaps/areas')
   }
+})
+
+it('index always lists /sitemaps/venues while pages are on, whatever the venue upstream does', async () => {
+  for (const venue of [{ status: 404, body: null }, { status: 503, body: null }, { status: 200, body: { items: [] } }]) {
+    vi.mocked(getVenueSitemap).mockResolvedValue(venue as never)
+    expect(await (await sitemapIndexResponse()).text()).toContain('https://jejakmasjid.my/sitemaps/venues')
+  }
+  expect(getVenueSitemap).not.toHaveBeenCalled()
+  vi.mocked(getSitemapCount).mockResolvedValue({ status: 503, body: null })
+  const r = await sitemapIndexResponse()
+  expect(r.status).toBe(200)
+  expect(await r.text()).toContain('/sitemaps/venues')
+  vi.mocked(getWorkerEnv).mockResolvedValue({ MASJID_PAGES_ENABLED: 'false' })
+  expect(await (await sitemapIndexResponse()).text()).not.toContain('/sitemaps/venues')
+})
+it('an empty venue sitemap is a valid empty urlset; lastmod is normalised to ISO and bad dates drop', async () => {
+  vi.mocked(getVenueSitemap).mockResolvedValue({ status: 200, body: { items: [] } })
+  const empty = await venueSitemapResponse()
+  expect(empty.status).toBe(200)
+  expect(await empty.text()).toContain('<urlset')
+  vi.mocked(getVenueSitemap).mockResolvedValue({
+    status: 200,
+    body: { items: [{ slug: 'mall-fixture', updatedAt: '2026-10-14 01:00:00Z' }, { slug: 'x-y-z', updatedAt: 'garbage' }] },
+  })
+  const text = await (await venueSitemapResponse()).text()
+  expect(text).toContain('<lastmod>2026-10-14T01:00:00.000Z</lastmod>')
+  expect(text).not.toContain('x-y-z')
+})
+it('venue sitemap lists /surau/ urls, drops invalid items, 503 on upstream failure, 404 when absent', async () => {
+  vi.mocked(getVenueSitemap).mockResolvedValue({
+    status: 200,
+    body: {
+      items: [
+        { slug: 'mall-fixture', updatedAt: '2026-10-14T01:00:00Z' },
+        { slug: '../bad', updatedAt: '2026-10-14' },
+        { slug: 'no-date', updatedAt: 'nope' },
+      ],
+    },
+  })
+  const r = await venueSitemapResponse()
+  expect(r.status).toBe(200)
+  expect(r.headers.get('Cache-Control')).toBe('no-store')
+  const text = await r.text()
+  expect(text).toContain('<loc>https://jejakmasjid.my/surau/mall-fixture</loc>')
+  expect(text).not.toContain('bad')
+  expect(text).not.toContain('no-date')
+  vi.mocked(getVenueSitemap).mockResolvedValue({ status: 503, body: null })
+  expect((await venueSitemapResponse()).status).toBe(503)
+  vi.mocked(getVenueSitemap).mockResolvedValue({ status: 404, body: null })
+  expect((await venueSitemapResponse()).status).toBe(404)
 })
