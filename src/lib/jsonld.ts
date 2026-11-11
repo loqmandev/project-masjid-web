@@ -8,7 +8,7 @@ import { isProvenFacility, publicFacilityDetails } from './masjid-facilities'
 import { SITE } from './site'
 import { directionsUrl, localISO, placeParts } from './masjid-format'
 import { trustedImage } from './masjid-seo'
-import { galleryPhotos } from './masjid-gallery'
+import { confirmedGalleryUrls } from './masjid-gallery'
 
 export function countryAddress(state: string) {
   const malaysianStates = new Set([
@@ -51,7 +51,7 @@ export function jsonLdScript(value: unknown) {
 function imageField(page: PublicMasjidPage) {
   const cover = trustedImage(page.profile?.coverUrl)
   if (cover) return { image: cover }
-  const photos = galleryPhotos({ profile: null, photos: page.photos }).slice(0, 3)
+  const photos = confirmedGalleryUrls({ profile: null, photos: page.photos }).slice(0, 3)
   return photos.length ? { image: photos } : {}
 }
 export function mosqueJsonLd(

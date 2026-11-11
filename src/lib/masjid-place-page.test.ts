@@ -269,11 +269,11 @@ describe('gallery counter after hydration', () => {
       observe() {}
       disconnect() {}
     })
-    const urls = Array.from({ length: 5 }, (_, i) => photoUrl(i))
+    const urls = Array.from({ length: 5 }, (_, i) => ({ url: photoUrl(i), confirmed: true }))
     const { container } = render(createElement(Gallery, { photos: urls, name: 'Masjid' }))
     await act(async () => {})
     expect(text(container.querySelector('.m-count'))).toBe('1 / 5')
-    const slides = [...container.querySelectorAll('.m-strip img')]
+    const slides = [...container.querySelectorAll('.m-strip > .m-shot')]
     await act(async () => {
       callback(
         [
@@ -287,11 +287,11 @@ describe('gallery counter after hydration', () => {
   })
   it('keeps "N photos" without IntersectionObserver and "1 photo" for a single image', async () => {
     vi.stubGlobal('IntersectionObserver', undefined)
-    const three = render(createElement(Gallery, { photos: [photoUrl(1), photoUrl(2), photoUrl(3)], name: 'Masjid' }))
+    const three = render(createElement(Gallery, { photos: [photoUrl(1), photoUrl(2), photoUrl(3)].map((url) => ({ url, confirmed: true })), name: 'Masjid' }))
     await act(async () => {})
     expect(text(three.container.querySelector('.m-count'))).toBe('3 photos')
     cleanup()
-    const one = render(createElement(Gallery, { photos: [photoUrl(1)], name: 'Masjid' }))
+    const one = render(createElement(Gallery, { photos: [photoUrl(1)].map((url) => ({ url, confirmed: true })), name: 'Masjid' }))
     await act(async () => {})
     expect(text(one.container.querySelector('.m-count'))).toBe('1 photo')
   })

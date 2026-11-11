@@ -177,3 +177,21 @@ it('venue page seo: title, description with verified floors, canonical, noindex'
   const none = venueSeo({ ...venuePage, places: venuePage.places.map((p) => ({ ...p, rooms: p.rooms.map((r) => ({ ...r, verified: false })) })) })
   expect(desc(none)).toBe('Tempat solat di Mall Fixture: aras, tempat wudhu dan arah ke surau di Jejak Masjid.')
 })
+
+it('og:image skips unconfirmed photos; none confirmed means no og:image', () => {
+  const p = {
+    ...page,
+    photos: [
+      { url: 'https://bucket.jejakmasjid.my/u.jpg', confirmed: false },
+      { url: 'https://bucket.jejakmasjid.my/c.jpg', confirmed: true },
+    ],
+  }
+  expect(masjidSeo(p).meta).toContainEqual({ property: 'og:image', content: 'https://bucket.jejakmasjid.my/c.jpg' })
+  const only = masjidSeo({ ...p, photos: [p.photos[0]] }).meta
+  expect(JSON.stringify(only)).not.toContain('/u.jpg')
+})
+it('a visitor-confirmed room gets the same title and description as a venue-verified one', () => {
+  const v = { ...page, rooms: [{ ...allRoom, confirmedBy: 'venue' as const }] }
+  const c = { ...page, rooms: [{ ...allRoom, confirmedBy: 'visitors' as const }] }
+  expect(masjidSeo(c).meta).toEqual(masjidSeo(v).meta)
+})

@@ -532,17 +532,43 @@
   .m-strip::-webkit-scrollbar {
     display: none;
   }
-  .m-strip img {
+  .m-strip > .m-shot {
     flex: 0 0 min(86%, 30rem);
     aspect-ratio: 4 / 3;
-    width: 100%;
-    object-fit: cover;
     border-radius: 16px;
     background: var(--surface-sunken);
     scroll-snap-align: center;
   }
-  .m-strip[data-n='1'] img {
+  .m-strip[data-n='1'] > .m-shot {
     flex-basis: min(100%, 36rem);
+  }
+  .m-shot {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+  }
+  .m-shot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .m-shot-grid {
+    aspect-ratio: 3 / 4;
+    border-radius: 12px;
+  }
+  /* Neutral information, never a warning: no amber, red or gold. */
+  .m-unconfirmed {
+    position: absolute;
+    top: 0.625rem;
+    left: 0.625rem;
+    padding: 0.3rem 0.625rem;
+    border-radius: 999px;
+    background: rgb(0 49 48 / 0.85);
+    color: var(--primary-foreground);
+    font-size: 0.72rem;
+    font-weight: 700;
+    pointer-events: none;
   }
   .m-count {
     position: absolute;
@@ -581,14 +607,14 @@
       border-radius: 20px;
       scroll-snap-type: none;
     }
-    .m-strip img {
+    .m-strip > .m-shot {
       width: 100%;
       height: 100%;
       min-height: 0;
       aspect-ratio: auto;
       border-radius: 0;
     }
-    .m-strip img:nth-child(n + 6) {
+    .m-strip > .m-shot:nth-child(n + 6) {
       display: none;
     }
     .m-strip[data-mosaic='1'] {
@@ -606,12 +632,12 @@
       grid-template-columns: 2fr 1fr 1fr;
       grid-template-rows: 1fr 1fr;
     }
-    .m-strip[data-mosaic='3'] img:first-child,
-    .m-strip[data-mosaic='4'] img:first-child,
-    .m-strip[data-mosaic='5'] img:first-child {
+    .m-strip[data-mosaic='3'] > .m-shot:first-child,
+    .m-strip[data-mosaic='4'] > .m-shot:first-child,
+    .m-strip[data-mosaic='5'] > .m-shot:first-child {
       grid-row: span 2;
     }
-    .m-strip[data-mosaic='4'] img:nth-child(4) {
+    .m-strip[data-mosaic='4'] > .m-shot:nth-child(4) {
       grid-column: span 2;
     }
     .m-map-hero {

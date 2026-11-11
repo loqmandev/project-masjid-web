@@ -8,7 +8,7 @@ import { galleryPhotos, MOSAIC_MAX } from '@/lib/masjid-gallery'
 import { placeParts, titleCaseAddress, venueLabel } from '@/lib/masjid-format'
 import type { MasjidReviews } from '@/lib/masjid-reviews'
 import type { FacilityCatalogueDetails, PublicMasjidPage } from '@/lib/masjid-types'
-import { Gallery, MapHero, NoPhotosCard } from './Gallery'
+import { Gallery, MapHero, NoPhotosCard, photoAlt } from './Gallery'
 import { Address, AppCard, MapLinks, PlaceCard, StickyBar } from './PlaceCards'
 import PrayerTimes from './PrayerTimes'
 import Reviews from './Reviews'
@@ -106,17 +106,20 @@ export default function MasjidPlacePage({
                 <section id="photos" className="hidden lg:block">
                   <h2 className="m-h2">Photos from visitors</h2>
                   <div className="grid grid-cols-4 gap-2">
-                    {photos.map((src, i) => (
-                      <img
-                        key={src}
-                        src={src}
-                        alt={i === 0 ? m.name : `${m.name}, photo ${i + 1}`}
-                        width={600}
-                        height={800}
-                        loading="lazy"
-                        decoding="async"
-                        className="aspect-[3/4] w-full rounded-xl object-cover"
-                      />
+                    {photos.map((p, i) => (
+                      <figure key={p.url} className="m-shot m-shot-grid">
+                        <img
+                          src={p.url}
+                          alt={photoAlt(m.name, i, p.confirmed)}
+                          width={600}
+                          height={800}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                        {!p.confirmed && (
+                          <figcaption className="m-unconfirmed">Not yet confirmed</figcaption>
+                        )}
+                      </figure>
                     ))}
                   </div>
                 </section>

@@ -234,6 +234,10 @@ The host script checks SSR and no-JS layouts at 360/768/1440 for both languages 
 retired AJK routes return 404. Preserve the planner's no-JS ready fix, 250–510 ms raster wipe
 tolerance and realistic denied-storage getter simulation.
 
+### Masjid page photos and location guides (backend 2.5.13)
+- Gallery photos are `{ url, confirmed? }`, validated by `validatePhotos` (`lib/masjid-gallery.ts`) in `loadMasjid`. Only the literal `confirmed: false` shows the "Not yet confirmed" pill (`.m-unconfirmed`, neutral deep teal); a missing field (older backend) means confirmed. Unconfirmed photos sort after confirmed ones and **never** feed JSON-LD `image` or `og:image` (`confirmedGalleryUrls`, `masjidSeo`).
+- Rooms gain optional `confirmedBy` (`venue|committee|visitors`; `visitors` reads "Confirmed by visitors Mon YYYY") and up to 3 way-finding `photos` (trusted hosts, none for women's rooms) inside the "How to get there" disclosure. No contributor identity, no room photos in JSON-LD. Both fields are optional: the web works before or after the backend.
+
 ### Known Follow-ups
 - App Store badge is the Malay (`_MY`) artwork while the Play badge is English. Swap one for
   consistency using Apple/Google marketing resources — badges must not be redrawn by hand.

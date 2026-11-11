@@ -1,5 +1,8 @@
+import { trustedImage } from './masjid-seo'
 import type {
   PrayerRoom,
+  RoomConfirmedBy,
+  RoomPhoto,
   PublicVenuePage,
   RoomAudience,
   VenueKind,
@@ -25,6 +28,23 @@ const AUDIENCE_RANK: Record<RoomAudience, number> = { all: 0, men: 1, women: 2 }
 const DATE = /^\d{4}-\d{2}-\d{2}/
 // eslint-disable-next-line no-control-regex
 const CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g
+
+const CONFIRMED_BY: RoomConfirmedBy[] = ['venue', 'committee', 'visitors']
+const dimension = (v: unknown): number | null =>
+  typeof v === 'number' && Number.isInteger(v) && v >= 1 && v <= 10000 ? v : null
+
+/** At most 3 way-finding photos on trusted hosts; never for a women's room. */
+function validateRoomPhotos(value: unknown, audience: RoomAudience): RoomPhoto[] {
+  if (audience === 'women' || !Array.isArray(value)) return []
+  const out: RoomPhoto[] = []
+  for (const raw of value.slice(0, 3)) {
+    if (!isObject(raw)) continue
+    const url = typeof raw.url === 'string' ? trustedImage(raw.url) : undefined
+    if (!url) continue
+    out.push({ url, width: dimension(raw.width), height: dimension(raw.height) })
+  }
+  return out
+}
 
 /** Trimmed string capped to `max`, or null when empty / not a string. */
 function capped(v: unknown, max: number): string | null {
@@ -61,6 +81,11 @@ export function validateRoom(value: unknown): PrayerRoom | null {
     accessNotes: capped(value.accessNotes, 300),
     verified,
     verifiedAt,
+    confirmedBy:
+      verified && CONFIRMED_BY.includes(value.confirmedBy as RoomConfirmedBy)
+        ? (value.confirmedBy as RoomConfirmedBy)
+        : null,
+    photos: validateRoomPhotos(value.photos, audience as RoomAudience),
   }
 }
 
@@ -265,10 +290,13 @@ export function roomDescription(rooms: PrayerRoom[] | undefined): string | null 
 // ---------------------------------------------------------------- display lines
 
 const monthYear = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', month: 'short', year: 'numeric' })
-export function verifiedLabel(room: Pick<PrayerRoom, 'verified' | 'verifiedAt'>): string {
+export function verifiedLabel(
+  room: Pick<PrayerRoom, 'verified' | 'verifiedAt'> & Partial<Pick<PrayerRoom, 'confirmedBy'>>,
+): string {
   if (!room.verified) return 'Not yet confirmed'
+  const word = room.confirmedBy === 'visitors' ? 'Confirmed by visitors' : 'Verified'
   const t = room.verifiedAt ? Date.parse(room.verifiedAt) : NaN
-  return Number.isFinite(t) ? `Verified ${monthYear.format(new Date(t))}` : 'Verified'
+  return Number.isFinite(t) ? `${word} ${monthYear.format(new Date(t))}` : word
 }
 
 export const wudhuText = (h: boolean | null) =>
@@ -280,7 +308,13 @@ export type RoomBlock = {
   /** How many leading lines are the location itself (rest are muted detail). */
   strong: number
   /** Disclosure content (directions + access notes), if any room has some. */
-  details: { label: string | null; directions: string | null; accessNotes: string | null }[]
+  details: {
+    label: string | null
+    audience: RoomAudience
+    directions: string | null
+    accessNotes: string | null
+    photos: RoomPhoto[]
+  }[]
 }
 
 /** Lines for the masjid page "Where to find it" block (spec §2). */
@@ -299,7 +333,9 @@ export function roomBlock(input: PrayerRoom[]): RoomBlock {
     if (second) lines.push(second)
     lines.push([r.audience === 'all' ? 'Lelaki & wanita' : null, verifiedLabel(r)].filter(Boolean).join(' · '))
   } else {
-    const allVerified = rooms.every((r) => r.verified)
+    // One shared line only when both are verified the same way.
+    const allVerified =
+      rooms.every((r) => r.verified) && rooms.every((r) => (r.confirmedBy ?? null) === (rooms[0].confirmedBy ?? null))
     for (const r of rooms) {
       const who = r.audience === 'all' ? 'Lelaki & wanita' : AUDIENCE_NAME[r.audience]
       lines.push(
@@ -310,12 +346,14 @@ export function roomBlock(input: PrayerRoom[]): RoomBlock {
     }
     if (allVerified) {
       const dates = rooms.map((r) => r.verifiedAt).filter((d): d is string => !!d).sort()
-      lines.push(verifiedLabel({ verified: true, verifiedAt: dates[0] ?? null }))
+      lines.push(verifiedLabel({ verified: true, verifiedAt: dates[0] ?? null, confirmedBy: rooms[0]?.confirmedBy }))
     }
   }
   const details = rooms
-    .filter((r) => r.directions || r.accessNotes)
+    .filter((r) => r.directions || r.accessNotes || r.photos?.length)
     .map((r) => ({
+      audience: r.audience,
+      photos: r.photos ?? [],
       label: rooms.length > 1 ? (r.audience === 'all' ? 'Lelaki & wanita' : AUDIENCE_NAME[r.audience]) : null,
       directions: r.directions,
       accessNotes: r.accessNotes,

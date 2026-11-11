@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseHeader } from '@tanstack/react-start/server'
 import { validPrayerTimes } from './masjid-format'
+import { validatePhotos } from './masjid-gallery'
 import { validateReviews } from './masjid-reviews'
 import { validEmbedKey } from './embed-map'
 import { validateRooms, validateVenueSummary, validateVenuePage } from './venue-rooms'
@@ -40,9 +41,10 @@ export const loadMasjid = createServerFn({ method: 'GET' })
     // an invalid or oversharing payload cannot reach the HTML or the hydration data.
     // Venue and rooms follow the same rule: validated copies replace the raw fields,
     // and an absent field stays absent (older backends).
-    const { reviews: rawReviews, venue: rawVenue, rooms: rawRooms, ...rest } = r.body
+    const { reviews: rawReviews, venue: rawVenue, rooms: rawRooms, photos: rawPhotos, ...rest } = r.body
     const page = {
       ...rest,
+      photos: validatePhotos(rawPhotos),
       ...(rawVenue !== undefined ? { venue: validateVenueSummary(rawVenue) } : {}),
       ...(rawRooms !== undefined ? { rooms: validateRooms(rawRooms) } : {}),
     }

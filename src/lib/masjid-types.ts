@@ -104,7 +104,12 @@ export type PrayerRoom = {
   accessNotes: string | null
   verified: boolean
   verifiedAt: string | null
+  // Location guides (backend 2.5.13). Optional: older backends omit both (absent = as before).
+  confirmedBy?: RoomConfirmedBy | null // null when not verified
+  photos?: RoomPhoto[] // ≤ 3 way-finding photos, in position order; never ids
 }
+export type RoomConfirmedBy = 'venue' | 'committee' | 'visitors'
+export type RoomPhoto = { url: string; width: number | null; height: number | null }
 export type VenueSummary = {
   slug: string
   name: string
@@ -164,7 +169,9 @@ export type PublicMasjidPage = {
   }
   upcomingPrograms: PublicProgramCard[]
   pastProgramCount: number
-  photos: { url: string }[] // ≤ 8 masjid_photo WHERE status='approved' AND is_hidden=0, newest first
+  // ≤ 8 visitor photos, newest first; `confirmed: false` = facility claim not yet confirmed
+  // (backend 2.5.13). Older backends send `{ url }` only: missing = confirmed.
+  photos: { url: string; confirmed?: boolean }[]
   posts: PublicMasjidPost[] // P3; [] before. news|volunteer|approved appeal, never khairat; ≤ 5 unexpired
 }
 export type PublicMasjidPost = {

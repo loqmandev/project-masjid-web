@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Camera } from 'lucide-react'
-import { MOSAIC_MAX } from '@/lib/masjid-gallery'
+import { MOSAIC_MAX, type GalleryPhoto } from '@/lib/masjid-gallery'
 import MapEmbed from './MapEmbed'
 
 /**
@@ -8,7 +8,13 @@ import MapEmbed from './MapEmbed'
  * mosaic from lg. The first image is the LCP element. The phone counter reads
  * "N photos" in the server HTML and "i / N" after hydration.
  */
-export function Gallery({ photos, name }: { photos: string[]; name: string }) {
+/** Alt text: the masjid name for the first photo, then "photo N"; plus the label when unconfirmed. */
+export function photoAlt(name: string, i: number, confirmed: boolean) {
+  const base = i === 0 ? name : `${name}, photo ${i + 1}`
+  return confirmed ? base : `${base}, not yet confirmed`
+}
+
+export function Gallery({ photos, name }: { photos: GalleryPhoto[]; name: string }) {
   const n = photos.length
   const strip = useRef<HTMLDivElement>(null)
   const [index, setIndex] = useState<number | null>(null)
@@ -48,17 +54,19 @@ export function Gallery({ photos, name }: { photos: string[]; name: string }) {
         data-mosaic={Math.min(n, MOSAIC_MAX)}
         aria-label="Photos"
       >
-        {photos.map((src, i) => (
-          <img
-            key={src}
-            src={src}
-            alt={i === 0 ? name : `${name}, photo ${i + 1}`}
-            width={1200}
-            height={900}
-            loading={i === 0 ? 'eager' : 'lazy'}
-            fetchPriority={i === 0 ? 'high' : undefined}
-            decoding={i === 0 ? 'sync' : 'async'}
-          />
+        {photos.map((p, i) => (
+          <figure className="m-shot" key={p.url}>
+            <img
+              src={p.url}
+              alt={photoAlt(name, i, p.confirmed)}
+              width={1200}
+              height={900}
+              loading={i === 0 ? 'eager' : 'lazy'}
+              fetchPriority={i === 0 ? 'high' : undefined}
+              decoding={i === 0 ? 'sync' : 'async'}
+            />
+            {!p.confirmed && <figcaption className="m-unconfirmed">Not yet confirmed</figcaption>}
+          </figure>
         ))}
       </div>
       <span className="m-count lg:hidden">

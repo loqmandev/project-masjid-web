@@ -57,7 +57,10 @@ export function masjidSeo(p: PublicMasjidPage, ajk = false) {
     noindex: !p.indexable,
     image:
       trustedImage(p.profile?.coverUrl) ||
-      p.photos.map((photo) => trustedImage(photo.url)).find(Boolean),
+      p.photos
+        .filter((photo) => photo.confirmed !== false)
+        .map((photo) => trustedImage(photo.url))
+        .find(Boolean),
   })
 }
 export function programSeo(p: PublicProgramDetail, now = Date.now()) {

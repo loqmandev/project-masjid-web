@@ -150,3 +150,15 @@ it('venue JSON-LD lists member mosques by name and url only', () => {
   ])
   expect(jsonLdScript(v)).not.toContain('Level')
 })
+
+it('JSON-LD image never contains an unconfirmed photo; only unconfirmed means no image', () => {
+  const photos = [
+    { url: 'https://bucket.jejakmasjid.my/u1.jpg', confirmed: false },
+    { url: 'https://bucket.jejakmasjid.my/c1.jpg', confirmed: true },
+    { url: 'https://bucket.jejakmasjid.my/u2.jpg', confirmed: false },
+    { url: 'https://bucket.jejakmasjid.my/c2.jpg' },
+  ]
+  expect(mosqueJsonLd({ ...page, photos }).image).toEqual(['https://bucket.jejakmasjid.my/c1.jpg', 'https://bucket.jejakmasjid.my/c2.jpg'])
+  expect(JSON.stringify(mosqueJsonLd({ ...page, photos }))).not.toContain('/u')
+  expect(mosqueJsonLd({ ...page, photos: [photos[0], photos[2]] })).not.toHaveProperty('image')
+})

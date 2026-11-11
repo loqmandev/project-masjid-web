@@ -119,15 +119,15 @@ export const program: PublicProgramDetail = {
 export const allRoom: PrayerRoom = {
   audience: 'all', floorLabel: 'Level UG', floorOrder: -1, zone: 'North Court',
   landmark: 'Between Typo and Uniqlo', directions: 'Take the lift near the food court to UG.',
-  hasWudhu: true, accessNotes: 'Wheelchair accessible via lift B.', verified: true, verifiedAt: '2026-10-14',
+  hasWudhu: true, accessNotes: 'Wheelchair accessible via lift B.', verified: true, verifiedAt: '2026-10-14', confirmedBy: null, photos: [],
 }
 export const menRoom: PrayerRoom = {
   audience: 'men', floorLabel: 'Level 2', floorOrder: 2, zone: 'North Court',
-  landmark: null, directions: null, hasWudhu: true, accessNotes: null, verified: true, verifiedAt: '2026-10-14',
+  landmark: null, directions: null, hasWudhu: true, accessNotes: null, verified: true, verifiedAt: '2026-10-14', confirmedBy: null, photos: [],
 }
 export const womenRoom: PrayerRoom = {
   audience: 'women', floorLabel: 'Level 1', floorOrder: 1, zone: null,
-  landmark: null, directions: null, hasWudhu: null, accessNotes: null, verified: true, verifiedAt: '2026-10-14',
+  landmark: null, directions: null, hasWudhu: null, accessNotes: null, verified: true, verifiedAt: '2026-10-14', confirmedBy: null, photos: [],
 }
 export const unverifiedRoom: PrayerRoom = { ...allRoom, verified: false, verifiedAt: null }
 export const venue: VenueSummary = {

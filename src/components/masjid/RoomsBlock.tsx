@@ -1,7 +1,7 @@
 import { roomBlock, venueLinkText } from '@/lib/venue-rooms'
 import type { PrayerRoom, VenueSummary } from '@/lib/masjid-types'
 
-/** Disclosure for directions + access notes; closed by default. */
+/** Disclosure for directions, access notes and way-finding photos; closed by default. */
 export function RoomDetails({ details }: { details: ReturnType<typeof roomBlock>['details'] }) {
   if (!details.length) return null
   return (
@@ -13,6 +13,23 @@ export function RoomDetails({ details }: { details: ReturnType<typeof roomBlock>
             {d.label && <p className="m-0 font-semibold">{d.label}</p>}
             {d.directions && <p className="m-0 whitespace-pre-line">{d.directions}</p>}
             {d.accessNotes && <p className="m-0 whitespace-pre-line">{d.accessNotes}</p>}
+            {d.photos.length > 0 && (
+              <div className="mt-1.5 flex flex-wrap gap-2">
+                {d.photos.map((p, j) => (
+                  <a key={p.url} href={p.url} target="_blank" rel="noopener">
+                    <img
+                      src={p.url}
+                      alt={`Way to the ${d.audience === 'men' ? "men's " : ''}surau, photo ${j + 1} of ${d.photos.length}`}
+                      width={p.width ?? undefined}
+                      height={p.height ?? undefined}
+                      loading="lazy"
+                      decoding="async"
+                      className="block h-24 w-auto rounded-xl object-cover"
+                    />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>

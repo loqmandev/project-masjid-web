@@ -249,3 +249,51 @@ it('venue page renders places in order, links, directions and no raw html', () =
   expect(html).toContain('Get directions')
   expect(html).toContain('Exact floor not listed yet.')
 })
+
+const gp = (n: string, confirmed?: boolean) => ({
+  url: `https://bucket.jejakmasjid.my/${n}.jpg`,
+  ...(confirmed === undefined ? {} : { confirmed }),
+})
+const count = (html: string, s: string) => html.split(s).length - 1
+it('"Not yet confirmed" label renders exactly on unconfirmed photos, last, with alt text', () => {
+  const html = render({ ...page, photos: [gp('u1', false), gp('c1', true), gp('u2', false)] })
+  expect(count(html, 'class="m-unconfirmed"')).toBe(2)
+  expect(html).toContain('<figcaption class="m-unconfirmed">Not yet confirmed</figcaption>')
+  expect(html).toContain('alt="Masjid Fixture, photo 3, not yet confirmed"'.replace('Masjid Fixture', page.masjid.name))
+  expect(html.indexOf('c1.jpg')).toBeLessThan(html.indexOf('u1.jpg'))
+  expect(html.indexOf('<img')).toBeLessThan(html.indexOf('u1.jpg'))
+  expect(html).toMatch(new RegExp('<img[^>]*alt="' + page.masjid.name + '"[^>]*c1.jpg|c1.jpg[^>]*alt="' + page.masjid.name + '"'))
+})
+it('desktop grid (6+ photos) carries the label too', () => {
+  const photos = [...[1, 2, 3, 4, 5].map((i) => gp('c' + i)), gp('u1', false), gp('u2', false)]
+  const html = render({ ...page, photos })
+  expect(count(html, 'class="m-unconfirmed"')).toBe(4) // strip + grid, 2 each
+  expect(html).toContain('m-shot m-shot-grid')
+})
+it('no label anywhere for an old payload without confirmed', () => {
+  const html = render({ ...page, photos: [gp('a'), gp('b'), gp('c')] })
+  expect(html).not.toContain('m-unconfirmed')
+  expect(html).not.toContain('not yet confirmed')
+})
+const wayPhotos = [1, 2, 3].map((i) => ({ url: `https://bucket.jejakmasjid.my/w${i}.jpg`, width: 800, height: 600 }))
+it('way-finding photos show in the disclosure without directions; none without any of the three', () => {
+  const html = render({ ...page, rooms: [{ ...menRoom, photos: wayPhotos }] })
+  expect(html).toContain('How to get there')
+  expect(count(html, 'w1.jpg') + count(html, 'w2.jpg') + count(html, 'w3.jpg')).toBe(6)
+  expect(html).toContain('Way to the men&#x27;s surau, photo 2 of 3')
+  expect(html).toContain('loading="lazy"')
+  expect(html).toContain('width="800"')
+  expect(html).toContain('rel="noopener"')
+  expect(render({ ...page, rooms: [menRoom] })).not.toContain('How to get there')
+  expect(render({ ...page, rooms: [{ ...allRoom, directions: null, accessNotes: null }] })).not.toContain('How to get there')
+})
+it('venue page cards render way-finding photos', () => {
+  const vp = {
+    ...venuePage,
+    places: [{ ...venuePage.places[1], rooms: [{ ...allRoom, confirmedBy: 'visitors' as const, photos: wayPhotos }] }],
+  }
+  const html = renderToString(createElement(VenuePage, { page: vp } as never))
+  expect(html).toContain('w1.jpg')
+  expect(html).toContain('Way to the surau, photo 1 of 3')
+  expect(html).toContain('Confirmed by visitors Oct 2026')
+})

@@ -198,3 +198,45 @@ it('validateVenuePage accepts the contract and rejects malformed payloads', () =
   expect(v.venue.websiteUrl).toBeNull()
   expect(v.places).toHaveLength(3)
 })
+
+// ---- location guides (confirmedBy + way-finding photos)
+const ph = (n: number | string, extra = {}) => ({ url: `https://bucket.jejakmasjid.my/${n}.jpg`, width: 800, height: 600, ...extra })
+it('validateRooms: confirmedBy only a known value, forced null when unverified', () => {
+  const r = (x: object) => validateRooms([{ ...allRoom, ...x }])[0]!
+  expect(r({ confirmedBy: 'visitors' }).confirmedBy).toBe('visitors')
+  expect(r({ confirmedBy: 'committee' }).confirmedBy).toBe('committee')
+  expect(r({ confirmedBy: 'bots' }).confirmedBy).toBeNull()
+  expect(r({}).confirmedBy).toBeNull()
+  expect(r({ verified: false, verifiedAt: null, confirmedBy: 'visitors' }).confirmedBy).toBeNull()
+})
+it('validateRooms: photos cut to 3, untrusted dropped, women none, bad size null', () => {
+  const r = (x: object) => validateRooms([{ ...allRoom, ...x }])[0]!
+  expect(r({ photos: [1, 2, 3, 4].map((i) => ph(i)) }).photos).toHaveLength(3)
+  expect(r({ photos: [ph(1, { url: 'https://tracker.test/x.jpg' }), ph(2)] }).photos!.map((p) => p.url)).toEqual([`https://bucket.jejakmasjid.my/2.jpg`])
+  expect(r({ photos: [ph(1, { width: 0, height: 'x' }), ph(2, { width: 1.5, height: 20000 })] }).photos).toEqual([
+    { url: `https://bucket.jejakmasjid.my/1.jpg`, width: null, height: null },
+    { url: `https://bucket.jejakmasjid.my/2.jpg`, width: null, height: null },
+  ])
+  expect(r({}).photos).toEqual([])
+  expect(validateRooms([{ ...womenRoom, photos: [ph(1)] }])[0].photos).toEqual([])
+  expect(validateVenuePage({ ...venuePage, places: [{ ...venuePage.places[0], rooms: [{ ...allRoom, photos: [ph(1)] }] }] })!.places[0].rooms[0].photos).toHaveLength(1)
+})
+it('verifiedLabel and roomBlock: visitors label, mixed vs same confirmedBy', () => {
+  expect(verifiedLabel({ ...allRoom, confirmedBy: 'visitors' })).toBe('Confirmed by visitors Oct 2026')
+  expect(verifiedLabel({ ...allRoom, confirmedBy: 'venue' })).toBe('Verified Oct 2026')
+  expect(verifiedLabel(allRoom)).toBe('Verified Oct 2026')
+  expect(verifiedLabel({ ...allRoom, verified: false, confirmedBy: null })).toBe('Not yet confirmed')
+  expect(roomBlock([{ ...allRoom, confirmedBy: 'visitors' }]).lines.at(-1)).toBe('Lelaki & wanita · Confirmed by visitors Oct 2026')
+  const same = roomBlock([{ ...menRoom, confirmedBy: 'visitors' }, { ...womenRoom, confirmedBy: 'visitors' }]).lines
+  expect(same).toHaveLength(3)
+  expect(same[2]).toBe('Confirmed by visitors Oct 2026')
+  const mixed = roomBlock([{ ...menRoom, confirmedBy: 'visitors' }, { ...womenRoom, confirmedBy: 'venue' }]).lines
+  expect(mixed).toHaveLength(2)
+  expect(mixed[0]).toContain('Confirmed by visitors Oct 2026')
+  expect(mixed[1]).toContain('Verified Oct 2026')
+})
+it('roomBlock details keep a room with photos only', () => {
+  const photos = [{ url: `https://bucket.jejakmasjid.my/1.jpg`, width: 1, height: 1 }]
+  expect(roomBlock([{ ...menRoom, photos }]).details).toHaveLength(1)
+  expect(roomBlock([menRoom]).details).toHaveLength(0)
+})
