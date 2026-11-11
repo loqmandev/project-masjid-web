@@ -65,7 +65,7 @@ export function Gallery({ photos, name }: { photos: GalleryPhoto[]; name: string
               fetchPriority={i === 0 ? 'high' : undefined}
               decoding={i === 0 ? 'sync' : 'async'}
             />
-            {!p.confirmed && <figcaption className="m-unconfirmed">Not yet confirmed</figcaption>}
+            {!p.confirmed && <figcaption className="m-unconfirmed" aria-hidden="true">Not yet confirmed</figcaption>}
           </figure>
         ))}
       </div>

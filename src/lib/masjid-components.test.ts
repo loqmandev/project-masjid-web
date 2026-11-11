@@ -258,7 +258,8 @@ const count = (html: string, s: string) => html.split(s).length - 1
 it('"Not yet confirmed" label renders exactly on unconfirmed photos, last, with alt text', () => {
   const html = render({ ...page, photos: [gp('u1', false), gp('c1', true), gp('u2', false)] })
   expect(count(html, 'class="m-unconfirmed"')).toBe(2)
-  expect(html).toContain('<figcaption class="m-unconfirmed">Not yet confirmed</figcaption>')
+  expect(html).toContain('<figcaption class="m-unconfirmed" aria-hidden="true">Not yet confirmed</figcaption>')
+  expect(count(html, 'aria-hidden="true">Not yet confirmed')).toBe(2)
   expect(html).toContain('alt="Masjid Fixture, photo 3, not yet confirmed"'.replace('Masjid Fixture', page.masjid.name))
   expect(html.indexOf('c1.jpg')).toBeLessThan(html.indexOf('u1.jpg'))
   expect(html.indexOf('<img')).toBeLessThan(html.indexOf('u1.jpg'))

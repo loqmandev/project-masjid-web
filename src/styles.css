@@ -555,7 +555,7 @@
   }
   .m-shot-grid {
     aspect-ratio: 3 / 4;
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
   }
   /* Neutral information, never a warning: no amber, red or gold. */
   .m-unconfirmed {

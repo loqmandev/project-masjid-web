@@ -117,7 +117,7 @@ export default function MasjidPlacePage({
                           decoding="async"
                         />
                         {!p.confirmed && (
-                          <figcaption className="m-unconfirmed">Not yet confirmed</figcaption>
+                          <figcaption className="m-unconfirmed" aria-hidden="true">Not yet confirmed</figcaption>
                         )}
                       </figure>
                     ))}
