@@ -32,6 +32,9 @@ const PrivacyPolicy = () => {
           We do not track your location in the background, and we do not collect location outside a check-in or check-out. We do not sell location data and we do not share it with advertisers or analytics providers. The app contains no third-party tracking or analytics SDKs.
         </p>
         <p>
+          <strong>App usage.</strong> When you are signed in, we record the days you open the app, together with your device type (iOS or Android) and app version. We use this only to understand how many people use Jejak Masjid and which features they use. It is kept on our own servers under a coded ID instead of your name or email, and it never includes your location. We do not share it or use it for advertising. We delete it within 7 days after you delete your account.
+        </p>
+        <p>
           Location data attached to your visits is kept for as long as your account exists. Deleting your account deletes your visit records and the location data attached to them.
         </p>
 
