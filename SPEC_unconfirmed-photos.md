@@ -1,6 +1,6 @@
 # Web SPEC: "Not yet confirmed" label on visitor photos (masjid pages)
 
-Status: ready to build (planner, 2026-11-12). Not built.
+Status: built and reviewed at 41bb50e (§1–§11). §12 (facility name in the label, owner 2026-11-12) is ready to build, not built.
 - **Owner decision (2026-11-12, D5 changed):** facility photos whose proof is still pending **stay** on the public masjid page, labelled **"Not yet confirmed"**, the same wording the site already uses for unverified prayer rooms (`verifiedLabel` in `src/lib/venue-rooms.ts`). Rejected proof photos and photos of women's areas or "open 24 hours" leave the page; the backend already drops those, so the website has nothing to filter.
 - **Backend contract:** backend 2.5.13, `SPEC_guides-prelaunch-2.5.13.md` §1.3 on backend `develop` (read it with `git -C ../project-masjid-backend-cf show develop:SPEC_guides-prelaunch-2.5.13.md`, or in `../.hermes/worktrees/hotfix-2.5.8-backend/`).
 - **Base:** web `main` 604882c (production). Line numbers below are from that commit. Web has no `develop`.
@@ -106,3 +106,99 @@ Screenshots from local fixtures (phone 360 px and desktop 1280 px): a page with 
 - Committed on `feature/unconfirmed-photos`, Opus-reviewed, merged into `main`.
 - Build report `../.hermes/reviews/guides-prelaunch-2.5.13/WEB-BUILD.md`: files, tests before/after, the screenshots of §9.
 - Web `CLAUDE.md` updated (masjid page photos: the label rule and the confirmed-only SEO image rule).
+
+## 12. Facility name in the label (owner 2026-11-12)
+
+Status: ready to build (planner, 2026-11-12). Amends §1–§9 on this branch (`feat/unconfirmed-photos-location-guides`, built and reviewed at 41bb50e, not deployed). Build it on the same branch before the web deploy.
+
+The owner answered the open question of backend `SPEC_guides-prelaunch-2.5.13.md` §5 Q1 with "yes": the label names the facility, for example **"Wheelchair access · Not yet confirmed"**.
+
+### 12.1 Backend contract (backend 2.5.14, `SPEC_photo-facility-label.md` on backend branch `feature/photo-facility-label`)
+
+```ts
+photos: Array<{
+  url: string
+  confirmed: boolean
+  facilityLabel: string | null   // NEW. English facility name (facility.info_label); non-null only when confirmed === false
+}>                               // ≤ 8, confirmed first, newest first inside each group
+```
+
+- Backend 2.5.13 (and any rollback to it) sends no `facilityLabel`: the label stays plain "Not yet confirmed". Live web `main` 604882c reads only `url`. Every order of the two deploys is safe.
+- The §2 rule still holds: the backend never sends ids or facility codes here, and the web must not ask for them. A display name is not an identifier.
+- The name is English copy from the backend catalogue. Show it as received: never translate, abbreviate, re-case or map codes to names on the web.
+
+### 12.2 Types and validation
+- `src/lib/masjid-types.ts:174`: `photos: { url: string; confirmed?: boolean; facilityLabel?: string | null }[]`; comment: "… `facilityLabel` = English facility name, only on unconfirmed photos (backend 2.5.14)".
+- `src/lib/masjid-gallery.ts`: `export type GalleryPhoto = { url: string; confirmed: boolean; facilityLabel: string | null }`.
+- `validatePhotos`: for each kept entry, `facilityLabel` is the backend string only when `confirmed` is `false` **and** the value is a string that, after collapsing whitespace runs to one space and trimming, is 1–60 characters long; otherwise `null`. Confirmed photos always get `null`. Every other key is still dropped.
+- `galleryPhotos`: carries `facilityLabel` through; the AJK cover is `{ confirmed: true, facilityLabel: null }`. De-duplication by URL is unchanged (first wins, so a URL that also appears confirmed keeps the confirmed copy).
+- `confirmedGalleryUrls`, `jsonld.ts`, `masjid-seo.ts`: unchanged. The facility name never goes into the title, description, JSON-LD or `og:*`.
+
+### 12.3 Pill text and markup
+One helper, exported from `src/components/masjid/Gallery.tsx` and used by both the gallery (§6.1) and the desktop "Photos from visitors" grid (§6.2, `MasjidPlacePage.tsx:110-121`):
+
+```tsx
+export function UnconfirmedLabel({ facilityLabel }: { facilityLabel: string | null }) {
+  return (
+    <figcaption className="m-unconfirmed" aria-hidden="true">
+      {facilityLabel && <span className="m-unconfirmed-name">{facilityLabel} ·</span>}
+      {facilityLabel && ' '}
+      <span className="m-unconfirmed-state">Not yet confirmed</span>
+    </figcaption>
+  )
+}
+```
+
+- With a name the text reads `Wheelchair access · Not yet confirmed` (U+00B7 middle dot, one space each side). Without one it reads `Not yet confirmed`, exactly as today.
+- Rendered only for `!p.confirmed`, as today. Keep `aria-hidden="true"` (the alt text carries it, §12.4).
+- React escapes the name; never use `dangerouslySetInnerHTML`.
+
+### 12.4 Alt text
+`photoAlt(name, i, confirmed, facilityLabel)`:
+- confirmed: unchanged (`name` for the first image, `name, photo N` after);
+- unconfirmed with a name: `{base}, {facilityLabel}, not yet confirmed`, e.g. `Masjid Al-Falah, photo 3, Wheelchair access, not yet confirmed`;
+- unconfirmed without a name: `{base}, not yet confirmed` (today's rule).
+
+### 12.5 Wrapping and truncation (`src/styles.css`, the `.m-unconfirmed` block at :561-572)
+Add:
+
+```css
+.m-unconfirmed {
+  /* existing rules stay */
+  max-width: calc(100% - 1.25rem);   /* never wider than the photo minus both 0.625rem insets */
+  line-height: 1.3;
+  border-radius: 0.75rem;            /* was 999px: a two-line pill stays a rounded box */
+}
+.m-unconfirmed-name,
+.m-unconfirmed-state { white-space: nowrap; }
+.m-unconfirmed-name {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+}
+```
+
+Result:
+- The only break point is the space after the middle dot. When the whole text fits it is one line; otherwise it is two lines: `Wheelchair access ·` / `Not yet confirmed`.
+- `Not yet confirmed` is never cut. Only a name too long for the photo is cut with "…" (the longest English name today is "Community kitchen / hall", 24 characters).
+- Phone 360 px: a strip photo is about 280 px wide (`min(86%, 30rem)`), so the pill may use about 262 px. Short names fit on one line; "Wheelchair access" and longer names wrap to two lines. Two lines are about 2.5rem tall at the top-left, clear of the phone counter (bottom-left) and of the desktop "All N photos" button (bottom-right).
+- Desktop mosaic tiles and the 4-column grid tiles (about 190 px): usually two lines; same rules.
+- Colours unchanged: deep teal `rgb(0 49 48 / 0.85)` with `var(--primary-foreground)` text. Never amber, red or gold (`../BRAND_COLOURS.md`).
+
+### 12.6 Tests (Vitest)
+| Suite | Cases |
+|---|---|
+| `src/lib/masjid-gallery.test.ts` | `validatePhotos`: `confirmed:false` + `"  Wheelchair   access "` → `facilityLabel: "Wheelchair access"`; `confirmed:true` + a name → `null`; missing `facilityLabel` → `null`; non-string → `null`; `""` / `"   "` → `null`; 61 characters → `null`, 60 kept; old `{url}` payload → `{url, confirmed:true, facilityLabel:null}`. Update the existing exact-shape expectations to include `facilityLabel`. `galleryPhotos`: carries the name; cover gets `null` |
+| `src/lib/masjid-server.test.ts` (`:343-357`) | the page carries only `{url, confirmed, facilityLabel}` per photo; an extra `facilityCode` / `id` is still dropped |
+| `src/lib/masjid-components.test.ts` (`:258-277`) | with tags and `<!-- -->` stripped, the gallery and the desktop grid read `Wheelchair access · Not yet confirmed` for a named unconfirmed photo and `Not yet confirmed` for a nameless one; `m-unconfirmed-name` only when there is a name; alt `…, Wheelchair access, not yet confirmed`; a name `<b>Ramp</b>` renders escaped; still no label for confirmed photos and for an old payload |
+| `src/lib/jsonld.test.ts`, `src/lib/masjid-seo.test.ts` | unchanged: no unconfirmed URL, and no facility name, in JSON-LD or `og:image` |
+
+Then the full `pnpm test`, the typecheck and `pnpm build`, under the machine lock (`flock /tmp/jm-heavy-job.lock …`), never next to an emulator.
+
+Screenshots from local fixtures (phone 360 px, desktop 1280 px): one named unconfirmed photo with "Wheelchair access", one with "Community kitchen / hall", one without a name, and a page with 6+ photos (mosaic + grid). Add them to `../.hermes/reviews/guides-prelaunch-2.5.13/WEB-BUILD.md` (or a sibling `WEB-BUILD-LABEL.md`).
+
+### 12.7 Deploy and docs
+- Same web deploy as §10. If the web deploys while the backend is still 2.5.13, the label stays plain until backend 2.5.14 is live; then purge Cache-Tag `jm-ajk-public` (the backend 2.5.14 runbook does this).
+- Web `CLAUDE.md` "Masjid page photos and location guides" bullet: "Gallery photos are `{ url, confirmed?, facilityLabel? }` … the pill reads `<facilityLabel> · Not yet confirmed` (name only on unconfirmed photos, cut with an ellipsis, never the status), and the alt text carries the same words."
