@@ -63,7 +63,7 @@ it('uses only native disclosures and exactly five help lines without rewards or 
   expect(doc.querySelector('.facility-help > summary')?.textContent).toBe('How we check facilities')
   expect(doc.querySelectorAll('.facility-help li')).toHaveLength(5)
   expect(doc.body.textContent).toContain('24 hours needs several visitors inside at night.')
-  expect(doc.body.textContent).toContain('Women friendly and compound parking need a photo.')
+  expect(doc.body.textContent).toContain("Compound parking needs a photo. Women's areas and 24 hours are confirmed by visitors' answers, never photos.")
   expect(doc.querySelector('button, script, [role="dialog"]')).toBeNull()
   expect(doc.body.innerHTML).not.toMatch(/points|\+10|gold|accent|confetti/i)
 })

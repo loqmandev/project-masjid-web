@@ -175,7 +175,7 @@ export default function MasjidFacilities({
           <li>Confirmed by visitors means people who checked in confirmed it.</li>
           <li>Reported, not confirmed is shown in grey.</li>
           <li>24 hours needs several visitors inside at night.</li>
-          <li>Women friendly and compound parking need a photo.</li>
+          <li>{"Compound parking needs a photo. Women's areas and 24 hours are confirmed by visitors' answers, never photos."}</li>
         </ul>
       </details>
     </section>
