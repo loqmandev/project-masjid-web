@@ -9,9 +9,26 @@ import MapEmbed from './MapEmbed'
  * "N photos" in the server HTML and "i / N" after hydration.
  */
 /** Alt text: the masjid name for the first photo, then "photo N"; plus the label when unconfirmed. */
-export function photoAlt(name: string, i: number, confirmed: boolean) {
+export function photoAlt(
+  name: string,
+  i: number,
+  confirmed: boolean,
+  facilityLabel: string | null = null,
+) {
   const base = i === 0 ? name : `${name}, photo ${i + 1}`
-  return confirmed ? base : `${base}, not yet confirmed`
+  if (confirmed) return base
+  return facilityLabel ? `${base}, ${facilityLabel}, not yet confirmed` : `${base}, not yet confirmed`
+}
+
+/** "<facility> · Not yet confirmed" pill; the alt text carries the same words. */
+export function UnconfirmedLabel({ facilityLabel }: { facilityLabel: string | null }) {
+  return (
+    <figcaption className="m-unconfirmed" aria-hidden="true">
+      {facilityLabel && <span className="m-unconfirmed-name">{facilityLabel} ·</span>}
+      {facilityLabel && ' '}
+      <span className="m-unconfirmed-state">Not yet confirmed</span>
+    </figcaption>
+  )
 }
 
 export function Gallery({ photos, name }: { photos: GalleryPhoto[]; name: string }) {
@@ -58,14 +75,14 @@ export function Gallery({ photos, name }: { photos: GalleryPhoto[]; name: string
           <figure className="m-shot" key={p.url}>
             <img
               src={p.url}
-              alt={photoAlt(name, i, p.confirmed)}
+              alt={photoAlt(name, i, p.confirmed, p.facilityLabel)}
               width={1200}
               height={900}
               loading={i === 0 ? 'eager' : 'lazy'}
               fetchPriority={i === 0 ? 'high' : undefined}
               decoding={i === 0 ? 'sync' : 'async'}
             />
-            {!p.confirmed && <figcaption className="m-unconfirmed" aria-hidden="true">Not yet confirmed</figcaption>}
+            {!p.confirmed && <UnconfirmedLabel facilityLabel={p.facilityLabel} />}
           </figure>
         ))}
       </div>

@@ -269,7 +269,7 @@ describe('gallery counter after hydration', () => {
       observe() {}
       disconnect() {}
     })
-    const urls = Array.from({ length: 5 }, (_, i) => ({ url: photoUrl(i), confirmed: true }))
+    const urls = Array.from({ length: 5 }, (_, i) => ({ url: photoUrl(i), confirmed: true, facilityLabel: null }))
     const { container } = render(createElement(Gallery, { photos: urls, name: 'Masjid' }))
     await act(async () => {})
     expect(text(container.querySelector('.m-count'))).toBe('1 / 5')
@@ -287,11 +287,11 @@ describe('gallery counter after hydration', () => {
   })
   it('keeps "N photos" without IntersectionObserver and "1 photo" for a single image', async () => {
     vi.stubGlobal('IntersectionObserver', undefined)
-    const three = render(createElement(Gallery, { photos: [photoUrl(1), photoUrl(2), photoUrl(3)].map((url) => ({ url, confirmed: true })), name: 'Masjid' }))
+    const three = render(createElement(Gallery, { photos: [photoUrl(1), photoUrl(2), photoUrl(3)].map((url) => ({ url, confirmed: true, facilityLabel: null })), name: 'Masjid' }))
     await act(async () => {})
     expect(text(three.container.querySelector('.m-count'))).toBe('3 photos')
     cleanup()
-    const one = render(createElement(Gallery, { photos: [photoUrl(1)].map((url) => ({ url, confirmed: true })), name: 'Masjid' }))
+    const one = render(createElement(Gallery, { photos: [photoUrl(1)].map((url) => ({ url, confirmed: true, facilityLabel: null })), name: 'Masjid' }))
     await act(async () => {})
     expect(text(one.container.querySelector('.m-count'))).toBe('1 photo')
   })

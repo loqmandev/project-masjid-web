@@ -8,7 +8,7 @@ import { galleryPhotos, MOSAIC_MAX } from '@/lib/masjid-gallery'
 import { placeParts, titleCaseAddress, venueLabel } from '@/lib/masjid-format'
 import type { MasjidReviews } from '@/lib/masjid-reviews'
 import type { FacilityCatalogueDetails, PublicMasjidPage } from '@/lib/masjid-types'
-import { Gallery, MapHero, NoPhotosCard, photoAlt } from './Gallery'
+import { Gallery, MapHero, NoPhotosCard, UnconfirmedLabel, photoAlt } from './Gallery'
 import { Address, AppCard, MapLinks, PlaceCard, StickyBar } from './PlaceCards'
 import PrayerTimes from './PrayerTimes'
 import Reviews from './Reviews'
@@ -110,15 +110,13 @@ export default function MasjidPlacePage({
                       <figure key={p.url} className="m-shot m-shot-grid">
                         <img
                           src={p.url}
-                          alt={photoAlt(m.name, i, p.confirmed)}
+                          alt={photoAlt(m.name, i, p.confirmed, p.facilityLabel)}
                           width={600}
                           height={800}
                           loading="lazy"
                           decoding="async"
                         />
-                        {!p.confirmed && (
-                          <figcaption className="m-unconfirmed" aria-hidden="true">Not yet confirmed</figcaption>
-                        )}
+                        {!p.confirmed && <UnconfirmedLabel facilityLabel={p.facilityLabel} />}
                       </figure>
                     ))}
                   </div>

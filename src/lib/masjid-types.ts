@@ -171,7 +171,8 @@ export type PublicMasjidPage = {
   pastProgramCount: number
   // ≤ 8 visitor photos, newest first; `confirmed: false` = facility claim not yet confirmed
   // (backend 2.5.13). Older backends send `{ url }` only: missing = confirmed.
-  photos: { url: string; confirmed?: boolean }[]
+  // `facilityLabel` = English facility name, only on unconfirmed photos (backend 2.5.14).
+  photos: { url: string; confirmed?: boolean; facilityLabel?: string | null }[]
   posts: PublicMasjidPost[] // P3; [] before. news|volunteer|approved appeal, never khairat; ≤ 5 unexpired
 }
 export type PublicMasjidPost = {

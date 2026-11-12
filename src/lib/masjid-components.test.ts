@@ -250,20 +250,37 @@ it('venue page renders places in order, links, directions and no raw html', () =
   expect(html).toContain('Exact floor not listed yet.')
 })
 
-const gp = (n: string, confirmed?: boolean) => ({
+const gp = (n: string, confirmed?: boolean, facilityLabel?: string) => ({
   url: `https://bucket.jejakmasjid.my/${n}.jpg`,
   ...(confirmed === undefined ? {} : { confirmed }),
+  ...(facilityLabel === undefined ? {} : { facilityLabel }),
 })
+const text = (html: string) => html.replace(/<!-- -->/g, '').replace(/<[^>]+>/g, '')
 const count = (html: string, s: string) => html.split(s).length - 1
 it('"Not yet confirmed" label renders exactly on unconfirmed photos, last, with alt text', () => {
   const html = render({ ...page, photos: [gp('u1', false), gp('c1', true), gp('u2', false)] })
   expect(count(html, 'class="m-unconfirmed"')).toBe(2)
-  expect(html).toContain('<figcaption class="m-unconfirmed" aria-hidden="true">Not yet confirmed</figcaption>')
-  expect(count(html, 'aria-hidden="true">Not yet confirmed')).toBe(2)
+  expect(html).toContain('<figcaption class="m-unconfirmed" aria-hidden="true"><span class="m-unconfirmed-state">Not yet confirmed</span></figcaption>')
+  expect(count(html, '"m-unconfirmed-state">Not yet confirmed')).toBe(2)
   expect(html).toContain('alt="Masjid Fixture, photo 3, not yet confirmed"'.replace('Masjid Fixture', page.masjid.name))
   expect(html.indexOf('c1.jpg')).toBeLessThan(html.indexOf('u1.jpg'))
   expect(html.indexOf('<img')).toBeLessThan(html.indexOf('u1.jpg'))
   expect(html).toMatch(new RegExp('<img[^>]*alt="' + page.masjid.name + '"[^>]*c1.jpg|c1.jpg[^>]*alt="' + page.masjid.name + '"'))
+})
+it('named unconfirmed photo reads "<name> · Not yet confirmed" in strip and grid, with alt; name is escaped', () => {
+  const photos = [...[1, 2, 3, 4, 5].map((i) => gp('c' + i)), gp('u1', false, 'Wheelchair access'), gp('u2', false), gp('u3', false, '<b>Ramp</b>')]
+  const html = render({ ...page, photos })
+  const t = text(html)
+  expect(t.split('Wheelchair access · Not yet confirmed').length - 1).toBe(2)
+  expect(count(html, 'm-unconfirmed-name')).toBe(4) // u1 and u3, strip + grid
+  expect(count(html, 'class="m-unconfirmed"')).toBe(6)
+  expect(html).toContain('Wheelchair access, not yet confirmed"')
+  expect(html).toContain('&lt;b&gt;Ramp&lt;/b&gt;')
+  expect(html).not.toContain('<b>Ramp</b>')
+  expect(text(html)).not.toMatch(/Wheelchair access · Not yet confirmed.*u2/)
+  // confirmed photos never get a name
+  const conf = render({ ...page, photos: [gp('c1', true, 'Ramp'), gp('c2')] })
+  expect(conf).not.toContain('m-unconfirmed')
 })
 it('desktop grid (6+ photos) carries the label too', () => {
   const photos = [...[1, 2, 3, 4, 5].map((i) => gp('c' + i)), gp('u1', false), gp('u2', false)]

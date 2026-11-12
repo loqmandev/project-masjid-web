@@ -235,7 +235,7 @@ retired AJK routes return 404. Preserve the planner's no-JS ready fix, 250–510
 tolerance and realistic denied-storage getter simulation.
 
 ### Masjid page photos and location guides (backend 2.5.13)
-- Gallery photos are `{ url, confirmed? }`, validated by `validatePhotos` (`lib/masjid-gallery.ts`) in `loadMasjid`. Only the literal `confirmed: false` shows the "Not yet confirmed" pill (`.m-unconfirmed`, neutral deep teal); a missing field (older backend) means confirmed. Unconfirmed photos sort after confirmed ones and **never** feed JSON-LD `image` or `og:image` (`confirmedGalleryUrls`, `masjidSeo`).
+- Gallery photos are `{ url, confirmed?, facilityLabel? }` (name only on unconfirmed photos, 1-60 chars, shown as received), validated by `validatePhotos` (`lib/masjid-gallery.ts`) in `loadMasjid`. Only the literal `confirmed: false` shows the pill (`UnconfirmedLabel`, `.m-unconfirmed`, neutral deep teal) reading `<facilityLabel> · Not yet confirmed` (name cut with an ellipsis, never the status; plain "Not yet confirmed" on older backends), and the alt text carries the same words; a missing field (older backend) means confirmed. Unconfirmed photos sort after confirmed ones and **never** feed JSON-LD `image` or `og:image` (`confirmedGalleryUrls`, `masjidSeo`).
 - Rooms gain optional `confirmedBy` (`venue|committee|visitors`; `visitors` reads "Confirmed by visitors Mon YYYY") and up to 3 way-finding `photos` (trusted hosts, none for women's rooms) inside the "How to get there" disclosure. No contributor identity, no room photos in JSON-LD. Both fields are optional: the web works before or after the backend.
 
 ### Known Follow-ups

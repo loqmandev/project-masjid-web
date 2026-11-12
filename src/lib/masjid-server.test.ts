@@ -340,21 +340,21 @@ it('loadVenue: 404, 503, malformed payload and success', async () => {
   expect(isRedirect(await loadVenue({ data: { slug: 'mall-fixture' } }).catch((e) => e))).toBe(true)
 })
 
-it('loadMasjid keeps only {url, confirmed} per photo; missing confirmed means confirmed', async () => {
+it('loadMasjid keeps only {url, confirmed, facilityLabel} per photo; missing confirmed means confirmed', async () => {
   vi.mocked(getMasjidPage).mockResolvedValue({
     status: 200,
     body: {
       ...page,
       photos: [
-        { url: 'https://bucket.jejakmasjid.my/a.jpg', confirmed: false, id: 'p1', facilityCode: 'wudhu' },
+        { url: 'https://bucket.jejakmasjid.my/a.jpg', confirmed: false, facilityLabel: 'Wudhu area', id: 'p1', facilityCode: 'wudhu' },
         { url: 'https://bucket.jejakmasjid.my/b.jpg' },
       ],
     } as never,
   })
   const r = await loadMasjid({ data: { slug: 'surau-test' } })
   expect(r.page.photos).toEqual([
-    { url: 'https://bucket.jejakmasjid.my/a.jpg', confirmed: false },
-    { url: 'https://bucket.jejakmasjid.my/b.jpg', confirmed: true },
+    { url: 'https://bucket.jejakmasjid.my/a.jpg', confirmed: false, facilityLabel: 'Wudhu area' },
+    { url: 'https://bucket.jejakmasjid.my/b.jpg', confirmed: true, facilityLabel: null },
   ])
   vi.mocked(getMasjidPage).mockResolvedValue({ status: 200, body: { ...page, photos: undefined } as never })
   expect((await loadMasjid({ data: { slug: 'surau-test' } })).page.photos).toEqual([])

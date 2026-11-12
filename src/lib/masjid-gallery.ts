@@ -5,7 +5,14 @@ export const MAX_GALLERY_PHOTOS = 8
 /** Images shown in the desktop mosaic: one large and up to four small. */
 export const MOSAIC_MAX = 5
 
-export type GalleryPhoto = { url: string; confirmed: boolean }
+export type GalleryPhoto = { url: string; confirmed: boolean; facilityLabel: string | null }
+
+/** English facility name from the backend, only for unconfirmed photos: 1-60 chars after whitespace collapse. */
+function cleanLabel(value: unknown, confirmed: boolean): string | null {
+  if (confirmed || typeof value !== 'string') return null
+  const t = value.replace(/\s+/g, ' ').trim()
+  return t.length >= 1 && t.length <= 60 ? t : null
+}
 
 /**
  * Visitor photos from the backend, validated. Only the literal `false` means
@@ -17,9 +24,14 @@ export function validatePhotos(value: unknown): GalleryPhoto[] {
   for (const entry of value) {
     if (out.length === MAX_GALLERY_PHOTOS) break
     if (!entry || typeof entry !== 'object') continue
-    const { url, confirmed } = entry as { url?: unknown; confirmed?: unknown }
+    const { url, confirmed, facilityLabel } = entry as {
+      url?: unknown
+      confirmed?: unknown
+      facilityLabel?: unknown
+    }
     if (typeof url !== 'string') continue
-    out.push({ url, confirmed: confirmed !== false })
+    const isConfirmed = confirmed !== false
+    out.push({ url, confirmed: isConfirmed, facilityLabel: cleanLabel(facilityLabel, isConfirmed) })
   }
   return out
 }
@@ -32,16 +44,19 @@ export function validatePhotos(value: unknown): GalleryPhoto[] {
 export function galleryPhotos(
   page: Pick<PublicMasjidPage, 'profile' | 'photos'>,
 ): GalleryPhoto[] {
-  const visitors = (page.photos ?? []).map((p) => ({ url: p.url, confirmed: p.confirmed !== false }))
-  const candidates: { url: string | null | undefined; confirmed: boolean }[] = [
-    { url: page.profile?.coverUrl, confirmed: true },
+  const visitors = (page.photos ?? []).map((p) => {
+    const confirmed = p.confirmed !== false
+    return { url: p.url, confirmed, facilityLabel: cleanLabel(p.facilityLabel, confirmed) }
+  })
+  const candidates: { url: string | null | undefined; confirmed: boolean; facilityLabel: string | null }[] = [
+    { url: page.profile?.coverUrl, confirmed: true, facilityLabel: null },
     ...visitors.filter((p) => p.confirmed),
     ...visitors.filter((p) => !p.confirmed),
   ]
   const out: GalleryPhoto[] = []
   for (const c of candidates) {
     const url = trustedImage(c.url)
-    if (url && !out.some((p) => p.url === url)) out.push({ url, confirmed: c.confirmed })
+    if (url && !out.some((p) => p.url === url)) out.push({ url, confirmed: c.confirmed, facilityLabel: c.facilityLabel })
     if (out.length === MAX_GALLERY_PHOTOS) break
   }
   return out
