@@ -202,3 +202,4 @@ Screenshots from local fixtures (phone 360 px, desktop 1280 px): one named uncon
 ### 12.7 Deploy and docs
 - Same web deploy as §10. If the web deploys while the backend is still 2.5.13, the label stays plain until backend 2.5.14 is live; then purge Cache-Tag `jm-ajk-public` (the backend 2.5.14 runbook does this).
 - Web `CLAUDE.md` "Masjid page photos and location guides" bullet: "Gallery photos are `{ url, confirmed?, facilityLabel? }` … the pill reads `<facilityLabel> · Not yet confirmed` (name only on unconfirmed photos, cut with an ellipsis, never the status), and the alt text carries the same words."
+- **Pending owner decision — `TOILET_FEMALE` ("Women's toilet"):** not a no-photo code today, so a pending one can read "Women's toilet · Not yet confirmed"; if the owner adds it to the backend no-photo list, that is a separate backend change to the upload and proof rules (the web needs no change: the backend simply stops sending those photos).
