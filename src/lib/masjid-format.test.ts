@@ -129,3 +129,22 @@ it('formats countdowns', () => {
   expect(countdownLabel(12)).toBe('12 min')
   expect(countdownLabel(1)).toBe('1 min')
 })
+
+import { mytDateLabel as dateLabel, nextPrayer as next, prayerTimeParts as parts, prayerTime as pt } from './masjid-format'
+it('formats prayers in the masjid zone, including daylight saving and half-hour offsets', () => {
+  // Sydney Maghrib on 22 Nov 2026 is 19:44 AEDT (UTC+11) = 08:44Z.
+  expect(pt('2026-11-22T08:44:00Z', 'Australia/Sydney')).toBe('7:44 pm')
+  expect(pt('2026-11-22T08:44:00Z')).toBe('4:44 pm') // default stays Malaysia time
+  expect(parts('2026-07-01T07:00:00Z', 'Australia/Sydney')).toEqual({ time: '5:00', meridiem: 'pm' }) // AEST winter
+  expect(pt('2026-12-10T09:00:00Z', 'Australia/Adelaide')).toBe('7:30 pm') // ACDT +10:30
+  expect(pt('2026-11-22T15:30:00Z', 'Asia/Riyadh')).toBe('6:30 pm')
+  // Sydney Subuh 04:03 on Sun 22 Nov is still Saturday 21 Nov in UTC.
+  expect(dateLabel('2026-11-21T17:03:00Z', 'Australia/Sydney')).toBe('Sunday 22 November')
+})
+it('picks the next prayer on the masjid local day', () => {
+  const syd = (h: string) => `2026-11-22T${h}+11:00`
+  const today = { subuh: syd('04:03'), zohor: syd('12:42'), asar: syd('16:26'), maghrib: syd('19:44'), isyak: syd('21:16'), timeZone: 'Australia/Sydney' }
+  expect(next(today, Date.parse(syd('15:00')))).toEqual({ key: 'asar', minutes: 86 })
+  expect(next(today, Date.parse(syd('23:00')))).toBeNull()
+  expect(next(today, Date.parse('2026-11-23T01:00:00+11:00'))).toBeNull() // next local day
+})

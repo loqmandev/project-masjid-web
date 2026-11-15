@@ -24,6 +24,8 @@ export default function PrayerTimes({ prayers }: { prayers: Record<string, strin
     tick()
     return () => clearTimeout(timer)
   }, [])
+  // The masjid's own zone (Sydney, Riyadh...), not the visitor's; Malaysia when absent.
+  const tz = prayers.timeZone || 'Asia/Kuala_Lumpur'
   const next = now === null ? null : nextPrayer(prayers, now)
   return (
     <section aria-labelledby="prayer-times-title">
@@ -32,7 +34,7 @@ export default function PrayerTimes({ prayers }: { prayers: Record<string, strin
       </h2>
       <dl className="m-pt">
         {PRAYER_KEYS.map((key) => {
-          const { time, meridiem } = prayerTimeParts(prayers[key])
+          const { time, meridiem } = prayerTimeParts(prayers[key], tz)
           return (
             <div key={key} className={next?.key === key ? 'is-next' : undefined}>
               <dt>{prayerName(key)}</dt>
@@ -49,7 +51,7 @@ export default function PrayerTimes({ prayers }: { prayers: Record<string, strin
             <b className="text-primary">{prayerName(next.key)}</b> in {countdownLabel(next.minutes)}
           </span>
         )}
-        <span className="ml-auto">{mytDateLabel(prayers.subuh)}</span>
+        <span className="ml-auto">{mytDateLabel(prayers.subuh, tz)}</span>
       </p>
     </section>
   )

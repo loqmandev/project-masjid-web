@@ -150,10 +150,12 @@ it('validates all five Malaysian prayers and drops incomplete or invalid data', 
   })
   expect(
     (await loadMasjid({ data: { slug: page.masjid.slug } })).prayers,
-  ).toEqual(times)
+  ).toEqual({ ...times, timeZone: 'Asia/Kuala_Lumpur' })
   for (const body of [
     null,
-    { country: 'SG', times },
+    { country: 'SG', times }, // non-Malaysian without a zone: never guess Malaysia time
+    { country: 'AU', timezone: 'Not/AZone', times },
+    { country: 'MY', timezone: 'Asia/Kuala_Lumpur', times: { ...times, zohor: 7 } },
     { country: 'MY', times: { ...times, subuh: undefined } },
     { country: 'MY', times: { ...times, isyak: 'bad' } },
   ]) {
@@ -161,6 +163,19 @@ it('validates all five Malaysian prayers and drops incomplete or invalid data', 
     expect(
       (await loadMasjid({ data: { slug: page.masjid.slug } })).prayers,
     ).toBeNull()
+  }
+})
+
+it('accepts every supported country with the zone the API returns', async () => {
+  const times = Object.fromEntries(
+    ['subuh', 'zohor', 'asar', 'maghrib', 'isyak'].map((k) => [k, '2026-11-22T08:44:00Z']),
+  )
+  for (const [country, timezone] of [
+    ['AU', 'Australia/Sydney'], ['SG', 'Asia/Singapore'], ['BN', 'Asia/Brunei'],
+    ['ID', 'Asia/Jakarta'], ['SA', 'Asia/Riyadh'], ['CN', 'Asia/Shanghai'], ['MY', 'Asia/Kuala_Lumpur'],
+  ]) {
+    vi.mocked(getPrayerTimes).mockResolvedValue({ status: 200, body: { country, timezone, times } })
+    expect((await loadMasjid({ data: { slug: page.masjid.slug } })).prayers).toEqual({ ...times, timeZone: timezone })
   }
 })
 

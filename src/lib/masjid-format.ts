@@ -65,13 +65,31 @@ export const PRAYER_KEYS = [
   'maghrib',
   'isyak',
 ] as const
+const MYT = 'Asia/Kuala_Lumpur'
+function isTimeZone(tz: unknown): tz is string {
+  if (typeof tz !== 'string' || !tz) return false
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: tz })
+    return true
+  } catch {
+    return false
+  }
+}
+/**
+ * Today's five prayers for any country the API supports, plus a `timeZone` entry:
+ * the IANA zone the API returns (DST-aware, e.g. Australia/Sydney). A Malaysian
+ * response without one (older API) falls back to Malaysia time; any other response
+ * without a valid zone is dropped rather than shown in the wrong time.
+ */
 export function validPrayerTimes(
   value: unknown,
 ): Record<string, string> | null {
   if (!value || typeof value !== 'object') return null
-  const p = value as { country?: unknown; times?: Record<string, unknown> }
+  const p = value as { country?: unknown; timezone?: unknown; times?: Record<string, unknown> }
+  const timeZone = isTimeZone(p.timezone) ? p.timezone : p.country === 'MY' ? MYT : null
   if (
-    p.country !== 'MY' ||
+    typeof p.country !== 'string' ||
+    !timeZone ||
     !p.times ||
     !PRAYER_KEYS.every(
       (k) =>
@@ -80,11 +98,14 @@ export function validPrayerTimes(
     )
   )
     return null
-  return Object.fromEntries(PRAYER_KEYS.map((k) => [k, p.times![k] as string]))
+  return {
+    ...Object.fromEntries(PRAYER_KEYS.map((k) => [k, p.times![k] as string])),
+    timeZone,
+  }
 }
-export const prayerTime = (iso: string) =>
+export const prayerTime = (iso: string, timeZone = MYT) =>
   new Intl.DateTimeFormat('en-MY', {
-    timeZone: 'Asia/Kuala_Lumpur',
+    timeZone,
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
@@ -92,22 +113,17 @@ export const prayerTime = (iso: string) =>
     .format(new Date(iso))
     .toLowerCase()
 /** "5:48 am" as { time: "5:48", meridiem: "am" } for the prayer table. */
-export function prayerTimeParts(iso: string) {
-  const [time, meridiem = ''] = prayerTime(iso).split(/[\s\u00a0\u202f]+/)
+export function prayerTimeParts(iso: string, timeZone = MYT) {
+  const [time, meridiem = ''] = prayerTime(iso, timeZone).split(/[\s\u00a0\u202f]+/)
   return { time, meridiem }
 }
-const mytDay = new Intl.DateTimeFormat('en-CA', {
-  timeZone: 'Asia/Kuala_Lumpur',
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-})
-/** Malaysia calendar day, YYYY-MM-DD. */
-export const mytDate = (ms: number) => mytDay.format(new Date(ms))
+/** Calendar day in `timeZone` (default Malaysia), YYYY-MM-DD. */
+export const mytDate = (ms: number, timeZone = MYT) =>
+  new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(ms))
 /** "Thursday 29 October" in Malaysia time (built from parts: no locale punctuation). */
-export function mytDateLabel(iso: string) {
+export function mytDateLabel(iso: string, timeZone = MYT) {
   const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Kuala_Lumpur',
+    timeZone,
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -122,7 +138,8 @@ export const prayerName = (key: (typeof PRAYER_KEYS)[number]) =>
  * different Malaysia day than `now` (a page left open past midnight) never match.
  */
 export function nextPrayer(prayers: Record<string, string>, now: number) {
-  if (mytDate(Date.parse(prayers.subuh)) !== mytDate(now)) return null
+  const tz = prayers.timeZone || MYT
+  if (mytDate(Date.parse(prayers.subuh), tz) !== mytDate(now, tz)) return null
   for (const key of PRAYER_KEYS) {
     const at = Date.parse(prayers[key])
     if (at > now) return { key, minutes: Math.max(1, Math.ceil((at - now) / 60000)) }
