@@ -1,10 +1,10 @@
 import { it, expect } from 'vitest'
-import { masjidSeo, programSeo, trustedImage, venueSeo } from './masjid-seo'
+import { holdsJumaat, masjidSeo, programSeo, searchName, trustedImage, venueSeo } from './masjid-seo'
 import { page, program, allRoom, menRoom, womenRoom, unverifiedRoom, venuePage } from './masjid-fixture'
 it('does not repeat equal district/state in the title or description', () => {
   const s = masjidSeo({ ...page, masjid: { ...page.masjid, districtName: 'PULAU PINANG', stateName: 'Pulau Pinang' } }, false)
   expect(s.meta[0].title).toContain('Surau Fixture · Pulau Pinang')
-  expect(s.meta.find(m => m.name === 'description')!.content).toContain('in Pulau Pinang:')
+  expect(s.meta.find(m => m.name === 'description')!.content).toContain('di Pulau Pinang:')
 })
 it('thin pages noindex with canonical and descriptive title', () => {
   const s = masjidSeo(page)
@@ -92,11 +92,11 @@ it('ajk off description has prayer times, no Programs; unknown district title is
   expect(s.meta[0].title).toContain('Surau Fixture · Putrajaya')
   expect(s.meta[0].title).not.toContain('Unknown')
   const d = s.meta.find((m) => m.name === 'description')!.content as string
-  expect(d).toContain('prayer times')
-  expect(d).not.toContain('Programs')
-  expect(d).toContain('in Putrajaya:')
+  expect(d).toContain('waktu solat')
+  expect(d).not.toContain('Program')
+  expect(d).toContain('di Putrajaya:')
   const on = masjidSeo(page, true).meta.find((m) => m.name === 'description')!
-  expect(on.content).toContain('Programs, photos and directions')
+  expect(on.content).toContain('Program, foto dan arah ke masjid')
 })
 
 it('title and description use clean place text for Sabah and ZON masjids', () => {
@@ -106,7 +106,7 @@ it('title and description use clean place text for Sabah and ZON masjids', () =>
   )
   expect(sabah.meta[0].title).toContain('Surau Fixture \u00b7 Kota Kinabalu')
   expect(sabah.meta.find((m) => m.name === 'description')!.content).toContain(
-    'in Kota Kinabalu, Sabah:',
+    'di Kota Kinabalu, Sabah:',
   )
   const zon = masjidSeo(
     { ...page, masjid: { ...page.masjid, districtName: 'ZON 6', stateName: 'KUALA LUMPUR' } },
@@ -114,14 +114,14 @@ it('title and description use clean place text for Sabah and ZON masjids', () =>
   )
   expect(zon.meta[0].title).toContain('Surau Fixture \u00b7 Kuala Lumpur')
   expect(zon.meta.find((m) => m.name === 'description')!.content).toContain(
-    'in Kuala Lumpur:',
+    'di Kuala Lumpur:',
   )
 })
 
 it('uses the place-card description for pages without a profile text, keeping title and noindex rules', () => {
   const s = masjidSeo({ ...page, indexable: true, masjid: { ...page.masjid, name: 'Masjid Negara', districtName: 'Kuala Lumpur', stateName: 'Wilayah Persekutuan Kuala Lumpur' } }, false)
   expect(s.meta.find((m) => m.name === 'description')!.content).toBe(
-    "Masjid Negara in Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur: today's prayer times, facilities, photos and reviews from visitors on Jejak Masjid.",
+    "Masjid Negara di Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur: waktu solat hari ini, kemudahan, foto dan ulasan pengunjung di Jejak Masjid.",
   )
   expect(s.meta[0].title).toBe('Masjid Negara · Kuala Lumpur | Jejak Masjid')
   expect(s.meta.some((m) => m.name === 'robots' && String(m.content).includes('noindex'))).toBe(false)
@@ -194,4 +194,37 @@ it('a visitor-confirmed room gets the same title and description as a venue-veri
   const v = { ...page, rooms: [{ ...allRoom, confirmedBy: 'venue' as const }] }
   const c = { ...page, rooms: [{ ...allRoom, confirmedBy: 'visitors' as const }] }
   expect(masjidSeo(c).meta).toEqual(masjidSeo(v).meta)
+})
+
+it('masjid pages outside Malaysia keep the English fallback description', () => {
+  const sydney = masjidSeo({ ...page, masjid: { ...page.masjid, districtName: 'Lakemba', stateName: 'New South Wales' } }, false)
+  expect(desc(sydney)).toBe("Surau Fixture in Lakemba, New South Wales: today's prayer times, facilities, photos and reviews from visitors on Jejak Masjid.")
+  const ajk = masjidSeo({ ...page, masjid: { ...page.masjid, districtName: 'Lakemba', stateName: 'New South Wales' } }, true)
+  expect(desc(ajk)).toContain('Programs, photos and directions')
+})
+it('a venue with one prayer space points its canonical at that place page', () => {
+  const one = venueSeo({ ...venuePage, places: [venuePage.places[0]] })
+  expect(one.links[0].href).toBe(`https://jejakmasjid.my/masjid/${venuePage.places[0].slug}`)
+  expect(one.meta).toContainEqual({ property: 'og:url', content: `https://jejakmasjid.my/masjid/${venuePage.places[0].slug}` })
+  expect(one.meta).toContainEqual({ name: 'robots', content: 'index, follow, max-image-preview:large' })
+})
+
+it('Malaysian masjid descriptions say solat Jumaat; plain suraus do not', () => {
+  const masjid = masjidSeo({ ...page, masjid: { ...page.masjid, name: 'Masjid Fixture', type: 'masjid' } })
+  expect(desc(masjid)).toContain('waktu solat hari ini, solat Jumaat, kemudahan')
+  expect(desc(masjidSeo({ ...page, masjid: { ...page.masjid, type: 'surau' } }))).not.toContain('Jumaat,')
+  expect(holdsJumaat('surau', 'Surau Ar-Raudhah (Surau Jumaat) Kajang')).toBe(true)
+  expect(holdsJumaat(null, 'Surau Al-Hidayah')).toBe(false)
+  expect(holdsJumaat('masjid', 'R&R Machap Mosque')).toBe(false)
+  expect(holdsJumaat('masjid', 'Surau Madani R&R Seremban (Surau Solat Jumaat)')).toBe(true)
+  const sydney = masjidSeo({ ...page, masjid: { ...page.masjid, name: 'Lakemba Mosque', type: 'masjid', districtName: 'Lakemba', stateName: 'New South Wales' } })
+  expect(desc(sydney)).not.toContain('Jumaat')
+})
+it('search titles keep RnR and R&R as people type them', () => {
+  expect(searchName('Surau Rnr Dengkil Arah Utara')).toBe('Surau RnR Dengkil Arah Utara')
+  expect(searchName('Surau R&r Gunung Semanggol Northbound')).toBe('Surau R&R Gunung Semanggol Northbound')
+  expect(searchName('Surau petronas rnr gambang(arah kl)')).toBe('Surau petronas RnR gambang (arah kl)')
+  expect(searchName('Surau Ar-Rahman')).toBe('Surau Ar-Rahman')
+  const s = masjidSeo({ ...page, masjid: { ...page.masjid, name: 'Surau Rnr Dengkil Arah Utara', districtName: 'Sepang', stateName: 'Selangor' } })
+  expect(title(s)).toBe('Surau RnR Dengkil Arah Utara · Sepang | Jejak Masjid')
 })
