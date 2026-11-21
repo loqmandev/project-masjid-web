@@ -1,5 +1,5 @@
 import { it, expect } from 'vitest'
-import { masjidSeo, programSeo, trustedImage, venueSeo } from './masjid-seo'
+import { holdsJumaat, masjidSeo, programSeo, searchName, trustedImage, venueSeo } from './masjid-seo'
 import { page, program, allRoom, menRoom, womenRoom, unverifiedRoom, venuePage } from './masjid-fixture'
 it('does not repeat equal district/state in the title or description', () => {
   const s = masjidSeo({ ...page, masjid: { ...page.masjid, districtName: 'PULAU PINANG', stateName: 'Pulau Pinang' } }, false)
@@ -207,4 +207,24 @@ it('a venue with one prayer space points its canonical at that place page', () =
   expect(one.links[0].href).toBe(`https://jejakmasjid.my/masjid/${venuePage.places[0].slug}`)
   expect(one.meta).toContainEqual({ property: 'og:url', content: `https://jejakmasjid.my/masjid/${venuePage.places[0].slug}` })
   expect(one.meta).toContainEqual({ name: 'robots', content: 'index, follow, max-image-preview:large' })
+})
+
+it('Malaysian masjid descriptions say solat Jumaat; plain suraus do not', () => {
+  const masjid = masjidSeo({ ...page, masjid: { ...page.masjid, name: 'Masjid Fixture', type: 'masjid' } })
+  expect(desc(masjid)).toContain('waktu solat hari ini, solat Jumaat, kemudahan')
+  expect(desc(masjidSeo({ ...page, masjid: { ...page.masjid, type: 'surau' } }))).not.toContain('Jumaat,')
+  expect(holdsJumaat('surau', 'Surau Ar-Raudhah (Surau Jumaat) Kajang')).toBe(true)
+  expect(holdsJumaat(null, 'Surau Al-Hidayah')).toBe(false)
+  expect(holdsJumaat('masjid', 'R&R Machap Mosque')).toBe(false)
+  expect(holdsJumaat('masjid', 'Surau Madani R&R Seremban (Surau Solat Jumaat)')).toBe(true)
+  const sydney = masjidSeo({ ...page, masjid: { ...page.masjid, name: 'Lakemba Mosque', type: 'masjid', districtName: 'Lakemba', stateName: 'New South Wales' } })
+  expect(desc(sydney)).not.toContain('Jumaat')
+})
+it('search titles keep RnR and R&R as people type them', () => {
+  expect(searchName('Surau Rnr Dengkil Arah Utara')).toBe('Surau RnR Dengkil Arah Utara')
+  expect(searchName('Surau R&r Gunung Semanggol Northbound')).toBe('Surau R&R Gunung Semanggol Northbound')
+  expect(searchName('Surau petronas rnr gambang(arah kl)')).toBe('Surau petronas RnR gambang (arah kl)')
+  expect(searchName('Surau Ar-Rahman')).toBe('Surau Ar-Rahman')
+  const s = masjidSeo({ ...page, masjid: { ...page.masjid, name: 'Surau Rnr Dengkil Arah Utara', districtName: 'Sepang', stateName: 'Selangor' } })
+  expect(title(s)).toBe('Surau RnR Dengkil Arah Utara · Sepang | Jejak Masjid')
 })
