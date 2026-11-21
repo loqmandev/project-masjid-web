@@ -3,6 +3,7 @@ import { seo } from './seo'
 import { placeParts } from './masjid-format'
 import { roomDescription, roomTitle, venueDescription, verifiedRooms } from './venue-rooms'
 import type { PublicVenuePage } from './masjid-types'
+import { countryAddress } from './jsonld'
 export function trustedImage(url: string | null | undefined, program = false) {
   if (!url) return undefined
   try {
@@ -40,6 +41,20 @@ export function sentenceDescription(
   const boundary = prefix.lastIndexOf(' ')
   return (boundary > 0 ? prefix.slice(0, boundary) : prefix).trimEnd()
 }
+/**
+ * Description for a masjid page with no AJK text and no verified room. Malaysian pages are
+ * Malay, like the searches that reach them ("masjid salahuddin manjung"); pages elsewhere
+ * (Singapore, Sydney, ...) stay English.
+ */
+function fallbackDescription(name: string, prose: string, ajk: boolean, malay: boolean) {
+  if (malay)
+    return ajk
+      ? `${name} di ${prose}. Program, foto dan arah ke masjid di Jejak Masjid.`
+      : `${name}${prose ? ` di ${prose}` : ''}: waktu solat hari ini, kemudahan, foto dan ulasan pengunjung di Jejak Masjid.`
+  return ajk
+    ? `${name} in ${prose}. Programs, photos and directions on Jejak Masjid.`
+    : `${name}${prose ? ` in ${prose}` : ''}: today's prayer times, facilities, photos and reviews from visitors on Jejak Masjid.`
+}
 export function masjidSeo(p: PublicMasjidPage, ajk = false) {
   const m = p.masjid,
     text = sentenceDescription(p.profile?.description),
@@ -50,9 +65,7 @@ export function masjidSeo(p: PublicMasjidPage, ajk = false) {
     description:
       text ||
       roomDescription(p.rooms) ||
-      (ajk
-        ? `${m.name} in ${place.prose}. Programs, photos and directions on Jejak Masjid.`
-        : `${m.name}${place.prose ? ` in ${place.prose}` : ''}: today's prayer times, facilities, photos and reviews from visitors on Jejak Masjid.`),
+      fallbackDescription(m.name, place.prose, ajk, !!countryAddress(m.stateName).addressCountry),
     path: `/masjid/${m.slug}`,
     noindex: !p.indexable,
     image:
@@ -92,7 +105,9 @@ export function venueSeo(p: PublicVenuePage) {
         ? `Surau di ${v.name} · ${short}`
         : `Surau di ${v.name}`,
     description: venueDescription(v.name, p.places.length, floors),
-    path: `/surau/${v.slug}`,
+    // A venue with one prayer space repeats its place page, and the two split the same
+    // searches ("surau mitsui outlet"). Point the canonical at the place page instead.
+    path: p.places.length === 1 ? `/masjid/${p.places[0].slug}` : `/surau/${v.slug}`,
     noindex: !p.indexable,
   })
 }
