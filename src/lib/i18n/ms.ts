@@ -20,7 +20,7 @@ export const ms = {
     completed: 'Kunjungan selesai · 30 hari', uniqueMasjids: 'Masjid berbeza dikunjungi · 30 hari', activeVisitors: 'Pengunjung aktif · 30 hari',
     byCountry: 'Mengikut negara', countryNote: 'Masjid dan surau direkod, bersama kunjungan selesai dalam 30 hari.',
     byState: 'Malaysia mengikut negeri', state: 'Negeri', masjids: 'Masjid & surau', visits: 'Kunjungan · 30 hari',
-    unknown: 'Lain-lain / tidak diketahui',
+    unknown: 'Negara lain',
     definitions: 'Kunjungan dikira apabila seseorang daftar masuk, singgah sekurang-kurangnya 10 minit dan melengkapkannya berdekatan. Bilangan kecil disembunyikan untuk privasi.',
   },
   features: {

@@ -22,7 +22,7 @@ export const en = {
     completed: 'Completed visits · 30 days', uniqueMasjids: 'Different mosques visited · 30 days', activeVisitors: 'Active visitors · 30 days',
     byCountry: 'By country', countryNote: 'Recorded mosques and surau, alongside completed visits in 30 days.',
     byState: 'Malaysia by state', state: 'State', masjids: 'Mosques & surau', visits: 'Visits · 30 days',
-    unknown: 'Other or unknown',
+    unknown: 'Other countries',
     definitions: 'A visit counts when someone checks in, stays at least 10 minutes and completes it nearby. Small numbers are hidden for privacy.',
   },
   features: {

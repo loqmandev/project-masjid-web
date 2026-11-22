@@ -7,6 +7,12 @@ export const COUNTRY_NAMES = {
   ID: { ms: 'Indonesia', en: 'Indonesia' },
   SA: { ms: 'Arab Saudi', en: 'Saudi Arabia' },
   CN: { ms: 'China', en: 'China' },
+  AE: { ms: 'Emiriah Arab Bersatu', en: 'United Arab Emirates' },
+  US: { ms: 'Amerika Syarikat', en: 'United States' },
+  GB: { ms: 'United Kingdom', en: 'United Kingdom' },
+  TR: { ms: 'Turkiye', en: 'Türkiye' },
+  TH: { ms: 'Thailand', en: 'Thailand' },
+  AU: { ms: 'Australia', en: 'Australia' },
 } as const
 
 // Mirrors backend CANONICAL_STATE_CODES; the spec's abbreviated SGR is illustrative.
@@ -65,7 +71,7 @@ const visits = (v: Record<string, unknown>) =>
     v.suppressed === false && count(v.completed) && (v.completed === 0 || v.completed >= 10)
 
 function rows(v: unknown, key: 'code' | 'stateCode', visit: boolean): boolean {
-  if (!Array.isArray(v) || v.length > (key === 'code' ? 7 : 16)) return false
+  if (!Array.isArray(v) || v.length > (key === 'code' ? 13 : 16)) return false
   const seen = new Set<unknown>()
   for (const row of v) {
     if (!record(row) || !fields(row, [key, ...(visit ? ['completed', 'suppressed'] : ['count'])]) ||

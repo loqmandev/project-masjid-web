@@ -13,11 +13,31 @@ import { getPublicStats } from './public-stats-api.server'
 import { loadPublicStats } from './public-stats-server'
 
 const fixture = (): PublicStats => JSON.parse(readFileSync(new URL('./fixtures/public-stats.json', import.meta.url), 'utf8'))
+const NEW_CODES = ['AE', 'US', 'GB', 'TR', 'TH', 'AU'] as const
+// 13 rows: today's 7 plus the six new codes, taking the null row's 50 masjids.
+const wide = (): PublicStats => {
+  const v = fixture()
+  const counts = [9, 9, 8, 8, 8, 8]
+  v.masjids.byCountry.find(r => r.code === null)!.count = 0
+  NEW_CODES.forEach((code, i) => {
+    v.masjids.byCountry.push({ code, count: counts[i] })
+    v.visits30d.byCountry.push({ code, completed: 0, suppressed: false })
+  })
+  return v
+}
 afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); vi.useRealTimers() })
 
 describe('public stats payload validation', () => {
   it('accepts v1, canonical states, exact totals and suppressed nulls', () => {
     expect(validPublicStats(fixture())).toEqual(fixture())
+  })
+  it('accepts the 13-row payload', () => { expect(validPublicStats(wide())).not.toBeNull() })
+  it('rejects an unknown code and a 14-row array', () => {
+    const unknown = wide(); unknown.masjids.byCountry[0].code = 'DE' as 'MY'
+    expect(validPublicStats(unknown)).toBeNull()
+    const long = wide()
+    long.masjids.byCountry.push({ code: 'MY', count: 0 }); long.visits30d.byCountry.push({ code: 'MY', completed: 0, suppressed: false })
+    expect(validPublicStats(long)).toBeNull()
   })
   const invalid: [string, (v: PublicStats) => void][] = [
     ['unsupported version', v => { v.payloadVersion = 2 as 1 }],
@@ -98,6 +118,22 @@ describe('SSR public numbers section', () => {
     expect(html.indexOf('data-state-code="SELANGOR"')).toBeLessThan(html.indexOf('data-state-code="JOHOR"'))
     expect(html).toContain(copy.definitions)
     expect(html).not.toContain('data-reveal')
+  })
+  it('renders the null row as the localized "other countries" label', () => {
+    expect(t('ms').stats.unknown).toBe('Negara lain')
+    expect(t('en').stats.unknown).toBe('Other countries')
+    expect(renderToStaticMarkup(createElement(PublicStatsSection, { locale: 'ms', stats: fixture() }))).toContain('Negara lain')
+    expect(renderToStaticMarkup(createElement(PublicStatsSection, { locale: 'en', stats: fixture() }))).toContain('Other countries')
+  })
+  it('renders the 13-row payload with ms and en names and hides zero-count rows', () => {
+    const stats = wide()
+    expect(validPublicStats(stats)).toEqual(stats)
+    const ms = renderToStaticMarkup(createElement(PublicStatsSection, { locale: 'ms', stats }))
+    const en = renderToStaticMarkup(createElement(PublicStatsSection, { locale: 'en', stats }))
+    for (const name of ['Emiriah Arab Bersatu', 'Amerika Syarikat', 'United Kingdom', 'Turkiye', 'Thailand', 'Australia']) expect(ms).toContain(name)
+    for (const name of ['United Arab Emirates', 'United States', 'United Kingdom', 'Türkiye', 'Thailand', 'Australia']) expect(en).toContain(name)
+    expect(ms).not.toContain('Negara lain')
+    expect(en).not.toContain('Other countries')
   })
   it('formats the snapshot date in MYT, regardless of server timezone', () => {
     expect(statsDate(fixture().computedAt, 'en')).toBe('28 October 2026')

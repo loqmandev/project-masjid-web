@@ -15,7 +15,7 @@ export default function PublicStats({ locale, stats }: { locale: Locale; stats: 
     [data.visits30d.uniqueMasjids, copy.uniqueMasjids],
     [data.visits30d.activeVisitors, copy.activeVisitors],
   ] as const
-  const countries = [...data.masjids.byCountry].sort((a, b) => b.count - a.count)
+  const countries = data.masjids.byCountry.filter(row => row.count > 0).sort((a, b) => b.count - a.count)
   const states = [...data.masjids.byState].sort((a, b) => b.count - a.count)
   const maximum = Math.max(1, ...countries.map(row => row.count))
 
