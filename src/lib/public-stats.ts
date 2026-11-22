@@ -10,7 +10,7 @@ export const COUNTRY_NAMES = {
   AE: { ms: 'Emiriah Arab Bersatu', en: 'United Arab Emirates' },
   US: { ms: 'Amerika Syarikat', en: 'United States' },
   GB: { ms: 'United Kingdom', en: 'United Kingdom' },
-  TR: { ms: 'Turkiye', en: 'Türkiye' },
+  TR: { ms: 'Türkiye', en: 'Türkiye' },
   TH: { ms: 'Thailand', en: 'Thailand' },
   AU: { ms: 'Australia', en: 'Australia' },
 } as const

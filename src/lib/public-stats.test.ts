@@ -130,7 +130,7 @@ describe('SSR public numbers section', () => {
     expect(validPublicStats(stats)).toEqual(stats)
     const ms = renderToStaticMarkup(createElement(PublicStatsSection, { locale: 'ms', stats }))
     const en = renderToStaticMarkup(createElement(PublicStatsSection, { locale: 'en', stats }))
-    for (const name of ['Emiriah Arab Bersatu', 'Amerika Syarikat', 'United Kingdom', 'Turkiye', 'Thailand', 'Australia']) expect(ms).toContain(name)
+    for (const name of ['Emiriah Arab Bersatu', 'Amerika Syarikat', 'United Kingdom', 'Türkiye', 'Thailand', 'Australia']) expect(ms).toContain(name)
     for (const name of ['United Arab Emirates', 'United States', 'United Kingdom', 'Türkiye', 'Thailand', 'Australia']) expect(en).toContain(name)
     expect(ms).not.toContain('Negara lain')
     expect(en).not.toContain('Other countries')
